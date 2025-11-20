@@ -15,20 +15,22 @@
     "build": "tsdown"
   },
   "devDependencies": {
-    "tsdown": "catalog:",
-    "@topside-db/config": "workspace:*"
+    "@topside-db/config": "workspace:*",
+    "@types/pg": "^8.15.6",
+    "tsdown": "catalog:"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
-    "@orpc/server": "catalog:",
     "@orpc/client": "catalog:",
     "@orpc/openapi": "catalog:",
+    "@orpc/server": "catalog:",
     "@orpc/zod": "catalog:",
-    "hono": "catalog:",
+    "@topside-db/db": "workspace:*",
     "dotenv": "catalog:",
-    "zod": "catalog:",
-    "@topside-db/db": "workspace:*"
+    "hono": "catalog:",
+    "meilisearch": "^0.54.0",
+    "zod": "catalog:"
   }
 }

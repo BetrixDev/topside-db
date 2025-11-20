@@ -30,19 +30,21 @@
     "db:studio": "turbo -F @topside-db/db db:studio",
     "db:generate": "turbo -F @topside-db/db db:generate",
     "db:migrate": "turbo -F @topside-db/db db:migrate",
-    "db:start": "turbo -F @topside-db/db db:start",
-    "db:watch": "turbo -F @topside-db/db db:watch",
-    "db:stop": "turbo -F @topside-db/db db:stop",
-    "db:down": "turbo -F @topside-db/db db:down"
+    "compose:start": "docker compose -f docker-compose.yml up -d",
+    "compose:up": "docker compose -f docker-compose.yml up",
+    "compose:stop": "docker compose -f docker-compose.yml stop",
+    "compose:down": "docker compose -f docker-compose.yml down"
   },
   "dependencies": {
+    "@trigger.dev/sdk": "4.1.0",
     "dotenv": "^17.2.2",
     "zod": "^4.1.11"
   },
   "devDependencies": {
-    "turbo": "^2.5.4",
+    "@trigger.dev/build": "4.1.0",
+    "@types/bun": "^1.2.6",
     "tsdown": "^0.15.5",
-    "@types/bun": "^1.2.6"
+    "turbo": "^2.5.4"
   },
   "packageManager": "bun@1.3.2"
 }

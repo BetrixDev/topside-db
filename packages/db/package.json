@@ -16,25 +16,22 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "db:start": "docker compose up -d",
-    "db:watch": "docker compose up",
-    "db:stop": "docker compose stop",
-    "db:down": "docker compose down"
+    "db:migrate": "drizzle-kit migrate"
   },
   "devDependencies": {
+    "@topside-db/config": "workspace:*",
+    "@types/pg": "^8.15.6",
     "drizzle-kit": "^0.31.2",
-    "@types/pg": "^8.11.11",
-    "tsdown": "catalog:",
-    "@topside-db/config": "workspace:*"
+    "tsdown": "catalog:"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
-    "drizzle-orm": "^0.44.2",
-    "pg": "^8.14.1",
+    "better-sqlite3": "^12.4.1",
     "dotenv": "catalog:",
+    "drizzle-orm": "^0.44.2",
+    "pg": "^8.16.3",
     "zod": "catalog:"
   }
 }
