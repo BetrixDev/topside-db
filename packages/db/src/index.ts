@@ -3,5 +3,5 @@ import * as schema from "./schemas";
 
 export const db = drizzle(process.env.DATABASE_URL!, { schema });
 
-export * from "./schemas";
+export * as Tables from "./schemas";
 export * from "drizzle-orm";

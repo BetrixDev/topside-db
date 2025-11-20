@@ -1,6 +1,7 @@
 import { publicProcedure } from "../index";
 import { z } from "zod";
 import { MeiliSearch } from "meilisearch";
+import { cacheMiddleware } from "../middleware/cache";
 
 const searchInputSchema = z.object({
   query: z.string(),
@@ -14,6 +15,7 @@ const meilisearch = new MeiliSearch({
 export const searchRouter = {
   search: publicProcedure
     .input(searchInputSchema)
+    .use(cacheMiddleware)
     .handler(async ({ input }) => {
       const { query } = input;
 
@@ -22,7 +24,6 @@ export const searchRouter = {
         limit: 20,
       });
 
-      return searchResult.hits;
+      return searchResult;
     }),
 };
-

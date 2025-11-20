@@ -16,8 +16,7 @@
     "@orpc/zod": "catalog:",
     "dotenv": "catalog:",
     "zod": "catalog:",
-    "@topside-db/api": "workspace:*",
-    "@topside-db/db": "workspace:*"
+    "@topside-db/api": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:",

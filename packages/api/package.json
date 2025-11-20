@@ -28,6 +28,7 @@
     "@orpc/server": "catalog:",
     "@orpc/zod": "catalog:",
     "@topside-db/db": "workspace:*",
+    "@topside-db/redis": "workspace:*",
     "dotenv": "catalog:",
     "hono": "catalog:",
     "meilisearch": "^0.54.0",

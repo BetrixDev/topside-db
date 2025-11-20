@@ -1,16 +1,17 @@
 import type { Context as HonoContext } from "hono";
 import { db } from "@topside-db/db";
+import { redis } from "@topside-db/redis";
 
 export type CreateContextOptions = {
-	context: HonoContext;
+  context: HonoContext;
 };
 
 export async function createContext({ context }: CreateContextOptions) {
-	// No auth configured
-	return {
-		session: null,
-		db,
-	};
+  return {
+    headers: context.req.header(),
+    db,
+    redis,
+  };
 }
 
 export type Context = Awaited<ReturnType<typeof createContext>>;

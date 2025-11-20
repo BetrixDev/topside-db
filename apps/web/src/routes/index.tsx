@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { orpc } from "@/utils/orpc";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -25,7 +25,7 @@ function HomeComponent() {
     })
   );
 
-  const searchResults = data ?? [];
+  const searchResults = data?.hits ?? [];
 
   return (
     <main className="min-h-screen bg-linear-to-b from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center px-4 relative overflow-hidden">
@@ -46,7 +46,7 @@ function HomeComponent() {
         {/* Search Command */}
         <Command className="rounded-lg border shadow-md">
           <CommandInput
-            placeholder="Search for items, weapons, resources..."
+            placeholder="Search for anything Arc Raiders..."
             value={searchQuery}
             onValueChange={setSearchQuery}
           />
@@ -57,9 +57,25 @@ function HomeComponent() {
             {searchResults.length > 0 && (
               <CommandGroup heading="Search Results">
                 {searchResults.map((result) => (
-                  <CommandItem key={result.id} value={result.name ?? undefined}>
-                    {result.name}
-                  </CommandItem>
+                  <Link
+                    to="/item/$itemId"
+                    params={{ itemId: result.id }}
+                    key={result.id}
+                    preload="intent"
+                  >
+                    <CommandItem value={result.name ?? undefined}>
+                      <img
+                        src={result.imageFilename}
+                        alt={result.name}
+                        className="w-10 h-10 rounded-full"
+                      />
+                      {result.name}{" "}
+                      <span className="text-muted-foreground">-</span>
+                      <span className="text-sm text-muted-foreground">
+                        {result.type}
+                      </span>
+                    </CommandItem>
+                  </Link>
                 ))}
               </CommandGroup>
             )}

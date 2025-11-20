@@ -1,15 +1,7 @@
 import AdmZip from "adm-zip";
 import { MeiliSearch } from "meilisearch";
 import { itemSchema } from "@topside-db/schemas";
-import {
-  db,
-  items,
-  itemEffects,
-  itemRecipes,
-  itemRecycles,
-  itemSalvages,
-  sql,
-} from "@topside-db/db";
+import { db, Tables, sql } from "@topside-db/db";
 
 export async function ingestData() {
   console.log("Ingesting ARC data");
@@ -39,11 +31,11 @@ export async function ingestData() {
   console.log(`Found ${itemEntries.length} items to process`);
 
   // Collect all data to batch insert
-  const itemsToInsert: (typeof items.$inferInsert)[] = [];
-  const effectsToInsert: (typeof itemEffects.$inferInsert)[] = [];
-  const recipesToInsert: (typeof itemRecipes.$inferInsert)[] = [];
-  const recyclesToInsert: (typeof itemRecycles.$inferInsert)[] = [];
-  const salvagesToInsert: (typeof itemSalvages.$inferInsert)[] = [];
+  const itemsToInsert: (typeof Tables.items.$inferInsert)[] = [];
+  const effectsToInsert: (typeof Tables.itemEffects.$inferInsert)[] = [];
+  const recipesToInsert: (typeof Tables.itemRecipes.$inferInsert)[] = [];
+  const recyclesToInsert: (typeof Tables.itemRecycles.$inferInsert)[] = [];
+  const salvagesToInsert: (typeof Tables.itemSalvages.$inferInsert)[] = [];
 
   for (const itemEntry of itemEntries) {
     const itemData = JSON.parse(itemEntry.getData().toString());
@@ -150,10 +142,10 @@ export async function ingestData() {
       } items)`
     );
     await db
-      .insert(items)
+      .insert(Tables.items)
       .values(chunk)
       .onConflictDoUpdate({
-        target: items.id,
+        target: Tables.items.id,
         set: {
           name: sql`excluded.name`,
           description: sql`excluded.description`,
@@ -182,10 +174,10 @@ export async function ingestData() {
       } effects)`
     );
     await db
-      .insert(itemEffects)
+      .insert(Tables.itemEffects)
       .values(chunk)
       .onConflictDoUpdate({
-        target: itemEffects.id,
+        target: Tables.itemEffects.id,
         set: {
           name: sql`excluded.name`,
           value: sql`excluded.value`,
@@ -206,10 +198,10 @@ export async function ingestData() {
       } recipes)`
     );
     await db
-      .insert(itemRecipes)
+      .insert(Tables.itemRecipes)
       .values(chunk)
       .onConflictDoUpdate({
-        target: itemRecipes.id,
+        target: Tables.itemRecipes.id,
         set: {
           quantity: sql`excluded.quantity`,
         },
@@ -229,10 +221,10 @@ export async function ingestData() {
       } recycles)`
     );
     await db
-      .insert(itemRecycles)
+      .insert(Tables.itemRecycles)
       .values(chunk)
       .onConflictDoUpdate({
-        target: itemRecycles.id,
+        target: Tables.itemRecycles.id,
         set: {
           quantity: sql`excluded.quantity`,
         },
@@ -252,10 +244,10 @@ export async function ingestData() {
       } salvages)`
     );
     await db
-      .insert(itemSalvages)
+      .insert(Tables.itemSalvages)
       .values(chunk)
       .onConflictDoUpdate({
-        target: itemSalvages.id,
+        target: Tables.itemSalvages.id,
         set: {
           quantity: sql`excluded.quantity`,
         },
