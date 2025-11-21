@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { orpc } from "@/utils/orpc";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import {
   Command,
@@ -10,6 +10,13 @@ import {
   CommandGroup,
   CommandItem,
 } from "@/components/ui/command";
+import { FlickeringGrid } from "@/components/ui/shadcn-io/flickering-grid";
+import {
+  ArchiveIcon,
+  ArrowRightIcon,
+  ChevronRightIcon,
+  SearchIcon,
+} from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: HomeComponent,
@@ -28,62 +35,125 @@ function HomeComponent() {
   const searchResults = data?.hits ?? [];
 
   return (
-    <main className="min-h-screen bg-linear-to-b from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center px-4 relative overflow-hidden">
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-orange-500 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500 rounded-full blur-3xl"></div>
-      </div>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-border/50 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 sticky top-0 z-40">
+        <div className="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <ArchiveIcon className="w-4 h-4" />
+            <span>Database</span>
+          </div>
+          <Link to="/">
+            <div className="text-xs text-muted-foreground">Topside DB</div>
+          </Link>
+        </div>
+      </header>
 
-      <div className="relative z-10 w-full max-w-2xl">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-white mb-2 text-balance">
-            Topside <span className="text-orange-500">DB</span>
-          </h1>
-          <p className="text-slate-400 text-lg">
-            Complete Arc Raiders resource database and search engine
-          </p>
+      {/* Main Content */}
+      <main className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden">
+        {/* Background Grid Effect */}
+        <div className="absolute inset-0 opacity-30">
+          <FlickeringGrid
+            className="z-0 absolute inset-0 size-full"
+            squareSize={8}
+            gridGap={10}
+            color="#6B7280"
+            maxOpacity={0.3}
+            flickerChance={0.05}
+          />
         </div>
 
-        {/* Search Command */}
-        <Command className="rounded-lg border shadow-md">
-          <CommandInput
-            placeholder="Search for anything Arc Raiders..."
-            value={searchQuery}
-            onValueChange={setSearchQuery}
-          />
-          <CommandList className="h-[300px] overflow-y-auto">
-            <CommandEmpty className="h-full flex items-center justify-center">
-              No results found.
-            </CommandEmpty>
-            {searchResults.length > 0 && (
-              <CommandGroup heading="Search Results">
-                {searchResults.map((result) => (
-                  <Link
-                    to="/item/$itemId"
-                    params={{ itemId: result.id }}
-                    key={result.id}
-                    preload="intent"
-                  >
-                    <CommandItem value={result.name ?? undefined}>
-                      <img
-                        src={result.imageFilename}
-                        alt={result.name}
-                        className="w-10 h-10 rounded-full"
-                      />
-                      {result.name}{" "}
-                      <span className="text-muted-foreground">-</span>
-                      <span className="text-sm text-muted-foreground">
-                        {result.type}
-                      </span>
-                    </CommandItem>
-                  </Link>
-                ))}
-              </CommandGroup>
-            )}
-          </CommandList>
-        </Command>
-      </div>
-    </main>
+        <div className="relative z-10 w-full max-w-2xl">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-bold mb-3 text-balance">
+              Topside <span className="text-primary">DB</span>
+            </h1>
+            <p className="text-muted-foreground text-lg leading-relaxed">
+              Arc Raiders database and search engine
+            </p>
+          </div>
+
+          {/* Search Command */}
+          <div className="bg-secondary rounded-lg border border-border/50 shadow-lg overflow-hidden">
+            <Command className="bg-transparent border-none">
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50">
+                <CommandInput
+                  placeholder="Search for anything Arc Raiders..."
+                  value={searchQuery}
+                  onValueChange={setSearchQuery}
+                  className="border-none focus-visible:ring-0 bg-transparent w-full"
+                />
+              </div>
+              <CommandList className="max-h-[400px] overflow-y-auto">
+                <CommandEmpty className="py-12 text-center text-muted-foreground">
+                  {searchQuery
+                    ? "No results found."
+                    : "Start typing to search..."}
+                </CommandEmpty>
+                {searchResults.length > 0 && (
+                  <CommandGroup heading="Search Results" className="p-2">
+                    {searchResults.map((result) => (
+                      <Link
+                        to="/item/$itemId"
+                        params={{ itemId: result.id }}
+                        key={result.id}
+                        preload="intent"
+                      >
+                        <CommandItem
+                          value={result.name ?? undefined}
+                          className="rounded-lg hover:bg-background/50 cursor-pointer transition-colors mb-1 p-3"
+                        >
+                          <div className="flex items-center gap-3 w-full">
+                            <div className="w-12 h-12 bg-background rounded-lg border border-border/30 flex items-center justify-center overflow-hidden shrink-0">
+                              <img
+                                src={result.imageFilename}
+                                alt={result.name}
+                                className="w-full h-full object-contain p-1"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium truncate">
+                                {result.name}
+                              </p>
+                              <div className="text-xs text-muted-foreground font-mono flex items-center gap-1">
+                                <span>Item &gt;</span>
+                                <span className="text-primary">
+                                  {result.type}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </CommandItem>
+                      </Link>
+                    ))}
+                  </CommandGroup>
+                )}
+              </CommandList>
+            </Command>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-border/50 mt-16 py-6 px-4 text-center text-xs text-muted-foreground">
+        <p className="mb-2">
+          Game content and materials are trademarks and copyrights of Embark
+          Studios and its licensors. All rights reserved.
+        </p>
+        <div className="flex justify-center gap-4">
+          <Link to="/terms" className="hover:text-foreground transition-colors">
+            Terms of Service
+          </Link>
+          <span>•</span>
+          <Link
+            to="/privacy"
+            className="hover:text-foreground transition-colors"
+          >
+            Privacy Policy
+          </Link>
+        </div>
+      </footer>
+    </div>
   );
 }

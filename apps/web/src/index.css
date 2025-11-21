@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap");
 
 @import "tailwindcss";
 @import "tw-animate-css";
@@ -39,8 +39,9 @@
   --sidebar-border: oklch(0.9037 0 0);
   --sidebar-ring: oklch(1 0 0);
   --font-sans: Chakra Petch, ui-sans-serif, sans-serif, system-ui;
-  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --font-mono: DM Mono, ui-monospace, monospace;
+  --font-serif: Inter, ui-serif, Georgia, Cambria, "Times New Roman", Times,
+    serif;
+  --font-mono: ui-monospace, monospace;
   --radius: 0.5rem;
   --shadow-x: 0px;
   --shadow-y: 1px;
