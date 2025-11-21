@@ -40,7 +40,9 @@ function HomeComponent() {
           <h1 className="text-5xl font-bold text-white mb-2 text-balance">
             Topside <span className="text-orange-500">DB</span>
           </h1>
-          <p className="text-slate-400 text-lg">Arc Raiders Search Engine</p>
+          <p className="text-slate-400 text-lg">
+            Complete Arc Raiders resource database and search engine
+          </p>
         </div>
 
         {/* Search Command */}
