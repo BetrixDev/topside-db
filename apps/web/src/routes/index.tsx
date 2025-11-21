@@ -92,7 +92,22 @@ function HomeComponent() {
                     : "Start typing to search..."}
                 </CommandEmpty>
                 {searchResults.length > 0 && (
-                  <CommandGroup heading="Search Results" className="p-2">
+                  <CommandGroup
+                    heading={
+                      <span>
+                        <span className="font-bold">
+                          {searchResults.length} Result
+                          {searchResults.length !== 1 ? "s" : ""}
+                        </span>
+                        {typeof data?.processingTimeMs === "number" && (
+                          <span className="ml-2 text-xs text-muted-foreground font-mono">
+                            ({data.processingTimeMs}ms)
+                          </span>
+                        )}
+                      </span>
+                    }
+                    className="p-2"
+                  >
                     {searchResults.map((result) => (
                       <Link
                         to="/item/$itemId"

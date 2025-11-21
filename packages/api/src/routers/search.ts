@@ -22,7 +22,7 @@ export const searchRouter = {
       const index = meilisearch.index("items");
       const searchResult = await index.search(query, {
         limit: 20,
-        attributesToSearchOn: ["name", "description", "type"],
+        attributesToSearchOn: ["name", "description"],
       });
 
       return searchResult;
