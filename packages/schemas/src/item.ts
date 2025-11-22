@@ -1,26 +1,5 @@
 import { z } from "zod";
-
-// Schema for localized strings (name, description, etc.)
-const localizedStringSchema = z.object({
-  en: z.string(),
-  de: z.string().optional(),
-  fr: z.string().optional(),
-  es: z.string().optional(),
-  pt: z.string().optional(),
-  pl: z.string().optional(),
-  no: z.string().optional(),
-  da: z.string().optional(),
-  it: z.string().optional(),
-  ru: z.string().optional(),
-  ja: z.string().optional(),
-  "zh-TW": z.string().optional(),
-  uk: z.string().optional(),
-  "zh-CN": z.string().optional(),
-  kr: z.string().optional(),
-  tr: z.string().optional(),
-  hr: z.string().optional(),
-  sr: z.string().optional(),
-});
+import { localizedStringSchema } from "./common";
 
 // Schema for effect with localized name and value
 const effectSchema = localizedStringSchema.extend({

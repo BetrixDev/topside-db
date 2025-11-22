@@ -56,12 +56,40 @@ export const itemSalvages = pgTable("item_salvages", {
   quantity: integer("quantity").notNull(),
 });
 
+// Hideouts table
+export const hideouts = pgTable("hideouts", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  maxLevel: integer("max_level").notNull(),
+});
+
+// Hideout levels
+export const hideoutLevels = pgTable("hideout_levels", {
+  id: text("id").primaryKey(), // composite: hideoutId-level
+  hideoutId: text("hideout_id")
+    .notNull()
+    .references(() => hideouts.id, { onDelete: "cascade" }),
+  level: integer("level").notNull(),
+});
+
+// Hideout level requirements (items needed to upgrade)
+export const hideoutLevelRequirements = pgTable("hideout_level_requirements", {
+  id: text("id").primaryKey(), // composite: hideoutId-level-itemId
+  hideoutId: text("hideout_id")
+    .notNull()
+    .references(() => hideouts.id, { onDelete: "cascade" }),
+  level: integer("level").notNull(),
+  itemId: text("item_id").notNull(),
+  quantity: integer("quantity").notNull(),
+});
+
 // Relations
 export const itemsRelations = relations(items, ({ many }) => ({
   effects: many(itemEffects),
   recipes: many(itemRecipes),
   recycles: many(itemRecycles),
   salvages: many(itemSalvages),
+  hideoutRequirements: many(hideoutLevelRequirements),
 }));
 
 export const itemEffectsRelations = relations(itemEffects, ({ one }) => ({
@@ -91,3 +119,40 @@ export const itemSalvagesRelations = relations(itemSalvages, ({ one }) => ({
     references: [items.id],
   }),
 }));
+
+export const hideoutsRelations = relations(hideouts, ({ many }) => ({
+  levels: many(hideoutLevels),
+  requirements: many(hideoutLevelRequirements),
+}));
+
+export const hideoutLevelsRelations = relations(
+  hideoutLevels,
+  ({ one, many }) => ({
+    hideout: one(hideouts, {
+      fields: [hideoutLevels.hideoutId],
+      references: [hideouts.id],
+    }),
+    requirements: many(hideoutLevelRequirements),
+  })
+);
+
+export const hideoutLevelRequirementsRelations = relations(
+  hideoutLevelRequirements,
+  ({ one }) => ({
+    hideout: one(hideouts, {
+      fields: [hideoutLevelRequirements.hideoutId],
+      references: [hideouts.id],
+    }),
+    level: one(hideoutLevels, {
+      fields: [
+        hideoutLevelRequirements.hideoutId,
+        hideoutLevelRequirements.level,
+      ],
+      references: [hideoutLevels.hideoutId, hideoutLevels.level],
+    }),
+    item: one(items, {
+      fields: [hideoutLevelRequirements.itemId],
+      references: [items.id],
+    }),
+  })
+);

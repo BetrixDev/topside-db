@@ -8,6 +8,27 @@
       "when": 1763602180955,
       "tag": "0000_broad_carnage",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1763785069463,
+      "tag": "0001_tan_zaladane",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1763785149207,
+      "tag": "0002_wet_mulholland_black",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1763785469681,
+      "tag": "0003_careful_moon_knight",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,6 @@
 import AdmZip from "adm-zip";
 import { MeiliSearch } from "meilisearch";
-import { itemSchema } from "@topside-db/schemas";
+import { itemSchema, hideoutSchema } from "@topside-db/schemas";
 import { db, Tables, sql } from "@topside-db/db";
 
 export async function ingestData() {
@@ -252,6 +252,145 @@ export async function ingestData() {
           quantity: sql`excluded.quantity`,
         },
       });
+  }
+
+  // Process hideout entries
+  const hideoutEntries = entries.filter(
+    (entry) =>
+      entry.entryName.includes("arcraiders-data-main/hideout/") &&
+      entry.name.endsWith(".json")
+  );
+
+  console.log(`Found ${hideoutEntries.length} hideouts to process`);
+
+  // Collect hideout data to batch insert
+  const hideoutsToInsert: (typeof Tables.hideouts.$inferInsert)[] = [];
+  const hideoutLevelsToInsert: (typeof Tables.hideoutLevels.$inferInsert)[] =
+    [];
+  const hideoutRequirementsToInsert: (typeof Tables.hideoutLevelRequirements.$inferInsert)[] =
+    [];
+
+  for (const hideoutEntry of hideoutEntries) {
+    const hideoutData = JSON.parse(hideoutEntry.getData().toString());
+    const hideoutParseResult = hideoutSchema.safeParse(hideoutData);
+
+    if (!hideoutParseResult.success) {
+      console.error(
+        `Invalid hideout data: ${hideoutEntry.entryName} - ${hideoutParseResult.error}`
+      );
+      continue;
+    }
+
+    const hideout = hideoutParseResult.data;
+
+    // Collect main hideout record
+    hideoutsToInsert.push({
+      id: hideout.id,
+      name: hideout.name.en, // Use English name
+      maxLevel: hideout.maxLevel,
+    });
+
+    // Collect hideout levels and requirements
+    for (const level of hideout.levels) {
+      const levelId = `${hideout.id}-${level.level}`;
+      hideoutLevelsToInsert.push({
+        id: levelId,
+        hideoutId: hideout.id,
+        level: level.level,
+      });
+
+      // Collect requirements for this level
+      for (const requirement of level.requirementItemIds) {
+        const requirementId = `${hideout.id}-${level.level}-${requirement.itemId}`;
+        hideoutRequirementsToInsert.push({
+          id: requirementId,
+          hideoutId: hideout.id,
+          level: level.level,
+          itemId: requirement.itemId,
+          quantity: requirement.quantity,
+        });
+      }
+    }
+  }
+
+  // Batch insert hideouts
+  if (hideoutsToInsert.length > 0) {
+    console.info(
+      `Inserting ${hideoutsToInsert.length} hideouts in batches of ${BATCH_SIZE}`
+    );
+    const hideoutChunks = chunkArray(hideoutsToInsert, BATCH_SIZE);
+    for (let i = 0; i < hideoutChunks.length; i++) {
+      const chunk = hideoutChunks[i]!;
+      console.info(
+        `Inserting hideouts batch ${i + 1}/${hideoutChunks.length} (${
+          chunk.length
+        } hideouts)`
+      );
+      await db
+        .insert(Tables.hideouts)
+        .values(chunk)
+        .onConflictDoUpdate({
+          target: Tables.hideouts.id,
+          set: {
+            name: sql`excluded.name`,
+            maxLevel: sql`excluded.max_level`,
+          },
+        });
+    }
+  }
+
+  // Batch insert hideout levels
+  if (hideoutLevelsToInsert.length > 0) {
+    console.info(
+      `Inserting ${hideoutLevelsToInsert.length} hideout levels in batches of ${BATCH_SIZE}`
+    );
+    const levelChunks = chunkArray(hideoutLevelsToInsert, BATCH_SIZE);
+    for (let i = 0; i < levelChunks.length; i++) {
+      const chunk = levelChunks[i]!;
+      console.info(
+        `Inserting hideout levels batch ${i + 1}/${levelChunks.length} (${
+          chunk.length
+        } levels)`
+      );
+      await db
+        .insert(Tables.hideoutLevels)
+        .values(chunk)
+        .onConflictDoUpdate({
+          target: Tables.hideoutLevels.id,
+          set: {
+            level: sql`excluded.level`,
+          },
+        });
+    }
+  }
+
+  // Batch insert hideout level requirements
+  if (hideoutRequirementsToInsert.length > 0) {
+    console.info(
+      `Inserting ${hideoutRequirementsToInsert.length} hideout requirements in batches of ${BATCH_SIZE}`
+    );
+    const requirementChunks = chunkArray(
+      hideoutRequirementsToInsert,
+      BATCH_SIZE
+    );
+    for (let i = 0; i < requirementChunks.length; i++) {
+      const chunk = requirementChunks[i]!;
+      console.info(
+        `Inserting hideout requirements batch ${i + 1}/${
+          requirementChunks.length
+        } (${chunk.length} requirements)`
+      );
+      await db
+        .insert(Tables.hideoutLevelRequirements)
+        .values(chunk)
+        .onConflictDoUpdate({
+          target: Tables.hideoutLevelRequirements.id,
+          set: {
+            itemId: sql`excluded.item_id`,
+            quantity: sql`excluded.quantity`,
+          },
+        });
+    }
   }
 
   console.info("ARC data ingestion complete");
