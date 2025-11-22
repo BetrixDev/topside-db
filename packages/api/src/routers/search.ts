@@ -38,6 +38,14 @@ export const searchRouter = {
               id: z.string(),
               name: z.string(),
             }),
+            z.object({
+              kind: z.literal("maps"),
+              id: z.string(),
+              name: z.string(),
+              description: z.string().nullish(),
+              maximumTimeMinutes: z.number().nullish(),
+              imageUrl: z.string().nullish(),
+            }),
           ])
         ),
         processingTimeMs: z.number(),
@@ -65,6 +73,12 @@ export const searchRouter = {
             q: query,
             limit: 10,
             attributesToSearchOn: ["name"],
+          },
+          {
+            indexUid: "maps",
+            q: query,
+            limit: 10,
+            attributesToSearchOn: ["name", "description"],
           },
         ],
       });

@@ -1,7 +1,9 @@
 import AdmZip from "adm-zip";
 import { MeiliSearch } from "meilisearch";
 import { itemSchema, hideoutSchema, questSchema } from "@topside-db/schemas";
-import { db, Tables, sql } from "@topside-db/db";
+import { db, Tables, sql, eq, and } from "@topside-db/db";
+import { BASE_WIKI_URL, scrapeMapPage, scrapeMapsPage } from "./wiki";
+import { snakeCase } from "es-toolkit/string";
 
 export async function ingestData() {
   console.log("Ingesting ARC data");
@@ -619,6 +621,103 @@ export async function ingestData() {
     }
   }
 
+  console.log("Scraping wiki pages");
+
+  const maps = await scrapeMapsPage();
+
+  for (const map of maps.maps) {
+    const mapData = await scrapeMapPage(map.wikiUrl);
+
+    await db
+      .insert(Tables.maps)
+      .values({
+        id: snakeCase(map.name),
+        name: map.name,
+        wikiUrl: `${BASE_WIKI_URL}${map.wikiUrl}`,
+        imageUrl: `${BASE_WIKI_URL}${map.imageUrl}`,
+        description: map.description,
+        maximumTimeMinutes: map.maximumTimeMinutes,
+      })
+      .onConflictDoUpdate({
+        target: Tables.maps.id,
+        set: {
+          name: sql`excluded.name`,
+          wikiUrl: sql`excluded.wiki_url`,
+          imageUrl: sql`excluded.image_url`,
+          description: sql`excluded.description`,
+          maximumTimeMinutes: sql`excluded.maximum_time_minutes`,
+        },
+      });
+
+    for (const difficulty of mapData.diffculties) {
+      if (
+        await db.query.mapDifficulties.findFirst({
+          where: (table, { and, eq }) =>
+            and(
+              eq(table.mapId, snakeCase(map.name)),
+              eq(table.name, difficulty.id)
+            ),
+        })
+      ) {
+        await db
+          .update(Tables.mapDifficulties)
+          .set({
+            rating: difficulty.rating,
+          })
+          .where(
+            and(
+              eq(Tables.mapDifficulties.mapId, snakeCase(map.name)),
+              eq(Tables.mapDifficulties.name, difficulty.id)
+            )
+          );
+      } else {
+        await db
+          .insert(Tables.mapDifficulties)
+          .values({
+            id: snakeCase(difficulty.id),
+            mapId: snakeCase(map.name),
+            name: difficulty.id,
+            rating: difficulty.rating,
+          })
+          .onConflictDoNothing();
+      }
+    }
+
+    for (const requirement of map.requirements) {
+      if (
+        await db.query.mapRequirements.findFirst({
+          where: (table, { and, eq }) =>
+            and(
+              eq(table.mapId, snakeCase(map.name)),
+              eq(table.name, requirement.name)
+            ),
+        })
+      ) {
+        await db
+          .update(Tables.mapRequirements)
+          .set({
+            value: requirement.value,
+          })
+          .where(
+            and(
+              eq(Tables.mapRequirements.mapId, snakeCase(map.name)),
+              eq(Tables.mapRequirements.name, requirement.name)
+            )
+          );
+      } else {
+        await db
+          .insert(Tables.mapRequirements)
+          .values({
+            id: snakeCase(requirement.name),
+            mapId: snakeCase(map.name),
+            name: requirement.name,
+            value: requirement.value,
+          })
+          .onConflictDoNothing();
+      }
+    }
+  }
+
   console.info("ARC data ingestion complete");
 
   // Sync to Meilisearch
@@ -675,4 +774,22 @@ export async function ingestData() {
   console.info("Meilisearch sync task created for hideouts", {
     task: hideoutTask,
   });
+
+  // Sync maps to Meilisearch
+  const mapIndex = meilisearch.index("maps");
+  console.info("Syncing maps to Meilisearch");
+
+  await mapIndex.updateSettings({
+    searchableAttributes: ["name", "description"],
+    filterableAttributes: ["maximumTimeMinutes"],
+    sortableAttributes: ["maximumTimeMinutes"],
+  });
+
+  const mapDocuments = await db.query.maps.findMany();
+
+  const mapTask = await mapIndex.addDocuments(mapDocuments, {
+    primaryKey: "id",
+  });
+
+  console.info("Meilisearch sync task created for maps", { task: mapTask });
 }

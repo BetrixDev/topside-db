@@ -5,43 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1763602180955,
-      "tag": "0000_broad_carnage",
+      "when": 1763822289792,
+      "tag": "0000_redundant_lily_hollister",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1763785069463,
-      "tag": "0001_tan_zaladane",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1763785149207,
-      "tag": "0002_wet_mulholland_black",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1763785469681,
-      "tag": "0003_careful_moon_knight",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1763785932806,
-      "tag": "0004_clammy_skrulls",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1763786303182,
-      "tag": "0005_acoustic_ser_duncan",
+      "when": 1763822590782,
+      "tag": "0001_lyrical_human_fly",
       "breakpoints": true
     }
   ]

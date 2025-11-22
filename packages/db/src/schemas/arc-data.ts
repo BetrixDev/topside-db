@@ -1,5 +1,12 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, integer, real, jsonb } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  integer,
+  real,
+  jsonb,
+  primaryKey,
+} from "drizzle-orm/pg-core";
 
 // Main items table
 export const items = pgTable("items", {
@@ -82,6 +89,45 @@ export const hideoutLevelRequirements = pgTable("hideout_level_requirements", {
   itemId: text("item_id").notNull(),
   quantity: integer("quantity").notNull(),
 });
+
+export const maps = pgTable("maps", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  wikiUrl: text("wiki_url").notNull(),
+  imageUrl: text("image_url").notNull(),
+  description: text("description"),
+  maximumTimeMinutes: integer("maximum_time_minutes").notNull(),
+});
+
+export const mapRequirements = pgTable(
+  "map_requirements",
+  {
+    id: text("id"),
+    mapId: text("map_id")
+      .notNull()
+      .references(() => maps.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    value: text("value").notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.mapId, t.name] }),
+  })
+);
+
+export const mapDifficulties = pgTable(
+  "map_difficulties",
+  {
+    id: text("id"),
+    mapId: text("map_id")
+      .notNull()
+      .references(() => maps.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    rating: real("rating").notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.mapId, t.name] }),
+  })
+);
 
 // Relations
 export const itemsRelations = relations(items, ({ many }) => ({

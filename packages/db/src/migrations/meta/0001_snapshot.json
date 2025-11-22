@@ -1,9 +1,142 @@
 {
-  "id": "47d16dc0-ff12-4ea3-a571-7027788230ae",
-  "prevId": "b61b0332-afb4-4666-b71e-566a6e36fc39",
+  "id": "69fb2f3b-609b-4755-a8fc-1e270d83677e",
+  "prevId": "f7f11b90-0bf5-4753-bceb-2dbfafd8c234",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.hideout_level_requirements": {
+      "name": "hideout_level_requirements",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "hideout_id": {
+          "name": "hideout_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "level": {
+          "name": "level",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "item_id": {
+          "name": "item_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "hideout_level_requirements_hideout_id_hideouts_id_fk": {
+          "name": "hideout_level_requirements_hideout_id_hideouts_id_fk",
+          "tableFrom": "hideout_level_requirements",
+          "tableTo": "hideouts",
+          "columnsFrom": [
+            "hideout_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.hideout_levels": {
+      "name": "hideout_levels",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "hideout_id": {
+          "name": "hideout_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "level": {
+          "name": "level",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "hideout_levels_hideout_id_hideouts_id_fk": {
+          "name": "hideout_levels_hideout_id_hideouts_id_fk",
+          "tableFrom": "hideout_levels",
+          "tableTo": "hideouts",
+          "columnsFrom": [
+            "hideout_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.hideouts": {
+      "name": "hideouts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "max_level": {
+          "name": "max_level",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.item_effects": {
       "name": "item_effects",
       "schema": "",
@@ -269,9 +402,10 @@
         },
         "craft_bench": {
           "name": "craft_bench",
-          "type": "text",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "'[]'::jsonb"
         },
         "updated_at": {
           "name": "updated_at",
@@ -288,8 +422,126 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.hideout_level_requirements": {
-      "name": "hideout_level_requirements",
+    "public.map_difficulties": {
+      "name": "map_difficulties",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "map_id": {
+          "name": "map_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rating": {
+          "name": "rating",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "map_difficulties_map_id_maps_id_fk": {
+          "name": "map_difficulties_map_id_maps_id_fk",
+          "tableFrom": "map_difficulties",
+          "tableTo": "maps",
+          "columnsFrom": [
+            "map_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "map_difficulties_map_id_name_pk": {
+          "name": "map_difficulties_map_id_name_pk",
+          "columns": [
+            "map_id",
+            "name"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.map_requirements": {
+      "name": "map_requirements",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "map_id": {
+          "name": "map_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "map_requirements_map_id_maps_id_fk": {
+          "name": "map_requirements_map_id_maps_id_fk",
+          "tableFrom": "map_requirements",
+          "tableTo": "maps",
+          "columnsFrom": [
+            "map_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "map_requirements_map_id_name_pk": {
+          "name": "map_requirements_map_id_name_pk",
+          "columns": [
+            "map_id",
+            "name"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.maps": {
+      "name": "maps",
       "schema": "",
       "columns": {
         "id": {
@@ -298,15 +550,199 @@
           "primaryKey": true,
           "notNull": true
         },
-        "hideout_id": {
-          "name": "hideout_id",
+        "name": {
+          "name": "name",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "level": {
-          "name": "level",
+        "wiki_url": {
+          "name": "wiki_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "image_url": {
+          "name": "image_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "maximum_time_minutes": {
+          "name": "maximum_time_minutes",
           "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.quest_next_quests": {
+      "name": "quest_next_quests",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "quest_id": {
+          "name": "quest_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "next_quest_id": {
+          "name": "next_quest_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "quest_next_quests_quest_id_quests_id_fk": {
+          "name": "quest_next_quests_quest_id_quests_id_fk",
+          "tableFrom": "quest_next_quests",
+          "tableTo": "quests",
+          "columnsFrom": [
+            "quest_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.quest_objectives": {
+      "name": "quest_objectives",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "quest_id": {
+          "name": "quest_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "text": {
+          "name": "text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "order_index": {
+          "name": "order_index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "quest_objectives_quest_id_quests_id_fk": {
+          "name": "quest_objectives_quest_id_quests_id_fk",
+          "tableFrom": "quest_objectives",
+          "tableTo": "quests",
+          "columnsFrom": [
+            "quest_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.quest_prerequisites": {
+      "name": "quest_prerequisites",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "quest_id": {
+          "name": "quest_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prerequisite_quest_id": {
+          "name": "prerequisite_quest_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "quest_prerequisites_quest_id_quests_id_fk": {
+          "name": "quest_prerequisites_quest_id_quests_id_fk",
+          "tableFrom": "quest_prerequisites",
+          "tableTo": "quests",
+          "columnsFrom": [
+            "quest_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.quest_reward_items": {
+      "name": "quest_reward_items",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "quest_id": {
+          "name": "quest_id",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -325,12 +761,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "hideout_level_requirements_hideout_id_hideouts_id_fk": {
-          "name": "hideout_level_requirements_hideout_id_hideouts_id_fk",
-          "tableFrom": "hideout_level_requirements",
-          "tableTo": "hideouts",
+        "quest_reward_items_quest_id_quests_id_fk": {
+          "name": "quest_reward_items_quest_id_quests_id_fk",
+          "tableFrom": "quest_reward_items",
+          "tableTo": "quests",
           "columnsFrom": [
-            "hideout_id"
+            "quest_id"
           ],
           "columnsTo": [
             "id"
@@ -345,53 +781,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.hideout_levels": {
-      "name": "hideout_levels",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "hideout_id": {
-          "name": "hideout_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "level": {
-          "name": "level",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "hideout_levels_hideout_id_hideouts_id_fk": {
-          "name": "hideout_levels_hideout_id_hideouts_id_fk",
-          "tableFrom": "hideout_levels",
-          "tableTo": "hideouts",
-          "columnsFrom": [
-            "hideout_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.hideouts": {
-      "name": "hideouts",
+    "public.quests": {
+      "name": "quests",
       "schema": "",
       "columns": {
         "id": {
@@ -406,11 +797,30 @@
           "primaryKey": false,
           "notNull": true
         },
-        "max_level": {
-          "name": "max_level",
+        "trader": {
+          "name": "trader",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "xp": {
+          "name": "xp",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false,
+          "default": 0
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},

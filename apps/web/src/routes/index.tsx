@@ -144,6 +144,44 @@ function HomeComponent() {
                         );
                       }
 
+                      if (result.kind === "maps") {
+                        return (
+                          <Link
+                            to="/map/$mapId"
+                            params={{ mapId: result.id }}
+                            key={result.id}
+                            preload="intent"
+                          >
+                            <CommandItem
+                              value={result.name ?? undefined}
+                              className="rounded-lg hover:bg-background/50 cursor-pointer transition-colors mb-1 p-3"
+                            >
+                              <div className="flex items-center gap-3 w-full">
+                                <div className="w-12 h-12 bg-background rounded-lg border border-border/30 flex items-center justify-center overflow-hidden shrink-0">
+                                  {result.imageUrl ? (
+                                    <img
+                                      src={result.imageUrl ?? undefined}
+                                      alt={result.name}
+                                      className="w-full h-full object-cover object-center"
+                                    />
+                                  ) : (
+                                    <MapIcon className="w-6 h-6 text-muted-foreground" />
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium truncate">
+                                    {result.name}
+                                  </p>
+                                  <div className="text-xs text-muted-foreground font-mono flex items-center gap-1">
+                                    Map
+                                  </div>
+                                </div>
+                              </div>
+                            </CommandItem>
+                          </Link>
+                        );
+                      }
+
                       if (result.kind === "hideouts") {
                         return (
                           <Link

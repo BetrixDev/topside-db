@@ -13,6 +13,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as QuestQuestIdRouteImport } from './routes/quest.$questId'
+import { Route as MapMapIdRouteImport } from './routes/map.$mapId'
 import { Route as ItemItemIdRouteImport } from './routes/item.$itemId'
 import { Route as HideoutWorkbenchIdRouteImport } from './routes/hideout.$workbenchId'
 
@@ -36,6 +37,11 @@ const QuestQuestIdRoute = QuestQuestIdRouteImport.update({
   path: '/quest/$questId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MapMapIdRoute = MapMapIdRouteImport.update({
+  id: '/map/$mapId',
+  path: '/map/$mapId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ItemItemIdRoute = ItemItemIdRouteImport.update({
   id: '/item/$itemId',
   path: '/item/$itemId',
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/hideout/$workbenchId': typeof HideoutWorkbenchIdRoute
   '/item/$itemId': typeof ItemItemIdRoute
+  '/map/$mapId': typeof MapMapIdRoute
   '/quest/$questId': typeof QuestQuestIdRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/hideout/$workbenchId': typeof HideoutWorkbenchIdRoute
   '/item/$itemId': typeof ItemItemIdRoute
+  '/map/$mapId': typeof MapMapIdRoute
   '/quest/$questId': typeof QuestQuestIdRoute
 }
 export interface FileRoutesById {
@@ -70,6 +78,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/hideout/$workbenchId': typeof HideoutWorkbenchIdRoute
   '/item/$itemId': typeof ItemItemIdRoute
+  '/map/$mapId': typeof MapMapIdRoute
   '/quest/$questId': typeof QuestQuestIdRoute
 }
 export interface FileRouteTypes {
@@ -80,6 +89,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/hideout/$workbenchId'
     | '/item/$itemId'
+    | '/map/$mapId'
     | '/quest/$questId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -88,6 +98,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/hideout/$workbenchId'
     | '/item/$itemId'
+    | '/map/$mapId'
     | '/quest/$questId'
   id:
     | '__root__'
@@ -96,6 +107,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/hideout/$workbenchId'
     | '/item/$itemId'
+    | '/map/$mapId'
     | '/quest/$questId'
   fileRoutesById: FileRoutesById
 }
@@ -105,6 +117,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   HideoutWorkbenchIdRoute: typeof HideoutWorkbenchIdRoute
   ItemItemIdRoute: typeof ItemItemIdRoute
+  MapMapIdRoute: typeof MapMapIdRoute
   QuestQuestIdRoute: typeof QuestQuestIdRoute
 }
 
@@ -138,6 +151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuestQuestIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/map/$mapId': {
+      id: '/map/$mapId'
+      path: '/map/$mapId'
+      fullPath: '/map/$mapId'
+      preLoaderRoute: typeof MapMapIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/item/$itemId': {
       id: '/item/$itemId'
       path: '/item/$itemId'
@@ -161,6 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   HideoutWorkbenchIdRoute: HideoutWorkbenchIdRoute,
   ItemItemIdRoute: ItemItemIdRoute,
+  MapMapIdRoute: MapMapIdRoute,
   QuestQuestIdRoute: QuestQuestIdRoute,
 }
 export const routeTree = rootRouteImport
