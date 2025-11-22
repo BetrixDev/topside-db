@@ -641,5 +641,38 @@ export async function ingestData() {
     primaryKey: "id",
   });
 
-  console.info("Meilisearch sync task created", { task });
+  console.info("Meilisearch sync task created for items", { task });
+
+  // Sync quests to Meilisearch
+  const questIndex = meilisearch.index("quests");
+  console.info("Syncing quests to Meilisearch");
+
+  await questIndex.updateSettings({
+    searchableAttributes: ["name", "description", "trader"],
+    filterableAttributes: ["trader"],
+    sortableAttributes: ["xp"],
+  });
+
+  const questTask = await questIndex.addDocuments(questsToInsert, {
+    primaryKey: "id",
+  });
+
+  console.info("Meilisearch sync task created for quests", { task: questTask });
+
+  // Sync hideouts to Meilisearch
+  const hideoutIndex = meilisearch.index("hideouts");
+  console.info("Syncing hideouts to Meilisearch");
+
+  await hideoutIndex.updateSettings({
+    searchableAttributes: ["name"],
+    sortableAttributes: ["maxLevel"],
+  });
+
+  const hideoutTask = await hideoutIndex.addDocuments(hideoutsToInsert, {
+    primaryKey: "id",
+  });
+
+  console.info("Meilisearch sync task created for hideouts", {
+    task: hideoutTask,
+  });
 }

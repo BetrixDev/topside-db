@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as QuestQuestIdRouteImport } from './routes/quest.$questId'
 import { Route as ItemItemIdRouteImport } from './routes/item.$itemId'
+import { Route as HideoutWorkbenchIdRouteImport } from './routes/hideout.$workbenchId'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -29,9 +31,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QuestQuestIdRoute = QuestQuestIdRouteImport.update({
+  id: '/quest/$questId',
+  path: '/quest/$questId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ItemItemIdRoute = ItemItemIdRouteImport.update({
   id: '/item/$itemId',
   path: '/item/$itemId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HideoutWorkbenchIdRoute = HideoutWorkbenchIdRouteImport.update({
+  id: '/hideout/$workbenchId',
+  path: '/hideout/$workbenchId',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -39,34 +51,61 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/hideout/$workbenchId': typeof HideoutWorkbenchIdRoute
   '/item/$itemId': typeof ItemItemIdRoute
+  '/quest/$questId': typeof QuestQuestIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/hideout/$workbenchId': typeof HideoutWorkbenchIdRoute
   '/item/$itemId': typeof ItemItemIdRoute
+  '/quest/$questId': typeof QuestQuestIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/hideout/$workbenchId': typeof HideoutWorkbenchIdRoute
   '/item/$itemId': typeof ItemItemIdRoute
+  '/quest/$questId': typeof QuestQuestIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/privacy' | '/terms' | '/item/$itemId'
+  fullPaths:
+    | '/'
+    | '/privacy'
+    | '/terms'
+    | '/hideout/$workbenchId'
+    | '/item/$itemId'
+    | '/quest/$questId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/privacy' | '/terms' | '/item/$itemId'
-  id: '__root__' | '/' | '/privacy' | '/terms' | '/item/$itemId'
+  to:
+    | '/'
+    | '/privacy'
+    | '/terms'
+    | '/hideout/$workbenchId'
+    | '/item/$itemId'
+    | '/quest/$questId'
+  id:
+    | '__root__'
+    | '/'
+    | '/privacy'
+    | '/terms'
+    | '/hideout/$workbenchId'
+    | '/item/$itemId'
+    | '/quest/$questId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
+  HideoutWorkbenchIdRoute: typeof HideoutWorkbenchIdRoute
   ItemItemIdRoute: typeof ItemItemIdRoute
+  QuestQuestIdRoute: typeof QuestQuestIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -92,11 +131,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/quest/$questId': {
+      id: '/quest/$questId'
+      path: '/quest/$questId'
+      fullPath: '/quest/$questId'
+      preLoaderRoute: typeof QuestQuestIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/item/$itemId': {
       id: '/item/$itemId'
       path: '/item/$itemId'
       fullPath: '/item/$itemId'
       preLoaderRoute: typeof ItemItemIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hideout/$workbenchId': {
+      id: '/hideout/$workbenchId'
+      path: '/hideout/$workbenchId'
+      fullPath: '/hideout/$workbenchId'
+      preLoaderRoute: typeof HideoutWorkbenchIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -106,7 +159,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
+  HideoutWorkbenchIdRoute: HideoutWorkbenchIdRoute,
   ItemItemIdRoute: ItemItemIdRoute,
+  QuestQuestIdRoute: QuestQuestIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

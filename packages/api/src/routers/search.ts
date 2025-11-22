@@ -16,15 +16,74 @@ export const searchRouter = {
       })
     )
     .use(cacheMiddleware)
+    .output(
+      z.object({
+        hits: z.array(
+          z.union([
+            z.object({
+              kind: z.literal("items"),
+              id: z.string(),
+              name: z.string(),
+              type: z.string(),
+              imageFilename: z.string().nullish(),
+            }),
+            z.object({
+              kind: z.literal("quests"),
+              id: z.string(),
+              name: z.string(),
+              trader: z.string(),
+            }),
+            z.object({
+              kind: z.literal("hideouts"),
+              id: z.string(),
+              name: z.string(),
+            }),
+          ])
+        ),
+        processingTimeMs: z.number(),
+      })
+    )
     .handler(async ({ input }) => {
       const { query } = input;
 
-      const index = meilisearch.index("items");
-      const searchResult = await index.search(query, {
-        limit: 20,
-        attributesToSearchOn: ["name", "description"],
+      const { results } = await meilisearch.multiSearch({
+        queries: [
+          {
+            indexUid: "items",
+            q: query,
+            limit: 10,
+            attributesToSearchOn: ["name", "description"],
+          },
+          {
+            indexUid: "quests",
+            q: query,
+            limit: 10,
+            attributesToSearchOn: ["name", "description", "trader"],
+          },
+          {
+            indexUid: "hideouts",
+            q: query,
+            limit: 10,
+            attributesToSearchOn: ["name"],
+          },
+        ],
       });
 
-      return searchResult;
+      console.log(results);
+
+      const hits = results.flatMap((result) =>
+        result.hits.map((hit) => ({
+          ...(hit as any),
+          kind: result.indexUid, // "items", "quests", "hideouts"
+        }))
+      );
+
+      return {
+        hits,
+        processingTimeMs: results.reduce(
+          (acc, result) => acc + result.processingTimeMs,
+          0
+        ),
+      };
     }),
 };

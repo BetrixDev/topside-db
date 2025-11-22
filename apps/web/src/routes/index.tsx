@@ -16,6 +16,8 @@ import {
   ArrowRightIcon,
   ChevronRightIcon,
   SearchIcon,
+  MapIcon,
+  HammerIcon,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -108,40 +110,106 @@ function HomeComponent() {
                     }
                     className="p-2"
                   >
-                    {searchResults.map((result) => (
-                      <Link
-                        to="/item/$itemId"
-                        params={{ itemId: result.id }}
-                        key={result.id}
-                        preload="intent"
-                      >
-                        <CommandItem
-                          value={result.name ?? undefined}
-                          className="rounded-lg hover:bg-background/50 cursor-pointer transition-colors mb-1 p-3"
+                    {searchResults.map((result) => {
+                      if (result.kind === "quests") {
+                        return (
+                          <Link
+                            to="/quest/$questId"
+                            params={{ questId: result.id }}
+                            key={result.id}
+                            preload="intent"
+                          >
+                            <CommandItem
+                              value={result.name ?? undefined}
+                              className="rounded-lg hover:bg-background/50 cursor-pointer transition-colors mb-1 p-3"
+                            >
+                              <div className="flex items-center gap-3 w-full">
+                                <div className="w-12 h-12 bg-background rounded-lg border border-border/30 flex items-center justify-center overflow-hidden shrink-0">
+                                  <MapIcon className="w-6 h-6 text-muted-foreground" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium truncate">
+                                    {result.name}
+                                  </p>
+                                  <div className="text-xs text-muted-foreground font-mono flex items-center gap-1">
+                                    <span>Quest &gt;</span>
+                                    <span className="text-primary">
+                                      {result.trader}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </CommandItem>
+                          </Link>
+                        );
+                      }
+
+                      if (result.kind === "hideouts") {
+                        return (
+                          <Link
+                            to="/hideout/$workbenchId"
+                            params={{ workbenchId: result.id }}
+                            key={result.id}
+                            preload="intent"
+                          >
+                            <CommandItem
+                              value={result.name ?? undefined}
+                              className="rounded-lg hover:bg-background/50 cursor-pointer transition-colors mb-1 p-3"
+                            >
+                              <div className="flex items-center gap-3 w-full">
+                                <div className="w-12 h-12 bg-background rounded-lg border border-border/30 flex items-center justify-center overflow-hidden shrink-0">
+                                  <HammerIcon className="w-6 h-6 text-muted-foreground" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium truncate">
+                                    {result.name}
+                                  </p>
+                                  <div className="text-xs text-muted-foreground font-mono flex items-center gap-1">
+                                    <span>Hideout &gt;</span>
+                                    <span className="text-primary">Module</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </CommandItem>
+                          </Link>
+                        );
+                      }
+
+                      return (
+                        <Link
+                          to="/item/$itemId"
+                          params={{ itemId: result.id }}
+                          key={result.id}
+                          preload="intent"
                         >
-                          <div className="flex items-center gap-3 w-full">
-                            <div className="w-12 h-12 bg-background rounded-lg border border-border/30 flex items-center justify-center overflow-hidden shrink-0">
-                              <img
-                                src={result.imageFilename}
-                                alt={result.name}
-                                className="w-full h-full object-contain p-1"
-                              />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium truncate">
-                                {result.name}
-                              </p>
-                              <div className="text-xs text-muted-foreground font-mono flex items-center gap-1">
-                                <span>Item &gt;</span>
-                                <span className="text-primary">
-                                  {result.type}
-                                </span>
+                          <CommandItem
+                            value={result.name ?? undefined}
+                            className="rounded-lg hover:bg-background/50 cursor-pointer transition-colors mb-1 p-3"
+                          >
+                            <div className="flex items-center gap-3 w-full">
+                              <div className="w-12 h-12 bg-background rounded-lg border border-border/30 flex items-center justify-center overflow-hidden shrink-0">
+                                <img
+                                  src={result.imageFilename ?? undefined}
+                                  alt={result.name}
+                                  className="w-full h-full object-contain p-1"
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium truncate">
+                                  {result.name}
+                                </p>
+                                <div className="text-xs text-muted-foreground font-mono flex items-center gap-1">
+                                  <span>Item &gt;</span>
+                                  <span className="text-primary">
+                                    {result.type}
+                                  </span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </CommandItem>
-                      </Link>
-                    ))}
+                          </CommandItem>
+                        </Link>
+                      );
+                    })}
                   </CommandGroup>
                 )}
               </CommandList>
