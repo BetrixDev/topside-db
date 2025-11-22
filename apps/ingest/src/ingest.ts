@@ -61,7 +61,13 @@ export async function ingestData() {
       weightKg: item.weightKg,
       stackSize: item.stackSize,
       imageFilename: item.imageFilename,
-      craftBench: item.craftBench,
+      craftBench: Array.isArray(item.craftBench)
+        ? item.craftBench.filter((x): x is string => typeof x === "string")
+        : item.craftBench === null
+        ? null
+        : typeof item.craftBench === "string"
+        ? [item.craftBench]
+        : [],
       updatedAt: item.updatedAt,
     });
 
@@ -72,8 +78,8 @@ export async function ingestData() {
         effectsToInsert.push({
           id: effectId,
           itemId: item.id,
-          name: effectData.en, // Use English name
-          value: effectData.value,
+          name: effectData?.en ?? effectKey, // Use English name
+          value: effectData?.value ?? null,
         });
       }
     }

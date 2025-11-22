@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, integer, real } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, real, jsonb } from "drizzle-orm/pg-core";
 
 // Main items table
 export const items = pgTable("items", {
@@ -12,7 +12,7 @@ export const items = pgTable("items", {
   weightKg: real("weight_kg"),
   stackSize: integer("stack_size").default(1),
   imageFilename: text("image_filename"),
-  craftBench: text("craft_bench"),
+  craftBench: jsonb("craft_bench").$type<string[]>().default([]),
   updatedAt: text("updated_at"),
 });
 

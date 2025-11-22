@@ -3,7 +3,7 @@ import { localizedStringSchema } from "./common";
 
 // Schema for effect with localized name and value
 const effectSchema = localizedStringSchema.extend({
-  value: z.string(),
+  value: z.coerce.string().optional().nullable(),
 });
 
 // Schema for material quantities (recipes, recycles, salvages)
@@ -15,16 +15,16 @@ export const itemSchema = z.object({
   name: localizedStringSchema,
   description: localizedStringSchema,
   type: z.string(),
-  value: z.number(),
+  value: z.number().optional(),
   rarity: z.string(),
   recyclesInto: materialsSchema.optional(),
-  weightKg: z.number(),
-  stackSize: z.number(),
-  effects: z.record(z.string(), effectSchema).optional(),
-  imageFilename: z.string(),
+  weightKg: z.number().optional(),
+  stackSize: z.number().optional(),
+  effects: z.record(z.string(), effectSchema.nullable()).optional(),
+  imageFilename: z.string().optional(),
   updatedAt: z.string(),
   recipe: materialsSchema.optional(),
-  craftBench: z.string().optional(),
+  craftBench: z.union([z.string(), z.array(z.string()), z.null()]).optional(),
   salvagesInto: materialsSchema.optional(),
 });
 
