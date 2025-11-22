@@ -156,3 +156,99 @@ export const hideoutLevelRequirementsRelations = relations(
     }),
   })
 );
+
+// Quests table
+export const quests = pgTable("quests", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  trader: text("trader"),
+  description: text("description"),
+  xp: integer("xp").default(0),
+  updatedAt: text("updated_at"),
+});
+
+// Quest objectives
+export const questObjectives = pgTable("quest_objectives", {
+  id: text("id").primaryKey(), // composite: questId-index
+  questId: text("quest_id")
+    .notNull()
+    .references(() => quests.id, { onDelete: "cascade" }),
+  text: text("text").notNull(),
+  orderIndex: integer("order_index").notNull(),
+});
+
+// Quest reward items
+export const questRewardItems = pgTable("quest_reward_items", {
+  id: text("id").primaryKey(), // composite: questId-itemId
+  questId: text("quest_id")
+    .notNull()
+    .references(() => quests.id, { onDelete: "cascade" }),
+  itemId: text("item_id").notNull(),
+  quantity: integer("quantity").notNull(),
+});
+
+// Quest prerequisites (previous quests required)
+export const questPrerequisites = pgTable("quest_prerequisites", {
+  id: text("id").primaryKey(), // composite: questId-prerequisiteQuestId
+  questId: text("quest_id")
+    .notNull()
+    .references(() => quests.id, { onDelete: "cascade" }),
+  prerequisiteQuestId: text("prerequisite_quest_id").notNull(),
+});
+
+// Quest next quests (unlocked after completion)
+export const questNextQuests = pgTable("quest_next_quests", {
+  id: text("id").primaryKey(), // composite: questId-nextQuestId
+  questId: text("quest_id")
+    .notNull()
+    .references(() => quests.id, { onDelete: "cascade" }),
+  nextQuestId: text("next_quest_id").notNull(),
+});
+
+// Quest Relations
+export const questsRelations = relations(quests, ({ many }) => ({
+  objectives: many(questObjectives),
+  rewardItems: many(questRewardItems),
+  prerequisites: many(questPrerequisites),
+  nextQuests: many(questNextQuests),
+}));
+
+export const questObjectivesRelations = relations(
+  questObjectives,
+  ({ one }) => ({
+    quest: one(quests, {
+      fields: [questObjectives.questId],
+      references: [quests.id],
+    }),
+  })
+);
+
+export const questRewardItemsRelations = relations(
+  questRewardItems,
+  ({ one }) => ({
+    quest: one(quests, {
+      fields: [questRewardItems.questId],
+      references: [quests.id],
+    }),
+  })
+);
+
+export const questPrerequisitesRelations = relations(
+  questPrerequisites,
+  ({ one }) => ({
+    quest: one(quests, {
+      fields: [questPrerequisites.questId],
+      references: [quests.id],
+    }),
+  })
+);
+
+export const questNextQuestsRelations = relations(
+  questNextQuests,
+  ({ one }) => ({
+    quest: one(quests, {
+      fields: [questNextQuests.questId],
+      references: [quests.id],
+    }),
+  })
+);

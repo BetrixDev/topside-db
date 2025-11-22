@@ -1,6 +1,6 @@
 import AdmZip from "adm-zip";
 import { MeiliSearch } from "meilisearch";
-import { itemSchema, hideoutSchema } from "@topside-db/schemas";
+import { itemSchema, hideoutSchema, questSchema } from "@topside-db/schemas";
 import { db, Tables, sql } from "@topside-db/db";
 
 export async function ingestData() {
@@ -388,6 +388,226 @@ export async function ingestData() {
           set: {
             itemId: sql`excluded.item_id`,
             quantity: sql`excluded.quantity`,
+          },
+        });
+    }
+  }
+
+  // Process quest entries
+  const questEntries = entries.filter(
+    (entry) =>
+      entry.entryName.includes("arcraiders-data-main/quests/") &&
+      entry.name.endsWith(".json")
+  );
+
+  console.log(`Found ${questEntries.length} quests to process`);
+
+  // Collect quest data to batch insert
+  const questsToInsert: (typeof Tables.quests.$inferInsert)[] = [];
+  const questObjectivesToInsert: (typeof Tables.questObjectives.$inferInsert)[] =
+    [];
+  const questRewardItemsToInsert: (typeof Tables.questRewardItems.$inferInsert)[] =
+    [];
+  const questPrerequisitesToInsert: (typeof Tables.questPrerequisites.$inferInsert)[] =
+    [];
+  const questNextQuestsToInsert: (typeof Tables.questNextQuests.$inferInsert)[] =
+    [];
+
+  for (const questEntry of questEntries) {
+    const questData = JSON.parse(questEntry.getData().toString());
+    const questParseResult = questSchema.safeParse(questData);
+
+    if (!questParseResult.success) {
+      console.error(
+        `Invalid quest data: ${questEntry.entryName} - ${questParseResult.error}`
+      );
+      continue;
+    }
+
+    const quest = questParseResult.data;
+
+    // Collect main quest record
+    questsToInsert.push({
+      id: quest.id,
+      name: quest.name.en, // Use English name
+      trader: quest.trader,
+      description: quest.description?.en, // Use English description if available
+      xp: quest.xp,
+      updatedAt: quest.updatedAt,
+    });
+
+    // Collect objectives
+    for (let i = 0; i < quest.objectives.length; i++) {
+      const objectiveId = `${quest.id}-${i}`;
+      questObjectivesToInsert.push({
+        id: objectiveId,
+        questId: quest.id,
+        text: quest.objectives[i]!.en, // Use English text
+        orderIndex: i,
+      });
+    }
+
+    // Collect reward items
+    for (const reward of quest.rewardItemIds) {
+      const rewardId = `${quest.id}-${reward.itemId}`;
+      questRewardItemsToInsert.push({
+        id: rewardId,
+        questId: quest.id,
+        itemId: reward.itemId,
+        quantity: reward.quantity,
+      });
+    }
+
+    // Collect prerequisites
+    for (const prerequisiteId of quest.previousQuestIds) {
+      const id = `${quest.id}-${prerequisiteId}`;
+      questPrerequisitesToInsert.push({
+        id,
+        questId: quest.id,
+        prerequisiteQuestId: prerequisiteId,
+      });
+    }
+
+    // Collect next quests
+    for (const nextQuestId of quest.nextQuestIds) {
+      const id = `${quest.id}-${nextQuestId}`;
+      questNextQuestsToInsert.push({
+        id,
+        questId: quest.id,
+        nextQuestId: nextQuestId,
+      });
+    }
+  }
+
+  // Batch insert quests
+  if (questsToInsert.length > 0) {
+    console.info(
+      `Inserting ${questsToInsert.length} quests in batches of ${BATCH_SIZE}`
+    );
+    const questChunks = chunkArray(questsToInsert, BATCH_SIZE);
+    for (let i = 0; i < questChunks.length; i++) {
+      const chunk = questChunks[i]!;
+      console.info(
+        `Inserting quests batch ${i + 1}/${questChunks.length} (${
+          chunk.length
+        } quests)`
+      );
+      await db
+        .insert(Tables.quests)
+        .values(chunk)
+        .onConflictDoUpdate({
+          target: Tables.quests.id,
+          set: {
+            name: sql`excluded.name`,
+            trader: sql`excluded.trader`,
+            description: sql`excluded.description`,
+            xp: sql`excluded.xp`,
+            updatedAt: sql`excluded.updated_at`,
+          },
+        });
+    }
+  }
+
+  // Batch insert quest objectives
+  if (questObjectivesToInsert.length > 0) {
+    console.info(
+      `Inserting ${questObjectivesToInsert.length} quest objectives in batches of ${BATCH_SIZE}`
+    );
+    const objectiveChunks = chunkArray(questObjectivesToInsert, BATCH_SIZE);
+    for (let i = 0; i < objectiveChunks.length; i++) {
+      const chunk = objectiveChunks[i]!;
+      console.info(
+        `Inserting quest objectives batch ${i + 1}/${objectiveChunks.length} (${
+          chunk.length
+        } objectives)`
+      );
+      await db
+        .insert(Tables.questObjectives)
+        .values(chunk)
+        .onConflictDoUpdate({
+          target: Tables.questObjectives.id,
+          set: {
+            text: sql`excluded.text`,
+            orderIndex: sql`excluded.order_index`,
+          },
+        });
+    }
+  }
+
+  // Batch insert quest reward items
+  if (questRewardItemsToInsert.length > 0) {
+    console.info(
+      `Inserting ${questRewardItemsToInsert.length} quest reward items in batches of ${BATCH_SIZE}`
+    );
+    const rewardChunks = chunkArray(questRewardItemsToInsert, BATCH_SIZE);
+    for (let i = 0; i < rewardChunks.length; i++) {
+      const chunk = rewardChunks[i]!;
+      console.info(
+        `Inserting quest reward items batch ${i + 1}/${rewardChunks.length} (${
+          chunk.length
+        } rewards)`
+      );
+      await db
+        .insert(Tables.questRewardItems)
+        .values(chunk)
+        .onConflictDoUpdate({
+          target: Tables.questRewardItems.id,
+          set: {
+            itemId: sql`excluded.item_id`,
+            quantity: sql`excluded.quantity`,
+          },
+        });
+    }
+  }
+
+  // Batch insert quest prerequisites
+  if (questPrerequisitesToInsert.length > 0) {
+    console.info(
+      `Inserting ${questPrerequisitesToInsert.length} quest prerequisites in batches of ${BATCH_SIZE}`
+    );
+    const prerequisiteChunks = chunkArray(
+      questPrerequisitesToInsert,
+      BATCH_SIZE
+    );
+    for (let i = 0; i < prerequisiteChunks.length; i++) {
+      const chunk = prerequisiteChunks[i]!;
+      console.info(
+        `Inserting quest prerequisites batch ${i + 1}/${
+          prerequisiteChunks.length
+        } (${chunk.length} prerequisites)`
+      );
+      await db
+        .insert(Tables.questPrerequisites)
+        .values(chunk)
+        .onConflictDoUpdate({
+          target: Tables.questPrerequisites.id,
+          set: {
+            prerequisiteQuestId: sql`excluded.prerequisite_quest_id`,
+          },
+        });
+    }
+  }
+
+  // Batch insert quest next quests
+  if (questNextQuestsToInsert.length > 0) {
+    console.info(
+      `Inserting ${questNextQuestsToInsert.length} quest next quests in batches of ${BATCH_SIZE}`
+    );
+    const nextQuestChunks = chunkArray(questNextQuestsToInsert, BATCH_SIZE);
+    for (let i = 0; i < nextQuestChunks.length; i++) {
+      const chunk = nextQuestChunks[i]!;
+      console.info(
+        `Inserting quest next quests batch ${i + 1}/${
+          nextQuestChunks.length
+        } (${chunk.length} next quests)`
+      );
+      await db
+        .insert(Tables.questNextQuests)
+        .values(chunk)
+        .onConflictDoUpdate({
+          target: Tables.questNextQuests.id,
+          set: {
+            nextQuestId: sql`excluded.next_quest_id`,
           },
         });
     }
