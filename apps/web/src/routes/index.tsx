@@ -10,7 +10,7 @@ import {
   CommandGroup,
   CommandItem,
 } from "@/components/ui/command";
-import { FlickeringGrid } from "@/components/ui/shadcn-io/flickering-grid";
+import { FlickeringGrid } from "@/components/ui/flickering-grid";
 import {
   ArchiveIcon,
   ArrowRightIcon,
