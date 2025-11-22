@@ -1,8 +1,11 @@
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { orpc } from "@/utils/orpc";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
+  AlertTriangleIcon,
   ArchiveIcon,
+  CheckCircleIcon,
   ChevronLeftIcon,
   HammerIcon,
   LightbulbIcon,
@@ -200,6 +203,31 @@ function RouteComponent() {
                   <RecycleIcon className="w-5 h-5 text-primary" />
                   <h2 className="text-lg font-semibold">Recycles Into</h2>
                 </div>
+                <Alert className="mb-4" variant="default">
+                  {!data.isRecycleWorthIt && (
+                    <AlertTriangleIcon className="w-4 h-4" color="yellow" />
+                  )}
+                  {data.isRecycleWorthIt && (
+                    <CheckCircleIcon className="w-4 h-4" color="green" />
+                  )}
+                  <AlertTitle>
+                    {data.isRecycleWorthIt
+                      ? "Recycling is worth it"
+                      : "Recycling is not worth it"}
+                  </AlertTitle>
+                  <AlertDescription>
+                    <div>
+                      {" "}
+                      Selling all recyced items would yield{" "}
+                      <span className="text-primary">
+                        {data.recycledValue} credits
+                      </span>
+                      , compared to{" "}
+                      <span className="text-primary">{data.value} credits</span>{" "}
+                      for the original item.
+                    </div>
+                  </AlertDescription>
+                </Alert>
                 <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
                   {data.recycles.map((recycle) => (
                     <Link

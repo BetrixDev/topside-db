@@ -37,8 +37,16 @@ export const itemsRouter = {
       // Map material IDs to item details
       const materialMap = new Map(relatedItems.map((i) => [i.id, i]));
 
+      // Calculate recycled value
+      const recycledValue = item.recycles.reduce((total, r) => {
+        const material = materialMap.get(r.materialId);
+        return total + (material?.value || 0) * r.quantity;
+      }, 0);
+
       return {
         ...item,
+        recycledValue,
+        isRecycleWorthIt: recycledValue > (item.value || 0),
         recipes: item.recipes.map((r) => ({
           ...r,
           material: materialMap.get(r.materialId),
