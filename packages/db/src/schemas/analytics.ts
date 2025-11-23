@@ -4,6 +4,7 @@ import {
   integer,
   timestamp,
   uniqueIndex,
+  index,
 } from "drizzle-orm/pg-core";
 
 export const pageViews = pgTable(
@@ -22,5 +23,6 @@ export const pageViews = pgTable(
       table.resourceType,
       table.resourceId
     ),
+    index("idx_view_count").on(table.viewCount),
   ]
 );

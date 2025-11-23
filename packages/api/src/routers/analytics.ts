@@ -4,6 +4,7 @@ import { rateLimitMiddleware } from "../middleware/rate-limit";
 import { createHash } from "crypto";
 import { Tables, eq, and, sql } from "@topside-db/db";
 import type { Context } from "../context";
+import { cacheMiddleware } from "../middleware/cache";
 
 const resourceTypes = ["item", "quest", "hideout", "map", "arc"] as const;
 
@@ -123,6 +124,158 @@ export const analyticsRouter = {
           lastUpdated: null,
         };
       }
+    }),
+
+  getHighestViewedResources: publicProcedure
+    .use(cacheMiddleware({ ttl: 60 * 5 }))
+    .handler(async ({ context }) => {
+      return context.db.query.pageViews.findMany({
+        limit: 10,
+        orderBy: (table, { desc }) => [desc(table.viewCount)],
+        columns: {
+          resourceType: true,
+          resourceId: true,
+          viewCount: true,
+        },
+      });
+    }),
+
+  getDisplayDataForResource: publicProcedure
+    .use(cacheMiddleware())
+    .input(
+      z.object({
+        resourceType: z.enum(resourceTypes),
+        resourceId: z.string(),
+      })
+    )
+    .handler(async ({ input, context }) => {
+      const { resourceType, resourceId } = input;
+
+      if (resourceType === "item") {
+        const item = await context.db.query.items.findFirst({
+          where: eq(Tables.items.id, resourceId),
+          columns: {
+            id: true,
+            name: true,
+            imageFilename: true,
+          },
+        });
+
+        if (!item) {
+          return null;
+        }
+
+        return {
+          id: item.id,
+          name: item.name,
+          imageUrl: item.imageFilename,
+        };
+      }
+
+      if (resourceType === "quest") {
+        const quest = await context.db.query.quests.findFirst({
+          where: eq(Tables.quests.id, resourceId),
+          columns: {
+            id: true,
+            name: true,
+          },
+        });
+
+        if (!quest) {
+          return null;
+        }
+
+        return {
+          id: quest.id,
+          name: quest.name,
+          imageUrl: null,
+        };
+      }
+
+      if (resourceType === "hideout") {
+        const hideout = await context.db.query.hideouts.findFirst({
+          where: eq(Tables.hideouts.id, resourceId),
+          columns: {
+            id: true,
+            name: true,
+          },
+        });
+
+        if (!hideout) {
+          return null;
+        }
+
+        return {
+          id: hideout.id,
+          name: hideout.name,
+          imageUrl: null,
+        };
+      }
+
+      if (resourceType === "map") {
+        const map = await context.db.query.maps.findFirst({
+          where: eq(Tables.maps.id, resourceId),
+          columns: {
+            id: true,
+            name: true,
+            imageUrl: true,
+          },
+        });
+
+        if (!map) {
+          return null;
+        }
+
+        return {
+          id: map.id,
+          name: map.name,
+          imageUrl: map.imageUrl,
+        };
+      }
+
+      if (resourceType === "arc") {
+        const arc = await context.db.query.arcs.findFirst({
+          where: eq(Tables.arcs.id, resourceId),
+          columns: {
+            id: true,
+            name: true,
+            imageUrl: true,
+          },
+        });
+
+        if (!arc) {
+          return null;
+        }
+
+        return {
+          id: arc.id,
+          name: arc.name,
+          imageUrl: arc.imageUrl,
+        };
+      }
+
+      if (resourceType === "trader") {
+        const trader = await context.db.query.traders.findFirst({
+          where: eq(Tables.traders.id, resourceId),
+          columns: {
+            id: true,
+            name: true,
+            imageUrl: true,
+          },
+        });
+
+        if (!trader) {
+          return null;
+        }
+
+        return {
+          id: trader.id,
+          name: trader.name,
+          imageUrl: trader.imageUrl,
+        };
+      }
+
+      return null;
     }),
 };
 

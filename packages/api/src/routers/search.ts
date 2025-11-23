@@ -15,7 +15,7 @@ export const searchRouter = {
         query: z.string(),
       })
     )
-    .use(cacheMiddleware)
+    .use(cacheMiddleware())
     .output(
       z.object({
         hits: z.array(
@@ -110,8 +110,6 @@ export const searchRouter = {
           },
         ],
       });
-
-      console.log(results);
 
       const hits = results.flatMap((result) =>
         result.hits.map((hit) => ({
