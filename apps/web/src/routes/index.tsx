@@ -38,19 +38,6 @@ function HomeComponent() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border/50 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 sticky top-0 z-40">
-        <div className="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <ArchiveIcon className="w-4 h-4" />
-            <span>Database</span>
-          </div>
-          <Link to="/">
-            <div className="text-xs text-muted-foreground">Topside DB</div>
-          </Link>
-        </div>
-      </header>
-
       {/* Main Content */}
       <main className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden">
         {/* Background Grid Effect */}
@@ -255,26 +242,6 @@ function HomeComponent() {
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="border-t border-border/50 mt-16 py-6 px-4 text-center text-xs text-muted-foreground">
-        <p className="mb-2">
-          Game content and materials are trademarks and copyrights of Embark
-          Studios and its licensors. All rights reserved.
-        </p>
-        <div className="flex justify-center gap-4">
-          <Link to="/terms" className="hover:text-foreground transition-colors">
-            Terms of Service
-          </Link>
-          <span>•</span>
-          <Link
-            to="/privacy"
-            className="hover:text-foreground transition-colors"
-          >
-            Privacy Policy
-          </Link>
-        </div>
-      </footer>
     </div>
   );
 }

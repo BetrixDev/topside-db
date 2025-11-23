@@ -78,22 +78,8 @@ function RouteComponent() {
   }, [recycles, search, showProfitableOnly, sortBy]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border/50 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 sticky top-0 z-40">
-        <div className="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <RecycleIcon className="w-4 h-4 text-primary" />
-            <span>Recycling Optimizer</span>
-          </div>
-          <Link to="/">
-            <div className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-              Topside DB
-            </div>
-          </Link>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 py-8 space-y-10">
+    <div className="min-h-screen bg-background mt-16">
+      <main className="max-w-7xl mx-auto py-8 space-y-10">
         <HeroSection stats={stats} isLoading={isLoading} />
 
         <section className="space-y-6">
@@ -131,7 +117,6 @@ function RouteComponent() {
               <Button
                 type="button"
                 variant={showProfitableOnly ? "default" : "outline"}
-                size="sm"
                 onClick={() => setShowProfitableOnly((prev) => !prev)}
                 className="whitespace-nowrap"
               >
@@ -329,9 +314,6 @@ function RecycleCard({
             ) : (
               <RecycleIcon className="w-8 h-8 text-muted-foreground" />
             )}
-            <div className="absolute -top-2 -left-2 bg-primary text-primary-foreground text-xs font-bold rounded-full px-2 py-0.5 shadow">
-              #{index}
-            </div>
           </div>
 
           <div className="flex-1">
@@ -548,6 +530,13 @@ function computeStats(recycles: RecycleValueEntry[]) {
   );
   const topProfitResult = recycles.reduce(
     (acc, entry) => {
+      if (
+        entry.recycleYieldPct === null ||
+        entry.recycleYieldPct === undefined
+      ) {
+        return acc;
+      }
+
       const profit = (entry.recycledValue ?? 0) - (entry.originalValue ?? 0);
       if (profit > acc.topProfit) {
         return {
