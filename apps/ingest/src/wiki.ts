@@ -2,6 +2,7 @@ import { load } from "cheerio";
 import z from "zod";
 import { generateObject } from "ai";
 import { openrouter } from "./ai";
+import { writeFileSync } from "fs";
 
 export const BASE_WIKI_URL = "https://arcraiders.wiki";
 
@@ -29,6 +30,7 @@ const mapsPageSchema = z.object({
 
 export async function scrapeMapsPage() {
   console.log("Scraping maps page");
+
   const mapUrl = `${BASE_WIKI_URL}/wiki/Maps`;
 
   const response = await fetch(mapUrl);
@@ -64,6 +66,7 @@ const mapPageSchema = z.object({
 
 export async function scrapeMapPage(wikiUrl: string) {
   console.log(`Scraping map page: ${wikiUrl}`);
+
   const response = await fetch(`${BASE_WIKI_URL}${wikiUrl}`);
 
   const html = await response.text();
@@ -97,6 +100,7 @@ export const arcsPageSchema = z.object({
 
 export async function scrapeArcsPage() {
   console.log("Scraping arcs page");
+
   const arcUrl = `${BASE_WIKI_URL}/wiki/ARC`;
 
   const response = await fetch(arcUrl);
@@ -137,6 +141,7 @@ export const arcPageSchema = z.object({
 
 export async function scrapeArcPage(wikiUrl: string) {
   console.log(`Scraping arc page: ${wikiUrl}`);
+
   const response = await fetch(`${BASE_WIKI_URL}${wikiUrl}`);
 
   const html = await response.text();
@@ -149,6 +154,93 @@ export async function scrapeArcPage(wikiUrl: string) {
     model: openrouter("google/gemini-2.0-flash-001"),
     schema: arcPageSchema,
     prompt: `Extract the arc information from this webpage: ${content}`,
+  });
+
+  return object;
+}
+
+export const tradersPageSchema = z.object({
+  traders: z.array(
+    z.object({
+      name: z.string(),
+      wikiUrl: z.string(),
+      imageUrl: z.string(),
+      sells: z.array(z.string()),
+    })
+  ),
+});
+
+export async function scrapeTradersPage() {
+  console.log("Scraping traders page");
+
+  const traderUrl = `${BASE_WIKI_URL}/wiki/Traders`;
+
+  const response = await fetch(traderUrl);
+
+  const html = await response.text();
+
+  const $ = load(html);
+
+  const content = $("#content").html();
+
+  const { object } = await generateObject({
+    model: openrouter("google/gemini-2.0-flash-001"),
+    schema: tradersPageSchema,
+    prompt: `Extract the list of traders from this webpage: ${content}`,
+  });
+
+  return object;
+}
+
+export const traderPageSchema = z.object({
+  description: z
+    .string()
+    .describe("A brief markdown formatted summary of the trader"),
+  itemsForSale: z
+    .array(
+      z
+        .object({
+          itemName: z.string().describe(".item-name"),
+          itemPrice: z.coerce.number().describe(".item-price"),
+          itemPriceCurrency: z
+            .enum(["credits", "nature", "augment"])
+            .describe(
+              "The currency the item is sold for. This can be found in the .template-price looking at the img src"
+            ),
+          stockAmount: z
+            .string()
+            .nullish()
+            .describe(
+              "If item has stock, it will be a fraction within .category-icon"
+            ),
+          quantityPerSale: z
+            .string()
+            .nullish()
+            .describe(
+              'The quantity of the item that is sold at a time. Typically 1, but will be denoted as "xN" where N is the quantity if present'
+            ),
+        })
+        .describe(".item-cell")
+    )
+    .describe(".item-grid")
+    .describe("The items the trader sells in their shop"),
+});
+
+export async function scrapeTraderPage(wikiUrl: string) {
+  console.log(`Scraping trader page: ${wikiUrl}`);
+
+  const response = await fetch(`${BASE_WIKI_URL}${wikiUrl}`);
+
+  const html = await response.text();
+
+  const $ = load(html);
+
+  const content = $("#content").html();
+
+  const { object } = await generateObject({
+    model: openrouter("google/gemini-2.0-flash-001"),
+    schema: traderPageSchema,
+    prompt: `Extract the trader information from this webpage: ${content}`,
   });
 
   return object;

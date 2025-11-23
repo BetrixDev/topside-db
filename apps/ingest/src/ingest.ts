@@ -8,8 +8,113 @@ import {
   scrapeArcsPage,
   scrapeMapPage,
   scrapeMapsPage,
+  scrapeTraderPage,
+  scrapeTradersPage,
 } from "./wiki";
 import { snakeCase } from "es-toolkit/string";
+
+// Helper function to calculate Levenshtein distance
+function levenshteinDistance(a: string, b: string): number {
+  const matrix: number[][] = [];
+
+  for (let i = 0; i <= b.length; i++) {
+    matrix[i] = [i];
+  }
+
+  for (let j = 0; j <= a.length; j++) {
+    matrix[0]![j] = j;
+  }
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i]![j] = matrix[i - 1]![j - 1]!;
+      } else {
+        matrix[i]![j] = Math.min(
+          matrix[i - 1]![j - 1]! + 1, // substitution
+          matrix[i]![j - 1]! + 1, // insertion
+          matrix[i - 1]![j]! + 1 // deletion
+        );
+      }
+    }
+  }
+
+  return matrix[b.length]![a.length]!;
+}
+
+// Helper function to normalize Roman numerals (I-X) to numbers (1-10)
+function normalizeRomanNumerals(text: string): string {
+  const romanToNumber: Record<string, string> = {
+    " I": " 1",
+    " II": " 2",
+    " III": " 3",
+    " IV": " 4",
+    " V": " 5",
+    " VI": " 6",
+    " VII": " 7",
+    " VIII": " 8",
+    " IX": " 9",
+    " X": " 10",
+  };
+
+  const numberToRoman: Record<string, string> = {
+    " 1": " I",
+    " 2": " II",
+    " 3": " III",
+    " 4": " IV",
+    " 5": " V",
+    " 6": " VI",
+    " 7": " VII",
+    " 8": " VIII",
+    " 9": " IX",
+    " 10": " X",
+  };
+
+  let normalized = text;
+
+  // Convert Roman numerals to numbers
+  for (const [roman, number] of Object.entries(romanToNumber)) {
+    normalized = normalized.replace(new RegExp(roman + "\\b", "gi"), number);
+  }
+
+  // Also try converting numbers to Roman numerals for comparison
+  for (const [number, roman] of Object.entries(numberToRoman)) {
+    normalized = normalized.replace(new RegExp(number + "\\b", "g"), roman);
+  }
+
+  return normalized;
+}
+
+// Helper function to find closest matching item name using Levenshtein distance
+function findClosestItemMatch(
+  targetName: string,
+  itemMap: Map<string, string>
+): { id: string; name: string; distance: number } | null {
+  let closestMatch: { id: string; name: string; distance: number } | null =
+    null;
+
+  const normalizedTarget = normalizeRomanNumerals(
+    targetName.toLowerCase().trim()
+  );
+
+  for (const [itemName, itemId] of itemMap.entries()) {
+    const normalizedItemName = normalizeRomanNumerals(itemName);
+
+    // First try exact match on normalized names
+    if (normalizedItemName === normalizedTarget) {
+      return { id: itemId, name: itemName, distance: 0 };
+    }
+
+    // Calculate Levenshtein distance
+    const distance = levenshteinDistance(normalizedTarget, normalizedItemName);
+
+    if (closestMatch === null || distance < closestMatch.distance) {
+      closestMatch = { id: itemId, name: itemName, distance };
+    }
+  }
+
+  return closestMatch;
+}
 
 export async function ingestData() {
   console.log("Ingesting ARC data");
@@ -799,6 +904,164 @@ export async function ingestData() {
 
   console.info("ARC data ingestion complete");
 
+  // Scrape and ingest trader data
+  console.log("Scraping traders page");
+  const tradersData = await scrapeTradersPage();
+
+  console.log(`Found ${tradersData.traders.length} traders to process`);
+
+  // Collect trader data to batch insert
+  const tradersToInsert: (typeof Tables.traders.$inferInsert)[] = [];
+  const traderItemsForSaleToInsert: (typeof Tables.traderItemsForSale.$inferInsert)[] =
+    [];
+
+  // Get all items from DB to match names to IDs
+  const allItems = await db.query.items.findMany();
+  const itemNameToId = new Map(
+    allItems
+      .filter((item) => item.name) // Filter out items without names
+      .map((item) => [item.name!.toLowerCase().trim(), item.id])
+  );
+
+  for (const trader of tradersData.traders) {
+    const traderId = snakeCase(trader.name);
+    console.log(`Processing trader: ${trader.name}`);
+
+    const traderDetails = await scrapeTraderPage(trader.wikiUrl);
+
+    tradersToInsert.push({
+      id: traderId,
+      name: trader.name,
+      wikiUrl: `${BASE_WIKI_URL}${trader.wikiUrl}`,
+      imageUrl: `${BASE_WIKI_URL}${trader.imageUrl}`,
+      description: traderDetails.description,
+      sellCategories: trader.sells,
+    });
+
+    for (const item of traderDetails.itemsForSale) {
+      // Try exact match first
+      let itemId = itemNameToId.get(item.itemName.toLowerCase().trim());
+
+      // If no exact match, use fuzzy matching
+      if (!itemId) {
+        const match = findClosestItemMatch(item.itemName, itemNameToId);
+
+        if (match && match.distance <= 3) {
+          // Accept matches with distance <= 3
+          itemId = match.id;
+          console.log(
+            `Fuzzy matched "${item.itemName}" to "${match.name}" (distance: ${match.distance})`
+          );
+        } else if (match) {
+          console.warn(
+            `Could not find good match for item: ${item.itemName} (trader: ${trader.name}). Closest was "${match.name}" with distance ${match.distance}`
+          );
+          continue;
+        } else {
+          console.warn(
+            `Could not find item ID for: ${item.itemName} (trader: ${trader.name})`
+          );
+          continue;
+        }
+      }
+
+      const quantity = item.stockAmount
+        ? parseInt(item.stockAmount.split("/")[0] || "1", 10)
+        : null;
+
+      const quantityPerSale = item.quantityPerSale
+        ? parseInt(item.quantityPerSale.replace(/^x/i, ""), 10)
+        : 1;
+
+      const currency =
+        item.itemPriceCurrency === "nature" ? "seeds" : item.itemPriceCurrency;
+
+      traderItemsForSaleToInsert.push({
+        traderId,
+        itemId,
+        quantity,
+        quantityPerSale,
+        currency,
+      });
+    }
+  }
+
+  // Deduplicate trader items - keep the last occurrence of each trader-item combination
+  const traderItemsMap = new Map<
+    string,
+    (typeof traderItemsForSaleToInsert)[0]
+  >();
+  for (const item of traderItemsForSaleToInsert) {
+    const key = `${item.traderId}-${item.itemId}`;
+    traderItemsMap.set(key, item);
+  }
+  const deduplicatedTraderItems = Array.from(traderItemsMap.values());
+
+  console.info(
+    `Deduplicated ${traderItemsForSaleToInsert.length} trader items to ${deduplicatedTraderItems.length} unique items`
+  );
+
+  // Batch insert traders
+  if (tradersToInsert.length > 0) {
+    console.info(
+      `Inserting ${tradersToInsert.length} traders in batches of ${BATCH_SIZE}`
+    );
+    const traderChunks = chunkArray(tradersToInsert, BATCH_SIZE);
+    for (let i = 0; i < traderChunks.length; i++) {
+      const chunk = traderChunks[i]!;
+      console.info(
+        `Inserting traders batch ${i + 1}/${traderChunks.length} (${
+          chunk.length
+        } traders)`
+      );
+      await db
+        .insert(Tables.traders)
+        .values(chunk)
+        .onConflictDoUpdate({
+          target: Tables.traders.id,
+          set: {
+            name: sql`excluded.name`,
+            wikiUrl: sql`excluded.wiki_url`,
+            imageUrl: sql`excluded.image_url`,
+            description: sql`excluded.description`,
+            sellCategories: sql`excluded.sell_categories`,
+          },
+        });
+    }
+  }
+
+  // Batch insert trader items for sale
+  if (deduplicatedTraderItems.length > 0) {
+    console.info(
+      `Inserting ${deduplicatedTraderItems.length} trader items in batches of ${BATCH_SIZE}`
+    );
+    const traderItemChunks = chunkArray(deduplicatedTraderItems, BATCH_SIZE);
+    for (let i = 0; i < traderItemChunks.length; i++) {
+      const chunk = traderItemChunks[i]!;
+      console.info(
+        `Inserting trader items batch ${i + 1}/${traderItemChunks.length} (${
+          chunk.length
+        } items)`
+      );
+      await db
+        .insert(Tables.traderItemsForSale)
+        .values(chunk)
+        .onConflictDoUpdate({
+          target: [
+            Tables.traderItemsForSale.traderId,
+            Tables.traderItemsForSale.itemId,
+          ],
+          set: {
+            quantity: sql`excluded.quantity`,
+            quantityPerSale: sql`excluded.quantity_per_sale`,
+            currency: sql`excluded.currency`,
+          },
+        });
+    }
+  }
+
+  console.info("Trader data ingestion complete");
+
   // Sync to Meilisearch
   const meilisearch = new MeiliSearch({
     host: process.env.MEILISEARCH_HOST || "http://localhost:7700",
@@ -887,4 +1150,21 @@ export async function ingestData() {
   });
 
   console.info("Meilisearch sync task created for arcs", { task: arcTask });
+
+  // Sync traders to Meilisearch
+  const traderIndex = meilisearch.index("traders");
+  console.info("Syncing traders to Meilisearch");
+
+  await traderIndex.updateSettings({
+    searchableAttributes: ["name", "description"],
+    filterableAttributes: ["sellCategories"],
+  });
+
+  const traderTask = await traderIndex.addDocuments(tradersToInsert, {
+    primaryKey: "id",
+  });
+
+  console.info("Meilisearch sync task created for traders", {
+    task: traderTask,
+  });
 }

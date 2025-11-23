@@ -55,6 +55,13 @@ export const searchRouter = {
               imageUrl: z.string().nullish(),
               health: z.number().nullish(),
             }),
+            z.object({
+              kind: z.literal("traders"),
+              id: z.string(),
+              name: z.string(),
+              description: z.string().nullish(),
+              imageUrl: z.string().nullish(),
+            }),
           ])
         ),
         processingTimeMs: z.number(),
@@ -91,6 +98,12 @@ export const searchRouter = {
           },
           {
             indexUid: "arcs",
+            q: query,
+            limit: 10,
+            attributesToSearchOn: ["name", "description"],
+          },
+          {
+            indexUid: "traders",
             q: query,
             limit: 10,
             attributesToSearchOn: ["name", "description"],

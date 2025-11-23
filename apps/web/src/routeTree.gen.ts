@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TraderTraderIdRouteImport } from './routes/trader.$traderId'
 import { Route as QuestQuestIdRouteImport } from './routes/quest.$questId'
 import { Route as MapMapIdRouteImport } from './routes/map.$mapId'
 import { Route as ItemsRecyclesRouteImport } from './routes/items.recycles'
@@ -32,6 +33,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TraderTraderIdRoute = TraderTraderIdRouteImport.update({
+  id: '/trader/$traderId',
+  path: '/trader/$traderId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QuestQuestIdRoute = QuestQuestIdRouteImport.update({
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/items/recycles': typeof ItemsRecyclesRoute
   '/map/$mapId': typeof MapMapIdRoute
   '/quest/$questId': typeof QuestQuestIdRoute
+  '/trader/$traderId': typeof TraderTraderIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByTo {
   '/items/recycles': typeof ItemsRecyclesRoute
   '/map/$mapId': typeof MapMapIdRoute
   '/quest/$questId': typeof QuestQuestIdRoute
+  '/trader/$traderId': typeof TraderTraderIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -98,6 +106,7 @@ export interface FileRoutesById {
   '/items/recycles': typeof ItemsRecyclesRoute
   '/map/$mapId': typeof MapMapIdRoute
   '/quest/$questId': typeof QuestQuestIdRoute
+  '/trader/$traderId': typeof TraderTraderIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -111,6 +120,7 @@ export interface FileRouteTypes {
     | '/items/recycles'
     | '/map/$mapId'
     | '/quest/$questId'
+    | '/trader/$traderId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -122,6 +132,7 @@ export interface FileRouteTypes {
     | '/items/recycles'
     | '/map/$mapId'
     | '/quest/$questId'
+    | '/trader/$traderId'
   id:
     | '__root__'
     | '/'
@@ -133,6 +144,7 @@ export interface FileRouteTypes {
     | '/items/recycles'
     | '/map/$mapId'
     | '/quest/$questId'
+    | '/trader/$traderId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -145,6 +157,7 @@ export interface RootRouteChildren {
   ItemsRecyclesRoute: typeof ItemsRecyclesRoute
   MapMapIdRoute: typeof MapMapIdRoute
   QuestQuestIdRoute: typeof QuestQuestIdRoute
+  TraderTraderIdRoute: typeof TraderTraderIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -168,6 +181,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trader/$traderId': {
+      id: '/trader/$traderId'
+      path: '/trader/$traderId'
+      fullPath: '/trader/$traderId'
+      preLoaderRoute: typeof TraderTraderIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/quest/$questId': {
@@ -225,6 +245,7 @@ const rootRouteChildren: RootRouteChildren = {
   ItemsRecyclesRoute: ItemsRecyclesRoute,
   MapMapIdRoute: MapMapIdRoute,
   QuestQuestIdRoute: QuestQuestIdRoute,
+  TraderTraderIdRoute: TraderTraderIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

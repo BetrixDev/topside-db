@@ -29,6 +29,20 @@
       "when": 1763872808266,
       "tag": "0003_slim_lake",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1763909555054,
+      "tag": "0004_famous_wolfsbane",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1763910681886,
+      "tag": "0005_heavy_cerise",
+      "breakpoints": true
     }
   ]
 }

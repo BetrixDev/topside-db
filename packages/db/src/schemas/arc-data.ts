@@ -141,6 +141,7 @@ export const itemsRelations = relations(items, ({ many, one }) => ({
     fields: [items.id],
     references: [pageViews.resourceId],
   }),
+  traders: many(traderItemsForSale),
 }));
 
 export const itemEffectsRelations = relations(itemEffects, ({ one }) => ({
@@ -335,3 +336,47 @@ export const arcsRelations = relations(arcs, ({ one }) => ({
     references: [pageViews.resourceId],
   }),
 }));
+
+export const traders = pgTable("traders", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  wikiUrl: text("wiki_url").notNull(),
+  imageUrl: text("image_url").notNull(),
+  description: text("description").notNull(),
+  sellCategories: jsonb("sell_categories")
+    .$type<string[]>()
+    .default([])
+    .notNull(),
+});
+
+export const tradersRelations = relations(traders, ({ many }) => ({
+  itemsForSale: many(traderItemsForSale),
+}));
+
+export const traderItemsForSale = pgTable(
+  "trader_items_for_sale",
+  {
+    traderId: text("trader_id")
+      .notNull()
+      .references(() => traders.id, { onDelete: "cascade" }),
+    itemId: text("item_id")
+      .notNull()
+      .references(() => items.id, { onDelete: "cascade" }),
+    quantity: integer("quantity"),
+    quantityPerSale: integer("quantity_per_sale").notNull().default(1),
+    currency: text("currency", {
+      enum: ["credits", "seeds", "augment"],
+    }).notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.traderId, t.itemId] })]
+);
+
+export const traderItemsForSaleRelations = relations(
+  traderItemsForSale,
+  ({ one }) => ({
+    trader: one(traders, {
+      fields: [traderItemsForSale.traderId],
+      references: [traders.id],
+    }),
+  })
+);
