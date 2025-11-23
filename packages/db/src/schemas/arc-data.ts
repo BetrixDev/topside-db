@@ -7,6 +7,7 @@ import {
   jsonb,
   primaryKey,
 } from "drizzle-orm/pg-core";
+import { pageViews } from "./analytics";
 
 // Main items table
 export const items = pgTable("items", {
@@ -130,12 +131,16 @@ export const mapDifficulties = pgTable(
 );
 
 // Relations
-export const itemsRelations = relations(items, ({ many }) => ({
+export const itemsRelations = relations(items, ({ many, one }) => ({
   effects: many(itemEffects),
   recipes: many(itemRecipes),
   recycles: many(itemRecycles),
   salvages: many(itemSalvages),
   hideoutRequirements: many(hideoutLevelRequirements),
+  pageViews: one(pageViews, {
+    fields: [items.id],
+    references: [pageViews.resourceId],
+  }),
 }));
 
 export const itemEffectsRelations = relations(itemEffects, ({ one }) => ({
@@ -166,9 +171,13 @@ export const itemSalvagesRelations = relations(itemSalvages, ({ one }) => ({
   }),
 }));
 
-export const hideoutsRelations = relations(hideouts, ({ many }) => ({
+export const hideoutsRelations = relations(hideouts, ({ many, one }) => ({
   levels: many(hideoutLevels),
   requirements: many(hideoutLevelRequirements),
+  pageViews: one(pageViews, {
+    fields: [hideouts.id],
+    references: [pageViews.resourceId],
+  }),
 }));
 
 export const hideoutLevelsRelations = relations(
@@ -252,11 +261,15 @@ export const questNextQuests = pgTable("quest_next_quests", {
 });
 
 // Quest Relations
-export const questsRelations = relations(quests, ({ many }) => ({
+export const questsRelations = relations(quests, ({ many, one }) => ({
   objectives: many(questObjectives),
   rewardItems: many(questRewardItems),
   prerequisites: many(questPrerequisites),
   nextQuests: many(questNextQuests),
+  pageViews: one(pageViews, {
+    fields: [quests.id],
+    references: [pageViews.resourceId],
+  }),
 }));
 
 export const questObjectivesRelations = relations(

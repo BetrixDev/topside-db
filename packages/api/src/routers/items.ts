@@ -1,6 +1,6 @@
 import z from "zod";
 import { publicProcedure } from "..";
-import { eq, Tables, inArray, sql, aliasedTable, desc } from "@topside-db/db";
+import { eq, Tables, inArray, sql, aliasedTable } from "@topside-db/db";
 
 export const itemsRouter = {
   getItem: publicProcedure

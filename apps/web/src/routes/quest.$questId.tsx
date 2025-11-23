@@ -1,9 +1,14 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from "@tanstack/react-router";
+import { usePageView } from "@/lib/hooks/use-page-view";
 
-export const Route = createFileRoute('/quest/$questId')({
+export const Route = createFileRoute("/quest/$questId")({
   component: RouteComponent,
-})
+});
 
 function RouteComponent() {
-  return <div>Hello "/quest/$questId"!</div>
+  const params = Route.useParams();
+
+  usePageView("quest", params.questId);
+
+  return <div>Hello "/quest/$questId"!</div>;
 }

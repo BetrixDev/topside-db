@@ -10,7 +10,6 @@ import { Link, useRouterState } from "@tanstack/react-router";
 
 import { cn } from "@/lib/utils";
 import { ModeToggle } from "./mode-toggle";
-import { Separator } from "./ui/separator";
 
 type NavItem = {
   label: string;

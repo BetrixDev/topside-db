@@ -12,6 +12,7 @@ import {
   RecycleIcon,
 } from "lucide-react";
 import { startCase } from "es-toolkit/string";
+import { usePageView } from "@/lib/hooks/use-page-view";
 
 export const Route = createFileRoute("/item/$itemId")({
   component: RouteComponent,
@@ -26,6 +27,8 @@ export const Route = createFileRoute("/item/$itemId")({
 
 function RouteComponent() {
   const params = Route.useParams();
+
+  usePageView("item", params.itemId);
 
   const { data } = useQuery(
     orpc.items.getItem.queryOptions({
