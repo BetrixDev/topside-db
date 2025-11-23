@@ -11,6 +11,7 @@ import {
   LightbulbIcon,
   RecycleIcon,
 } from "lucide-react";
+import { startCase } from "es-toolkit/string";
 
 export const Route = createFileRoute("/item/$itemId")({
   component: RouteComponent,
@@ -156,7 +157,7 @@ function RouteComponent() {
                       Craft Bench:
                     </p>
                     <p className="font-medium text-foreground">
-                      {data.craftBench}
+                      {startCase(data.craftBench.join(", "))}
                     </p>
                   </div>
                 )}
@@ -165,29 +166,27 @@ function RouteComponent() {
                     <p className="text-sm text-muted-foreground mb-3">
                       Required Materials:
                     </p>
-                    <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                    <div className="flex flex-col gap-2">
                       {data.recipes.map((recipe) => (
                         <Link
                           key={recipe.id}
                           to="/item/$itemId"
                           params={{ itemId: recipe.materialId }}
-                          className="bg-background/50 rounded-lg p-2 border border-border/30 hover:border-accent/50 transition-colors cursor-pointer group"
+                          className="flex bg-card hover:bg-background rounded-lg border border-border hover:border-primary/50 transition-colors p-2 gap-2"
                         >
-                          <div className="w-full aspect-square bg-linear-to-br from-accent/5 to-background rounded mb-1.5 flex items-center justify-center overflow-hidden">
-                            <img
-                              src={recipe.material?.imageFilename ?? undefined}
-                              alt={recipe.material?.name ?? "Material"}
-                              width={48}
-                              height={48}
-                              className="w-3/4 h-3/4 object-contain"
-                            />
+                          <img
+                            src={recipe.material?.imageFilename ?? undefined}
+                            alt={recipe.material?.name ?? "Material"}
+                            className="w-12 h-12 object-contain"
+                          />
+                          <div className="flex flex-col gap-1 justify-center">
+                            <p className="text-xs font-medium truncate">
+                              {recipe.material?.name ?? recipe.materialId}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {recipe.quantity}x
+                            </p>
                           </div>
-                          <p className="text-xs font-medium truncate">
-                            {recipe.material?.name ?? recipe.materialId}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {recipe.quantity}x
-                          </p>
                         </Link>
                       ))}
                     </div>
@@ -203,7 +202,7 @@ function RouteComponent() {
                   <RecycleIcon className="w-5 h-5 text-primary" />
                   <h2 className="text-lg font-semibold">Recycles Into</h2>
                 </div>
-                <Alert className="mb-4" variant="default">
+                <Alert className="mb-2" variant="default">
                   {!data.isRecycleWorthIt && (
                     <AlertTriangleIcon className="w-4 h-4" color="yellow" />
                   )}
@@ -228,29 +227,29 @@ function RouteComponent() {
                     </div>
                   </AlertDescription>
                 </Alert>
-                <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                <div className="flex flex-col gap-2">
                   {data.recycles.map((recycle) => (
                     <Link
                       key={recycle.id}
                       to="/item/$itemId"
                       params={{ itemId: recycle.materialId }}
-                      className="bg-background/50 rounded-lg p-2 border border-border/30 hover:border-accent/50 transition-colors cursor-pointer group"
+                      className="flex bg-card hover:bg-background rounded-lg border border-border hover:border-primary/50 transition-colors p-2 gap-2"
                     >
-                      <div className="w-full aspect-square bg-linear-to-br from-accent/5 to-background rounded mb-1.5 flex items-center justify-center overflow-hidden">
+                      <div className="">
                         <img
                           src={recycle.material?.imageFilename ?? undefined}
                           alt={recycle.material?.name ?? "Material"}
-                          width={48}
-                          height={48}
-                          className="w-3/4 h-3/4 object-contain"
+                          className="w-12 h-12 object-contain"
                         />
                       </div>
-                      <p className="text-xs font-medium truncate">
-                        {recycle.material?.name ?? recycle.materialId}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {recycle.quantity}x
-                      </p>
+                      <div className="flex flex-col gap-1 justify-center">
+                        <p className="text-xs font-medium truncate">
+                          {recycle.material?.name ?? recycle.materialId}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {recycle.quantity}x
+                        </p>
+                      </div>
                     </Link>
                   ))}
                 </div>
