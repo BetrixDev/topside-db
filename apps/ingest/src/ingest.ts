@@ -2,7 +2,13 @@ import AdmZip from "adm-zip";
 import { MeiliSearch } from "meilisearch";
 import { itemSchema, hideoutSchema, questSchema } from "@topside-db/schemas";
 import { db, Tables, sql, eq, and } from "@topside-db/db";
-import { BASE_WIKI_URL, scrapeMapPage, scrapeMapsPage } from "./wiki";
+import {
+  BASE_WIKI_URL,
+  scrapeArcPage,
+  scrapeArcsPage,
+  scrapeMapPage,
+  scrapeMapsPage,
+} from "./wiki";
 import { snakeCase } from "es-toolkit/string";
 
 export async function ingestData() {
@@ -718,6 +724,79 @@ export async function ingestData() {
     }
   }
 
+  const arcs = await scrapeArcsPage();
+
+  console.log(`Found ${arcs.arcVariants.length} arcs to process`);
+
+  // Collect arc data to batch insert
+  const arcsToInsert: (typeof Tables.arcs.$inferInsert)[] = [];
+
+  await Promise.all(
+    arcs.arcVariants.map(async (arc) => {
+      const arcData = await scrapeArcPage(arc.wikiUrlPath);
+
+      // Collect main arc record with all data in JSON columns
+      arcsToInsert.push({
+        id: snakeCase(arc.name),
+        name: arc.name,
+        wikiUrl: `${BASE_WIKI_URL}${arc.wikiUrlPath}`,
+        imageUrl: `${BASE_WIKI_URL}${arc.imageUrl}`,
+        description: arcData.generalSummary,
+        health:
+          typeof arcData.health === "string" && arcData.health.trim() !== ""
+            ? (() => {
+                const numStr = arcData.health
+                  .replace(/,/g, "")
+                  .replace(/[^0-9.]/g, "");
+                const num = Number(numStr);
+
+                const PG_INT_MAX = 2147483647;
+                return !isNaN(num) && num <= PG_INT_MAX ? num : null;
+              })()
+            : null,
+        armorPlating: arcData.armorPlating ?? null,
+        threatLevel: arcData.threatLevel ?? null,
+        loot: arcData.loot,
+        attacks: arcData.attacks,
+        weaknesses: arcData.weaknesses,
+      });
+    })
+  );
+
+  // Batch insert arcs
+  if (arcsToInsert.length > 0) {
+    console.info(
+      `Inserting ${arcsToInsert.length} arcs in batches of ${BATCH_SIZE}`
+    );
+    const arcChunks = chunkArray(arcsToInsert, BATCH_SIZE);
+    for (let i = 0; i < arcChunks.length; i++) {
+      const chunk = arcChunks[i]!;
+      console.info(
+        `Inserting arcs batch ${i + 1}/${arcChunks.length} (${
+          chunk.length
+        } arcs)`
+      );
+      await db
+        .insert(Tables.arcs)
+        .values(chunk)
+        .onConflictDoUpdate({
+          target: Tables.arcs.id,
+          set: {
+            name: sql`excluded.name`,
+            wikiUrl: sql`excluded.wiki_url`,
+            imageUrl: sql`excluded.image_url`,
+            description: sql`excluded.description`,
+            health: sql`excluded.health`,
+            armorPlating: sql`excluded.armor_plating`,
+            threatLevel: sql`excluded.threat_level`,
+            loot: sql`excluded.loot`,
+            attacks: sql`excluded.attacks`,
+            weaknesses: sql`excluded.weaknesses`,
+          },
+        });
+    }
+  }
+
   console.info("ARC data ingestion complete");
 
   // Sync to Meilisearch
@@ -792,4 +871,20 @@ export async function ingestData() {
   });
 
   console.info("Meilisearch sync task created for maps", { task: mapTask });
+
+  // Sync arcs to Meilisearch
+  const arcIndex = meilisearch.index("arcs");
+  console.info("Syncing arcs to Meilisearch");
+
+  await arcIndex.updateSettings({
+    searchableAttributes: ["name", "description", "threatLevel"],
+    filterableAttributes: ["threatLevel"],
+    sortableAttributes: ["health"],
+  });
+
+  const arcTask = await arcIndex.addDocuments(arcsToInsert, {
+    primaryKey: "id",
+  });
+
+  console.info("Meilisearch sync task created for arcs", { task: arcTask });
 }

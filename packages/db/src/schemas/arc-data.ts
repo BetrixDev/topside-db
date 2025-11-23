@@ -311,3 +311,27 @@ export const questNextQuestsRelations = relations(
     }),
   })
 );
+
+export const arcs = pgTable("arcs", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  wikiUrl: text("wiki_url").notNull(),
+  imageUrl: text("image_url").notNull(),
+  description: text("description").notNull(),
+  health: integer("health"),
+  armorPlating: text("armor_plating"),
+  threatLevel: text("threat_level"),
+  loot: jsonb("loot").$type<string[]>().default([]).notNull(),
+  attacks: jsonb("attacks")
+    .$type<{ type: string; description: string }[]>()
+    .default([])
+    .notNull(),
+  weaknesses: jsonb("weaknesses").$type<string[]>().default([]).notNull(),
+});
+
+export const arcsRelations = relations(arcs, ({ one }) => ({
+  pageViews: one(pageViews, {
+    fields: [arcs.id],
+    references: [pageViews.resourceId],
+  }),
+}));

@@ -46,6 +46,15 @@ export const searchRouter = {
               maximumTimeMinutes: z.number().nullish(),
               imageUrl: z.string().nullish(),
             }),
+            z.object({
+              kind: z.literal("arcs"),
+              id: z.string(),
+              name: z.string(),
+              description: z.string().nullish(),
+              threatLevel: z.string().nullish(),
+              imageUrl: z.string().nullish(),
+              health: z.number().nullish(),
+            }),
           ])
         ),
         processingTimeMs: z.number(),
@@ -76,6 +85,12 @@ export const searchRouter = {
           },
           {
             indexUid: "maps",
+            q: query,
+            limit: 10,
+            attributesToSearchOn: ["name", "description"],
+          },
+          {
+            indexUid: "arcs",
             q: query,
             limit: 10,
             attributesToSearchOn: ["name", "description"],

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { orpc } from "@/utils/orpc";
 
-type ResourceType = "item" | "quest" | "hideout" | "map";
+type ResourceType = "item" | "quest" | "hideout" | "map" | "arc";
 
 export function usePageView(resourceType: ResourceType, resourceId: string) {
   const hasTracked = useRef(false);

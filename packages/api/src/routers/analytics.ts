@@ -5,7 +5,7 @@ import { createHash } from "crypto";
 import { Tables, eq, and, sql } from "@topside-db/db";
 import type { Context } from "../context";
 
-const resourceTypes = ["item", "quest", "hideout", "map"] as const;
+const resourceTypes = ["item", "quest", "hideout", "map", "arc"] as const;
 
 // Rate limit: 30 views per minute per IP
 const trackViewProcedure = publicProcedure.use(

@@ -17,6 +17,7 @@ import { Route as MapMapIdRouteImport } from './routes/map.$mapId'
 import { Route as ItemsRecyclesRouteImport } from './routes/items.recycles'
 import { Route as ItemItemIdRouteImport } from './routes/item.$itemId'
 import { Route as HideoutWorkbenchIdRouteImport } from './routes/hideout.$workbenchId'
+import { Route as ArcArcIdRouteImport } from './routes/arc.$arcId'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -58,11 +59,17 @@ const HideoutWorkbenchIdRoute = HideoutWorkbenchIdRouteImport.update({
   path: '/hideout/$workbenchId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArcArcIdRoute = ArcArcIdRouteImport.update({
+  id: '/arc/$arcId',
+  path: '/arc/$arcId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/arc/$arcId': typeof ArcArcIdRoute
   '/hideout/$workbenchId': typeof HideoutWorkbenchIdRoute
   '/item/$itemId': typeof ItemItemIdRoute
   '/items/recycles': typeof ItemsRecyclesRoute
@@ -73,6 +80,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/arc/$arcId': typeof ArcArcIdRoute
   '/hideout/$workbenchId': typeof HideoutWorkbenchIdRoute
   '/item/$itemId': typeof ItemItemIdRoute
   '/items/recycles': typeof ItemsRecyclesRoute
@@ -84,6 +92,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/arc/$arcId': typeof ArcArcIdRoute
   '/hideout/$workbenchId': typeof HideoutWorkbenchIdRoute
   '/item/$itemId': typeof ItemItemIdRoute
   '/items/recycles': typeof ItemsRecyclesRoute
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/privacy'
     | '/terms'
+    | '/arc/$arcId'
     | '/hideout/$workbenchId'
     | '/item/$itemId'
     | '/items/recycles'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/privacy'
     | '/terms'
+    | '/arc/$arcId'
     | '/hideout/$workbenchId'
     | '/item/$itemId'
     | '/items/recycles'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/'
     | '/privacy'
     | '/terms'
+    | '/arc/$arcId'
     | '/hideout/$workbenchId'
     | '/item/$itemId'
     | '/items/recycles'
@@ -127,6 +139,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
+  ArcArcIdRoute: typeof ArcArcIdRoute
   HideoutWorkbenchIdRoute: typeof HideoutWorkbenchIdRoute
   ItemItemIdRoute: typeof ItemItemIdRoute
   ItemsRecyclesRoute: typeof ItemsRecyclesRoute
@@ -192,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HideoutWorkbenchIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/arc/$arcId': {
+      id: '/arc/$arcId'
+      path: '/arc/$arcId'
+      fullPath: '/arc/$arcId'
+      preLoaderRoute: typeof ArcArcIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -199,6 +219,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
+  ArcArcIdRoute: ArcArcIdRoute,
   HideoutWorkbenchIdRoute: HideoutWorkbenchIdRoute,
   ItemItemIdRoute: ItemItemIdRoute,
   ItemsRecyclesRoute: ItemsRecyclesRoute,
