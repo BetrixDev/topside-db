@@ -22,16 +22,9 @@ export const items = pgTable("items", {
   imageFilename: text("image_filename"),
   craftBench: jsonb("craft_bench").$type<string[]>().default([]),
   updatedAt: text("updated_at"),
-});
-
-// Item effects
-export const itemEffects = pgTable("item_effects", {
-  id: text("id").primaryKey(), // composite: itemId-effectName
-  itemId: text("item_id")
-    .notNull()
-    .references(() => items.id, { onDelete: "cascade" }),
-  name: text("name").notNull(), // "Stamina Regeneration", "Duration", etc.
-  value: text("value"), // "5/s", "10s", etc.
+  effects: jsonb("effects")
+    .$type<{ name: string; value: string }[]>()
+    .default([]),
 });
 
 // Item recipes (crafting ingredients)
@@ -98,41 +91,16 @@ export const maps = pgTable("maps", {
   imageUrl: text("image_url").notNull(),
   description: text("description"),
   maximumTimeMinutes: integer("maximum_time_minutes").notNull(),
+  requirements: jsonb("requirements")
+    .$type<{ name: string; value: string }[]>()
+    .default([]),
+  difficulties: jsonb("difficulties")
+    .$type<{ name: string; rating: number }[]>()
+    .default([]),
 });
-
-export const mapRequirements = pgTable(
-  "map_requirements",
-  {
-    id: text("id"),
-    mapId: text("map_id")
-      .notNull()
-      .references(() => maps.id, { onDelete: "cascade" }),
-    name: text("name").notNull(),
-    value: text("value").notNull(),
-  },
-  (t) => ({
-    pk: primaryKey({ columns: [t.mapId, t.name] }),
-  })
-);
-
-export const mapDifficulties = pgTable(
-  "map_difficulties",
-  {
-    id: text("id"),
-    mapId: text("map_id")
-      .notNull()
-      .references(() => maps.id, { onDelete: "cascade" }),
-    name: text("name").notNull(),
-    rating: real("rating").notNull(),
-  },
-  (t) => ({
-    pk: primaryKey({ columns: [t.mapId, t.name] }),
-  })
-);
 
 // Relations
 export const itemsRelations = relations(items, ({ many, one }) => ({
-  effects: many(itemEffects),
   recipes: many(itemRecipes),
   recycles: many(itemRecycles),
   salvages: many(itemSalvages),
@@ -142,13 +110,6 @@ export const itemsRelations = relations(items, ({ many, one }) => ({
     references: [pageViews.resourceId],
   }),
   traders: many(traderItemsForSale),
-}));
-
-export const itemEffectsRelations = relations(itemEffects, ({ one }) => ({
-  item: one(items, {
-    fields: [itemEffects.itemId],
-    references: [items.id],
-  }),
 }));
 
 export const itemRecipesRelations = relations(itemRecipes, ({ one }) => ({

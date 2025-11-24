@@ -1,7 +1,7 @@
 import AdmZip from "adm-zip";
 import { MeiliSearch } from "meilisearch";
 import { itemSchema, hideoutSchema, questSchema } from "@topside-db/schemas";
-import { db, Tables, sql, eq, and } from "@topside-db/db";
+import { db, Tables, sql } from "@topside-db/db";
 import {
   BASE_WIKI_URL,
   scrapeArcPage,
@@ -145,7 +145,6 @@ export async function ingestData() {
 
   // Collect all data to batch insert
   const itemsToInsert: (typeof Tables.items.$inferInsert)[] = [];
-  const effectsToInsert: (typeof Tables.itemEffects.$inferInsert)[] = [];
   const recipesToInsert: (typeof Tables.itemRecipes.$inferInsert)[] = [];
   const recyclesToInsert: (typeof Tables.itemRecycles.$inferInsert)[] = [];
   const salvagesToInsert: (typeof Tables.itemSalvages.$inferInsert)[] = [];
@@ -163,6 +162,22 @@ export async function ingestData() {
 
     const item = itemParseResult.data;
 
+    const craftBench = Array.isArray(item.craftBench)
+      ? item.craftBench.filter((x): x is string => typeof x === "string")
+      : item.craftBench === null
+      ? null
+      : typeof item.craftBench === "string"
+      ? [item.craftBench]
+      : [];
+
+    const effects =
+      item.effects !== undefined
+        ? Object.entries(item.effects).map(([effectKey, effectData]) => ({
+            name: effectData?.en ?? effectKey,
+            value: effectData?.value ?? "",
+          }))
+        : [];
+
     // Collect main item record
     itemsToInsert.push({
       id: item.id,
@@ -174,28 +189,10 @@ export async function ingestData() {
       weightKg: item.weightKg,
       stackSize: item.stackSize,
       imageFilename: item.imageFilename,
-      craftBench: Array.isArray(item.craftBench)
-        ? item.craftBench.filter((x): x is string => typeof x === "string")
-        : item.craftBench === null
-        ? null
-        : typeof item.craftBench === "string"
-        ? [item.craftBench]
-        : [],
+      craftBench,
+      effects,
       updatedAt: item.updatedAt,
     });
-
-    // Collect effects
-    if (item.effects) {
-      for (const [effectKey, effectData] of Object.entries(item.effects)) {
-        const effectId = `${item.id}-${effectKey}`;
-        effectsToInsert.push({
-          id: effectId,
-          itemId: item.id,
-          name: effectData?.en ?? effectKey, // Use English name
-          value: effectData?.value ?? null,
-        });
-      }
-    }
 
     // Collect recipes
     if (item.recipe) {
@@ -276,30 +273,6 @@ export async function ingestData() {
           imageFilename: sql`excluded.image_filename`,
           craftBench: sql`excluded.craft_bench`,
           updatedAt: sql`excluded.updated_at`,
-        },
-      });
-  }
-
-  // Batch insert effects in chunks of 100
-  console.info(
-    `Inserting ${effectsToInsert.length} effects in batches of ${BATCH_SIZE}`
-  );
-  const effectChunks = chunkArray(effectsToInsert, BATCH_SIZE);
-  for (let i = 0; i < effectChunks.length; i++) {
-    const chunk = effectChunks[i]!;
-    console.info(
-      `Inserting effects batch ${i + 1}/${effectChunks.length} (${
-        chunk.length
-      } effects)`
-    );
-    await db
-      .insert(Tables.itemEffects)
-      .values(chunk)
-      .onConflictDoUpdate({
-        target: Tables.itemEffects.id,
-        set: {
-          name: sql`excluded.name`,
-          value: sql`excluded.value`,
         },
       });
   }
@@ -739,6 +712,16 @@ export async function ingestData() {
   for (const map of maps.maps) {
     const mapData = await scrapeMapPage(map.wikiUrl);
 
+    const difficulties = (mapData.diffculties ?? []).map((difficulty) => ({
+      name: difficulty.id,
+      rating: difficulty.rating,
+    }));
+
+    const requirements = (map.requirements ?? []).map((requirement) => ({
+      name: requirement.name,
+      value: requirement.value,
+    }));
+
     await db
       .insert(Tables.maps)
       .values({
@@ -748,6 +731,8 @@ export async function ingestData() {
         imageUrl: `${BASE_WIKI_URL}${map.imageUrl}`,
         description: map.description,
         maximumTimeMinutes: map.maximumTimeMinutes,
+        difficulties,
+        requirements,
       })
       .onConflictDoUpdate({
         target: Tables.maps.id,
@@ -757,76 +742,10 @@ export async function ingestData() {
           imageUrl: sql`excluded.image_url`,
           description: sql`excluded.description`,
           maximumTimeMinutes: sql`excluded.maximum_time_minutes`,
+          difficulties: sql`excluded.difficulties`,
+          requirements: sql`excluded.requirements`,
         },
       });
-
-    for (const difficulty of mapData.diffculties) {
-      if (
-        await db.query.mapDifficulties.findFirst({
-          where: (table, { and, eq }) =>
-            and(
-              eq(table.mapId, snakeCase(map.name)),
-              eq(table.name, difficulty.id)
-            ),
-        })
-      ) {
-        await db
-          .update(Tables.mapDifficulties)
-          .set({
-            rating: difficulty.rating,
-          })
-          .where(
-            and(
-              eq(Tables.mapDifficulties.mapId, snakeCase(map.name)),
-              eq(Tables.mapDifficulties.name, difficulty.id)
-            )
-          );
-      } else {
-        await db
-          .insert(Tables.mapDifficulties)
-          .values({
-            id: snakeCase(difficulty.id),
-            mapId: snakeCase(map.name),
-            name: difficulty.id,
-            rating: difficulty.rating,
-          })
-          .onConflictDoNothing();
-      }
-    }
-
-    for (const requirement of map.requirements) {
-      if (
-        await db.query.mapRequirements.findFirst({
-          where: (table, { and, eq }) =>
-            and(
-              eq(table.mapId, snakeCase(map.name)),
-              eq(table.name, requirement.name)
-            ),
-        })
-      ) {
-        await db
-          .update(Tables.mapRequirements)
-          .set({
-            value: requirement.value,
-          })
-          .where(
-            and(
-              eq(Tables.mapRequirements.mapId, snakeCase(map.name)),
-              eq(Tables.mapRequirements.name, requirement.name)
-            )
-          );
-      } else {
-        await db
-          .insert(Tables.mapRequirements)
-          .values({
-            id: snakeCase(requirement.name),
-            mapId: snakeCase(map.name),
-            name: requirement.name,
-            value: requirement.value,
-          })
-          .onConflictDoNothing();
-      }
-    }
   }
 
   const arcs = await scrapeArcsPage();
