@@ -320,12 +320,6 @@ function RouteComponent() {
                                   ? `${salePrice.toLocaleString()} ${currencyLabel}`
                                   : "Price unavailable"}
                               </p>
-                              <p className="text-xs text-muted-foreground">
-                                per sale
-                                {quantityPerSale > 1
-                                  ? ` • ${quantityPerSale.toLocaleString()} items`
-                                  : ""}
-                              </p>
                             </div>
                           </div>
                         </div>
