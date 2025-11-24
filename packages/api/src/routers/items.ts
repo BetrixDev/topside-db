@@ -13,6 +13,17 @@ export const itemsRouter = {
           recipes: true,
           recycles: true,
           salvages: true,
+          traders: {
+            with: {
+              trader: {
+                columns: {
+                  name: true,
+                  id: true,
+                  imageUrl: true,
+                },
+              },
+            },
+          },
         },
       });
 

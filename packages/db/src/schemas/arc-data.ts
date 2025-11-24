@@ -378,5 +378,9 @@ export const traderItemsForSaleRelations = relations(
       fields: [traderItemsForSale.traderId],
       references: [traders.id],
     }),
+    item: one(items, {
+      fields: [traderItemsForSale.itemId],
+      references: [items.id],
+    }),
   })
 );

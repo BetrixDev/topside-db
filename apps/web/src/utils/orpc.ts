@@ -6,22 +6,27 @@ import { toast } from "sonner";
 import type { AppRouterClient } from "@topside-db/api/routers/index";
 
 export const queryClient = new QueryClient({
-	queryCache: new QueryCache({
-		onError: (error) => {
-			toast.error(`Error: ${error.message}`, {
-				action: {
-					label: "retry",
-					onClick: () => {
-						queryClient.invalidateQueries();
-					},
-				},
-			});
-		},
-	}),
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+  queryCache: new QueryCache({
+    onError: (error) => {
+      toast.error(`Error: ${error.message}`, {
+        action: {
+          label: "retry",
+          onClick: () => {
+            queryClient.invalidateQueries();
+          },
+        },
+      });
+    },
+  }),
 });
 
 export const link = new RPCLink({
-	url: `${import.meta.env.VITE_SERVER_URL}/rpc`,
+  url: `${import.meta.env.VITE_SERVER_URL}/rpc`,
 });
 
 export const client: AppRouterClient = createORPCClient(link);

@@ -4,12 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   AlertTriangleIcon,
-  ArchiveIcon,
   CheckCircleIcon,
-  ChevronLeftIcon,
   HammerIcon,
   LightbulbIcon,
   RecycleIcon,
+  UsersIcon,
 } from "lucide-react";
 import { startCase } from "es-toolkit/string";
 import { usePageView } from "@/lib/hooks/use-page-view";
@@ -35,6 +34,15 @@ function RouteComponent() {
       input: { id: params.itemId },
     })
   );
+
+  const traders =
+    data?.traders
+      ?.slice()
+      .sort((a, b) =>
+        (a.trader?.name ?? a.traderId).localeCompare(
+          b.trader?.name ?? b.traderId
+        )
+      ) ?? [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -235,6 +243,95 @@ function RouteComponent() {
                       </div>
                     </Link>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {traders.length > 0 && (
+              <div className="bg-secondary rounded-lg border border-border/50 p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <UsersIcon className="w-5 h-5 text-primary" />
+                  <h2 className="text-lg font-semibold">Traders</h2>
+                </div>
+                <div className="flex flex-col gap-3">
+                  {traders.map((trader) => {
+                    const traderInfo = trader.trader;
+                    const quantityPerSale = Math.max(
+                      trader.quantityPerSale ?? 1,
+                      1
+                    );
+                    const traderRecord = trader as Record<string, unknown>;
+                    const rawPrice =
+                      typeof traderRecord.pricePerSale === "number"
+                        ? (traderRecord.pricePerSale as number)
+                        : typeof traderRecord.salePrice === "number"
+                        ? (traderRecord.salePrice as number)
+                        : typeof traderRecord.itemPrice === "number"
+                        ? (traderRecord.itemPrice as number)
+                        : typeof traderRecord.price === "number"
+                        ? (traderRecord.price as number)
+                        : null;
+                    const fallbackPrice =
+                      rawPrice == null &&
+                      trader.currency === "credits" &&
+                      data?.value != null
+                        ? data.value * quantityPerSale
+                        : null;
+                    const salePrice = rawPrice ?? fallbackPrice;
+                    const currencyLabel = trader.currency
+                      ? startCase(trader.currency)
+                      : "Credits";
+
+                    return (
+                      <Link
+                        key={trader.traderId}
+                        to="/trader/$traderId"
+                        params={{ traderId: trader.traderId }}
+                        className="group block"
+                        aria-label={`View ${
+                          traderInfo?.name ?? trader.traderId
+                        } trader profile`}
+                        preload="intent"
+                      >
+                        <div className="rounded-xl border border-border/60 bg-card/80 p-4 shadow-sm transition-colors duration-200 group-hover:border-primary/50 group-hover:bg-card">
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="flex min-w-0 items-center gap-3">
+                              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border/60 bg-background/70">
+                                {traderInfo?.imageUrl ? (
+                                  <img
+                                    src={traderInfo.imageUrl ?? undefined}
+                                    alt={traderInfo.name ?? "Trader"}
+                                    className="h-full w-full object-cover object-center"
+                                  />
+                                ) : (
+                                  <UsersIcon className="h-6 w-6 text-muted-foreground" />
+                                )}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-semibold">
+                                  {traderInfo?.name ??
+                                    startCase(trader.traderId)}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-semibold text-foreground">
+                                {salePrice != null
+                                  ? `${salePrice.toLocaleString()} ${currencyLabel}`
+                                  : "Price unavailable"}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                per sale
+                                {quantityPerSale > 1
+                                  ? ` • ${quantityPerSale.toLocaleString()} items`
+                                  : ""}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             )}
