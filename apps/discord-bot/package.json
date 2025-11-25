@@ -16,6 +16,7 @@
     "dependencies": {
         "@orpc/client": "^1.11.3",
         "@topside-db/api": "workspace:*",
+        "@topside-db/utils": "workspace:*",
         "discord.js": "^14.24.2",
         "dotenv": "^17.2.3",
         "sunar": "^0.7.3",

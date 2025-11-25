@@ -1,6 +1,7 @@
 import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
 import { Autocomplete, execute, Slash } from "sunar";
 import { api } from "../api";
+import { createTopsideDbUrl } from "@topside-db/utils";
 
 export const autocomplete = new Autocomplete({
   name: "query",
@@ -41,8 +42,41 @@ export const slash = new Slash({
 execute(slash, async (interaction) => {
   const mapId = interaction.options.getString("query") ?? "";
 
+  const embed = await getMapCommandEmbed(mapId);
+
+  if (!embed) {
+    return interaction.reply({ content: "Map not found" });
+  }
+
   interaction.reply({
-    embeds: [new EmbedBuilder().setDescription(`Map: ${mapId}`)],
+    embeds: [embed],
   });
 });
 
+export async function getMapCommandEmbed(mapId: string) {
+  const map = await api.maps.getMap({ id: mapId });
+
+  if (!map) {
+    return null;
+  }
+
+  return new EmbedBuilder()
+    .setTitle(map.name)
+    .setDescription(map.description)
+    .addFields({
+      name: "Difficulty",
+      value:
+        map.difficulties
+          ?.map((d) => `**${d.name}**: ${Math.round(d.rating * 5)}/5`)
+          .join("\n") ?? "N/A",
+      inline: true,
+    })
+    .addFields({
+      name: "Maximum Time",
+      value: map.formattedMaxTime ?? "N/A",
+      inline: true,
+    })
+    .setImage(map.imageUrl)
+    .setURL(createTopsideDbUrl({ type: "map", id: map.id }))
+    .setColor("#1692df");
+}

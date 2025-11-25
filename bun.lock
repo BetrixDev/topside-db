@@ -22,6 +22,7 @@
       "dependencies": {
         "@orpc/client": "^1.11.3",
         "@topside-db/api": "workspace:*",
+        "@topside-db/utils": "workspace:*",
         "discord.js": "^14.24.2",
         "dotenv": "^17.2.3",
         "sunar": "^0.7.3",
@@ -184,6 +185,15 @@
       "devDependencies": {
         "@topside-db/config": "workspace:*",
         "tsdown": "catalog:",
+      },
+      "peerDependencies": {
+        "typescript": "^5",
+      },
+    },
+    "packages/utils": {
+      "name": "@topside-db/utils",
+      "devDependencies": {
+        "@topside-db/config": "workspace:*",
       },
       "peerDependencies": {
         "typescript": "^5",
@@ -773,6 +783,8 @@
     "@topside-db/redis": ["@topside-db/redis@workspace:packages/redis"],
 
     "@topside-db/schemas": ["@topside-db/schemas@workspace:packages/schemas"],
+
+    "@topside-db/utils": ["@topside-db/utils@workspace:packages/utils"],
 
     "@trigger.dev/build": ["@trigger.dev/build@4.1.0", "", { "dependencies": { "@trigger.dev/core": "4.1.0", "pkg-types": "^1.1.3", "tinyglobby": "^0.2.2", "tsconfck": "3.1.3" } }, "sha512-1GDBv2D//CImAQ7fU253olxZyUzO1QGselRmW5gjmY1zkdshdI09F1vkDT79wut59iqzxbc+WMi3fBhTmAJGZQ=="],
 
