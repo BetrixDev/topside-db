@@ -60,6 +60,8 @@ export async function getMapCommandEmbed(mapId: string) {
     return null;
   }
 
+  await api.analytics.trackView({ resourceType: "map", resourceId: map.id });
+
   return new EmbedBuilder()
     .setTitle(map.name)
     .setDescription(map.description)
