@@ -41,8 +41,23 @@ export const slash = new Slash({
 execute(slash, async (interaction) => {
   const traderId = interaction.options.getString("query") ?? "";
 
+  const embed = await getTraderCommandEmbed(traderId);
+
+  if (!embed) {
+    return interaction.reply({ content: "Trader not found" });
+  }
+
   interaction.reply({
-    embeds: [new EmbedBuilder().setDescription(`Trader: ${traderId}`)],
+    embeds: [embed],
   });
 });
 
+export async function getTraderCommandEmbed(traderId: string) {
+  const trader = await api.traders.getTrader({ id: traderId });
+
+  if (!trader) {
+    return null;
+  }
+
+  return new EmbedBuilder().setDescription(`Trader: ${trader.name}`);
+}
