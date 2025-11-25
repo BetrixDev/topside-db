@@ -1,15 +1,16 @@
 import z from "zod";
 import { publicProcedure } from "..";
 import { eq, Tables, inArray, sql, aliasedTable } from "@topside-db/db";
+import { cacheMiddleware } from "../middleware/cache";
 
 export const itemsRouter = {
   getItem: publicProcedure
+    .use(cacheMiddleware({ keyPrefix: "items" }))
     .input(z.object({ id: z.string() }))
     .handler(async ({ input, context }) => {
       const item = await context.db.query.items.findFirst({
         where: eq(Tables.items.id, input.id),
         with: {
-          effects: true,
           recipes: true,
           recycles: true,
           salvages: true,
@@ -69,6 +70,7 @@ export const itemsRouter = {
       };
     }),
   recycleValueList: publicProcedure
+    .use(cacheMiddleware({ keyPrefix: "items:recycle" }))
     .output(
       z.array(
         z.object({
@@ -84,18 +86,18 @@ export const itemsRouter = {
       const materials = aliasedTable(Tables.items, "materials");
 
       const recycledValue = sql<number>`
-      COALESCE(SUM(${Tables.itemRecycles.quantity} * ${materials.value}), 0)
-    `;
+        COALESCE(SUM(${Tables.itemRecycles.quantity} * ${materials.value}), 0)
+      `;
 
       const recycleYieldPct = sql<number>`
-      ROUND(
-        (
-          ${recycledValue}
-          / NULLIF(${Tables.items.value}, 0)
-        )::numeric,
-        2
-      )
-    `;
+        ROUND(
+          (
+            ${recycledValue}
+            / NULLIF(${Tables.items.value}, 0)
+          )::numeric,
+          2
+        )
+      `;
 
       const rows = await context.db
         .select({
