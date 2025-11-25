@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
 import { Autocomplete, execute, Slash } from "sunar";
 import { api } from "../api";
-import { createTopsideDbUrl } from "@topside-db/utils";
+import { createTopsideDbUrl, PRIMARY_COLOR } from "@topside-db/utils";
 
 export const autocomplete = new Autocomplete({
   name: "query",
@@ -78,5 +78,5 @@ export async function getMapCommandEmbed(mapId: string) {
     })
     .setImage(map.imageUrl)
     .setURL(createTopsideDbUrl({ type: "map", id: map.id }))
-    .setColor("#1692df");
+    .setColor(PRIMARY_COLOR);
 }
