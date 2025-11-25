@@ -1,129 +1,147 @@
 import { publicProcedure } from "../index";
-import { z } from "zod";
 import { MeiliSearch } from "meilisearch";
 import { cacheMiddleware } from "../middleware/cache";
+import {
+  searchInputSchema,
+  type SearchHit,
+  type SearchCategory,
+  type SearchResult,
+} from "@topside-db/schemas";
 
 const meilisearch = new MeiliSearch({
   host: process.env.MEILISEARCH_HOST || "http://localhost:7700",
   apiKey: process.env.MEILISEARCH_MASTER_KEY || "masterKey",
 });
 
+type IndexConfig = {
+  indexUid: SearchCategory;
+  attributesToSearchOn: string[];
+  weight: number;
+};
+
+const INDEX_CONFIGS: IndexConfig[] = [
+  {
+    indexUid: "items",
+    attributesToSearchOn: ["name"],
+    weight: 1.0,
+  },
+  {
+    indexUid: "quests",
+    attributesToSearchOn: ["name"],
+    weight: 1.0,
+  },
+  {
+    indexUid: "hideouts",
+    attributesToSearchOn: ["name"],
+    weight: 1.0,
+  },
+  {
+    indexUid: "maps",
+    attributesToSearchOn: ["name"],
+    weight: 2.0,
+  },
+  {
+    indexUid: "arcs",
+    attributesToSearchOn: ["name"],
+    weight: 1.0,
+  },
+  {
+    indexUid: "traders",
+    attributesToSearchOn: ["name"],
+    weight: 2.0,
+  },
+];
+
 export const searchRouter = {
   search: publicProcedure
-    .input(
-      z.object({
-        query: z.string(),
-      })
-    )
+    .input(searchInputSchema)
     .use(cacheMiddleware())
-    .output(
-      z.object({
-        hits: z.array(
-          z.union([
-            z.object({
-              kind: z.literal("items"),
-              id: z.string(),
-              name: z.string(),
-              type: z.string(),
-              imageFilename: z.string().nullish(),
-            }),
-            z.object({
-              kind: z.literal("quests"),
-              id: z.string(),
-              name: z.string(),
-              trader: z.string(),
-            }),
-            z.object({
-              kind: z.literal("hideouts"),
-              id: z.string(),
-              name: z.string(),
-            }),
-            z.object({
-              kind: z.literal("maps"),
-              id: z.string(),
-              name: z.string(),
-              description: z.string().nullish(),
-              maximumTimeMinutes: z.number().nullish(),
-              imageUrl: z.string().nullish(),
-            }),
-            z.object({
-              kind: z.literal("arcs"),
-              id: z.string(),
-              name: z.string(),
-              description: z.string().nullish(),
-              threatLevel: z.string().nullish(),
-              imageUrl: z.string().nullish(),
-              health: z.number().nullish(),
-            }),
-            z.object({
-              kind: z.literal("traders"),
-              id: z.string(),
-              name: z.string(),
-              description: z.string().nullish(),
-              imageUrl: z.string().nullish(),
-            }),
-          ])
-        ),
-        processingTimeMs: z.number(),
-      })
-    )
-    .handler(async ({ input }) => {
-      const { query } = input;
+    .handler(async ({ input }): Promise<SearchResult<SearchHit>> => {
+      const { query, category, limit, offset } = input;
 
-      const { results } = await meilisearch.multiSearch({
-        queries: [
-          {
-            indexUid: "items",
-            q: query,
-            limit: 10,
-            attributesToSearchOn: ["name", "description"],
+      const configs = category
+        ? INDEX_CONFIGS.filter((c) => c.indexUid === category)
+        : INDEX_CONFIGS;
+
+      if (category) {
+        const index = meilisearch.index(category);
+        const config = configs[0]!;
+
+        const result = await index.search(query, {
+          limit,
+          offset,
+          attributesToSearchOn: config.attributesToSearchOn,
+        });
+
+        const hits = result.hits.map((hit) => ({
+          ...(hit as Record<string, unknown>),
+          kind: category,
+        })) as SearchHit[];
+
+        return {
+          hits,
+          totalHits: result.estimatedTotalHits ?? result.hits.length,
+          processingTimeMs: result.processingTimeMs,
+          limit,
+          offset,
+        };
+      }
+
+      const response = await meilisearch.multiSearch({
+        federation: {
+          limit,
+          offset,
+        },
+        queries: configs.map((config) => ({
+          indexUid: config.indexUid,
+          q: query,
+          attributesToSearchOn: config.attributesToSearchOn,
+          federationOptions: {
+            weight: config.weight,
           },
-          {
-            indexUid: "quests",
-            q: query,
-            limit: 10,
-            attributesToSearchOn: ["name", "description", "trader"],
-          },
-          {
-            indexUid: "hideouts",
-            q: query,
-            limit: 10,
-            attributesToSearchOn: ["name"],
-          },
-          {
-            indexUid: "maps",
-            q: query,
-            limit: 10,
-            attributesToSearchOn: ["name", "description"],
-          },
-          {
-            indexUid: "arcs",
-            q: query,
-            limit: 10,
-            attributesToSearchOn: ["name", "description"],
-          },
-          {
-            indexUid: "traders",
-            q: query,
-            limit: 10,
-            attributesToSearchOn: ["name", "description"],
-          },
-        ],
+        })),
       });
 
-      const hits = results.flatMap((result) =>
-        result.hits.map((hit) => ({
-          ...(hit as any),
-          kind: result.indexUid, // "items", "quests", "hideouts"
-        }))
-      );
+      const hits = response.hits.map((hit) => ({
+        ...(hit as Record<string, unknown>),
+        kind: hit._federation!.indexUid as SearchCategory,
+      })) as SearchHit[];
 
       return {
         hits,
-        processingTimeMs: results.reduce(
-          (acc, result) => acc + result.processingTimeMs,
-          0
-        ),
+        totalHits: response.estimatedTotalHits ?? hits.length,
+        processingTimeMs: response.processingTimeMs,
+        limit,
+        offset,
+      };
+    }),
+
+  searchByCategory: publicProcedure
+    .input(searchInputSchema.required({ category: true }))
+    .use(cacheMiddleware())
+    .handler(async ({ input }): Promise<SearchResult<SearchHit>> => {
+      const { query, category, limit, offset } = input;
+
+      const config = INDEX_CONFIGS.find((c) => c.indexUid === category)!;
+      const index = meilisearch.index(category);
+
+      const result = await index.search(query, {
+        limit,
+        offset,
+        attributesToSearchOn: config.attributesToSearchOn,
+      });
+
+      const hits = result.hits.map((hit) => ({
+        ...(hit as Record<string, unknown>),
+        kind: category,
+      })) as SearchHit[];
+
+      return {
+        hits,
+        totalHits: result.estimatedTotalHits ?? result.hits.length,
+        processingTimeMs: result.processingTimeMs,
+        limit,
+        offset,
       };
     }),
 };

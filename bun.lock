@@ -125,6 +125,7 @@
         "@orpc/zod": "catalog:",
         "@topside-db/db": "workspace:*",
         "@topside-db/redis": "workspace:*",
+        "@topside-db/schemas": "workspace:*",
         "dotenv": "catalog:",
         "hono": "catalog:",
         "meilisearch": "^0.54.0",
