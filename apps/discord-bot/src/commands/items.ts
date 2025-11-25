@@ -4,31 +4,33 @@ import { api } from "../api";
 
 export const autocomplete = new Autocomplete({
   name: "query",
-  commandName: "search",
+  commandName: "items",
 });
 
 execute(autocomplete, async (interaction) => {
   const query = interaction.options.getString("query") ?? "";
 
-  const result = await api.search.search({ query, limit: 25 });
+  const result = await api.search.searchByCategory({
+    query,
+    category: "items",
+    limit: 25,
+  });
 
   return interaction.respond(
-    result.hits.map((hit) => {
-      return {
-        name: hit.name,
-        value: hit.id,
-      };
-    })
+    result.hits.map((hit) => ({
+      name: hit.name,
+      value: hit.id,
+    }))
   );
 });
 
 export const slash = new Slash({
-  name: "search",
-  description: "Search for anything related to Arc Raiders",
+  name: "items",
+  description: "Search for items in Arc Raiders",
   options: [
     {
       name: "query",
-      description: "Search query",
+      description: "Item name to search for",
       type: ApplicationCommandOptionType.String,
       required: true,
       autocomplete: true,
@@ -37,9 +39,10 @@ export const slash = new Slash({
 });
 
 execute(slash, async (interaction) => {
-  const query = interaction.options.getString("query") ?? "";
+  const itemId = interaction.options.getString("query") ?? "";
 
   interaction.reply({
-    embeds: [new EmbedBuilder().setDescription(query)],
+    embeds: [new EmbedBuilder().setDescription(`Item: ${itemId}`)],
   });
 });
+
