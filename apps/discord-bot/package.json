@@ -1,0 +1,28 @@
+{
+    "name": "discord-bot",
+    "version": "0.0.0",
+    "description": "An awesome Discord bot created with Sunar.",
+    "main": "dist/index.js",
+    "scripts": {
+        "start": "node dist/index.js",
+        "dev": "bun --watch src/index.ts",
+        "build": "tsc",
+        "lint": "tsc --noEmit"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "module",
+    "dependencies": {
+        "@orpc/client": "^1.11.3",
+        "@topside-db/api": "workspace:*",
+        "discord.js": "^14.24.2",
+        "dotenv": "^17.2.3",
+        "sunar": "^0.7.3",
+        "ts-pattern": "^5.9.0"
+    },
+    "devDependencies": {
+        "@types/node": "^24.10.0",
+        "typescript": "^5.9.3"
+    }
+}
