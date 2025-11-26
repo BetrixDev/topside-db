@@ -4,12 +4,14 @@ import {
   DatabaseIcon,
   LayoutGridIcon,
   RecycleIcon,
+  SearchIcon,
 } from "lucide-react";
 
 import { Link, useRouterState } from "@tanstack/react-router";
 
 import { cn } from "@/lib/utils";
 import { ModeToggle } from "./mode-toggle";
+import { useSpotlight } from "./spotlight-search";
 
 type NavItem = {
   label: string;
@@ -35,6 +37,7 @@ const navItems: ReadonlyArray<NavItem> = [
 ];
 
 export default function Header() {
+  const { setOpen } = useSpotlight();
   const pathname = useRouterState({
     select: (state) => state.location.pathname.replace(/\/+$/, "") || "/",
   });
@@ -101,7 +104,19 @@ export default function Header() {
           </nav>
         </div>
 
-        <ModeToggle />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setOpen(true)}
+            className="flex items-center gap-2 rounded-full border border-border/60 bg-card/40 px-3 py-1.5 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
+          >
+            <SearchIcon className="h-4 w-4" />
+            <span className="hidden sm:inline">Search</span>
+            <kbd className="hidden sm:inline-flex h-5 items-center gap-0.5 rounded border border-border/60 bg-muted/50 px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+              <span className="text-xs">⌘</span>K
+            </kbd>
+          </button>
+          <ModeToggle />
+        </div>
       </header>
     </div>
   );

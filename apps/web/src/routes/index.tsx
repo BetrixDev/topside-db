@@ -1,25 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { orpc } from "@/utils/orpc";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import {
-  Command,
-  CommandInput,
-  CommandList,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-} from "@/components/ui/command";
+import { SpotlightSearchInput } from "@/components/spotlight-search";
 import { FlickeringGrid } from "@/components/ui/flickering-grid";
 import {
   ArchiveIcon,
-  ArrowRightIcon,
-  ChevronRightIcon,
-  SearchIcon,
   MapIcon,
   HammerIcon,
   BotIcon,
-  UserIcon,
   EyeIcon,
   TrendingUpIcon,
 } from "lucide-react";
@@ -29,23 +17,12 @@ export const Route = createFileRoute("/")({
 });
 
 function HomeComponent() {
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const { data } = useQuery(
-    orpc.search.search.queryOptions({
-      input: { query: searchQuery },
-      staleTime: 1000 * 60 * 5,
-    })
-  );
-
   const { data: highestViewedResources } = useQuery(
     orpc.analytics.getHighestViewedResources.queryOptions({
       staleTime: 1000 * 60 * 10,
       refetchOnMount: false,
     })
   );
-
-  const searchResults = data?.hits ?? [];
 
   return (
     <main className="min-h-screen flex flex-col lg:flex-row px-4 relative overflow-hidden">
@@ -72,259 +49,8 @@ function HomeComponent() {
             </p>
           </div>
 
-          {/* Search Command */}
-          <div className="bg-secondary rounded-lg border border-border/50 shadow-lg overflow-hidden">
-            <Command className="bg-transparent border-none">
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50">
-                <CommandInput
-                  placeholder="Search for anything Arc Raiders..."
-                  value={searchQuery}
-                  onValueChange={setSearchQuery}
-                  className="border-none focus-visible:ring-0 bg-transparent w-full"
-                />
-              </div>
-              <CommandList className="max-h-[400px] overflow-y-auto">
-                <CommandEmpty className="py-12 text-center text-muted-foreground">
-                  {searchQuery
-                    ? "No results found."
-                    : "Start typing to search..."}
-                </CommandEmpty>
-                {searchResults.length > 0 && (
-                  <CommandGroup
-                    heading={
-                      <span>
-                        <span className="font-bold">
-                          {searchResults.length} Result
-                          {searchResults.length !== 1 ? "s" : ""}
-                        </span>
-                        {typeof data?.processingTimeMs === "number" && (
-                          <span className="ml-2 text-xs text-muted-foreground font-mono">
-                            ({data.processingTimeMs}ms)
-                          </span>
-                        )}
-                      </span>
-                    }
-                    className="p-2"
-                  >
-                    {searchResults.map((result) => {
-                      if (result.kind === "quests") {
-                        return (
-                          <Link
-                            to="/quest/$questId"
-                            params={{ questId: result.id }}
-                            key={result.id}
-                            preload="intent"
-                          >
-                            <CommandItem
-                              value={result.name ?? undefined}
-                              className="rounded-lg hover:bg-background/50 cursor-pointer transition-colors mb-1 p-3"
-                            >
-                              <div className="flex items-center gap-3 w-full">
-                                <div className="w-12 h-12 bg-background rounded-lg border border-border/30 flex items-center justify-center overflow-hidden shrink-0">
-                                  <MapIcon className="w-6 h-6 text-muted-foreground" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-medium truncate">
-                                    {result.name}
-                                  </p>
-                                  <div className="text-xs text-muted-foreground font-mono flex items-center gap-1">
-                                    <span>Quest &gt;</span>
-                                    <span className="text-primary">
-                                      {result.trader}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            </CommandItem>
-                          </Link>
-                        );
-                      }
-
-                      if (result.kind === "maps") {
-                        return (
-                          <Link
-                            to="/map/$mapId"
-                            params={{ mapId: result.id }}
-                            key={result.id}
-                            preload="intent"
-                          >
-                            <CommandItem
-                              value={result.name ?? undefined}
-                              className="rounded-lg hover:bg-background/50 cursor-pointer transition-colors mb-1 p-3"
-                            >
-                              <div className="flex items-center gap-3 w-full">
-                                <div className="w-12 h-12 bg-background rounded-lg border border-border/30 flex items-center justify-center overflow-hidden shrink-0">
-                                  {result.imageUrl ? (
-                                    <img
-                                      src={result.imageUrl ?? undefined}
-                                      alt={result.name}
-                                      className="w-full h-full object-cover object-center"
-                                    />
-                                  ) : (
-                                    <MapIcon className="w-6 h-6 text-muted-foreground" />
-                                  )}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-medium truncate">
-                                    {result.name}
-                                  </p>
-                                  <div className="text-xs text-muted-foreground font-mono flex items-center gap-1">
-                                    Map
-                                  </div>
-                                </div>
-                              </div>
-                            </CommandItem>
-                          </Link>
-                        );
-                      }
-
-                      if (result.kind === "hideouts") {
-                        return (
-                          <Link
-                            to="/hideout/$workbenchId"
-                            params={{ workbenchId: result.id }}
-                            key={result.id}
-                            preload="intent"
-                          >
-                            <CommandItem
-                              value={result.name ?? undefined}
-                              className="rounded-lg hover:bg-background/50 cursor-pointer transition-colors mb-1 p-3"
-                            >
-                              <div className="flex items-center gap-3 w-full">
-                                <div className="w-12 h-12 bg-background rounded-lg border border-border/30 flex items-center justify-center overflow-hidden shrink-0">
-                                  <HammerIcon className="w-6 h-6 text-muted-foreground" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-medium truncate">
-                                    {result.name}
-                                  </p>
-                                  <div className="text-xs text-muted-foreground font-mono flex items-center gap-1">
-                                    <span>Hideout &gt;</span>
-                                    <span className="text-primary">Module</span>
-                                  </div>
-                                </div>
-                              </div>
-                            </CommandItem>
-                          </Link>
-                        );
-                      }
-
-                      if (result.kind === "arcs") {
-                        return (
-                          <Link
-                            to="/arc/$arcId"
-                            params={{ arcId: result.id }}
-                            key={result.id}
-                            preload="intent"
-                          >
-                            <CommandItem
-                              value={result.name ?? undefined}
-                              className="rounded-lg hover:bg-background/50 cursor-pointer transition-colors mb-1 p-3"
-                            >
-                              <div className="flex items-center gap-3 w-full">
-                                <div className="w-12 h-12 bg-background rounded-lg border border-border/30 flex items-center justify-center overflow-hidden shrink-0">
-                                  {result.imageUrl ? (
-                                    <img
-                                      src={result.imageUrl ?? undefined}
-                                      alt={result.name}
-                                      className="w-full h-full object-cover object-center"
-                                    />
-                                  ) : (
-                                    <BotIcon className="w-6 h-6 text-muted-foreground" />
-                                  )}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-medium truncate">
-                                    {result.name}
-                                  </p>
-                                  <div className="text-xs text-muted-foreground font-mono flex items-center gap-1">
-                                    Arc
-                                  </div>
-                                </div>
-                              </div>
-                            </CommandItem>
-                          </Link>
-                        );
-                      }
-
-                      if (result.kind === "traders") {
-                        return (
-                          <Link
-                            to="/trader/$traderId"
-                            params={{ traderId: result.id }}
-                            key={result.id}
-                            preload="intent"
-                          >
-                            <CommandItem
-                              value={result.name ?? undefined}
-                              className="rounded-lg hover:bg-background/50 cursor-pointer transition-colors mb-1 p-3"
-                            >
-                              <div className="flex items-center gap-3 w-full">
-                                <div className="w-12 h-12 bg-background rounded-lg border border-border/30 flex items-center justify-center overflow-hidden shrink-0">
-                                  {result.imageUrl ? (
-                                    <img
-                                      src={result.imageUrl ?? undefined}
-                                      alt={result.name}
-                                      className="w-full h-full object-cover object-center"
-                                    />
-                                  ) : (
-                                    <UserIcon className="w-6 h-6 text-muted-foreground" />
-                                  )}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-medium truncate">
-                                    {result.name}
-                                  </p>
-                                  <div className="text-xs text-muted-foreground font-mono flex items-center gap-1">
-                                    Arc
-                                  </div>
-                                </div>
-                              </div>
-                            </CommandItem>
-                          </Link>
-                        );
-                      }
-
-                      return (
-                        <Link
-                          to="/item/$itemId"
-                          params={{ itemId: result.id }}
-                          key={result.id}
-                          preload="intent"
-                        >
-                          <CommandItem
-                            value={result.name ?? undefined}
-                            className="rounded-lg hover:bg-background/50 cursor-pointer transition-colors mb-1 p-3"
-                          >
-                            <div className="flex items-center gap-3 w-full">
-                              <div className="w-12 h-12 bg-background rounded-lg border border-border/30 flex items-center justify-center overflow-hidden shrink-0">
-                                <img
-                                  src={result.imageFilename ?? undefined}
-                                  alt={result.name}
-                                  className="w-full h-full object-contain p-1"
-                                />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium truncate">
-                                  {result.name}
-                                </p>
-                                <div className="text-xs text-muted-foreground font-mono flex items-center gap-1">
-                                  <span>Item &gt;</span>
-                                  <span className="text-primary">
-                                    {result.type}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </CommandItem>
-                        </Link>
-                      );
-                    })}
-                  </CommandGroup>
-                )}
-              </CommandList>
-            </Command>
-          </div>
+          {/* Search - Click to open spotlight */}
+          <SpotlightSearchInput />
         </div>
       </div>
 
