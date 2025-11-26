@@ -10,6 +10,7 @@ import {
   BotIcon,
   EyeIcon,
   TrendingUpIcon,
+  ShoppingBagIcon,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -100,13 +101,15 @@ function ViewedResourceCard({
       case "item":
         return `/items/${resource.resourceId}`;
       case "quest":
-        return `/quest/${resource.resourceId}`;
+        return `/quests/${resource.resourceId}`;
       case "hideout":
         return `/hideout/${resource.resourceId}`;
       case "map":
-        return `/map/${resource.resourceId}`;
+        return `/maps/${resource.resourceId}`;
       case "arc":
-        return `/arc/${resource.resourceId}`;
+        return `/arcs/${resource.resourceId}`;
+      case "trader":
+        return `/traders/${resource.resourceId}`;
       default:
         return "#";
     }
@@ -124,6 +127,8 @@ function ViewedResourceCard({
         return MapIcon;
       case "arc":
         return BotIcon;
+      case "trader":
+        return ShoppingBagIcon;
       default:
         return ArchiveIcon;
     }

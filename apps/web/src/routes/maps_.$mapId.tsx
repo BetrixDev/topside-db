@@ -1,14 +1,14 @@
 import { usePageView } from "@/lib/hooks/use-page-view";
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/arc/$arcId")({
+export const Route = createFileRoute("/maps_/$mapId")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
   const params = Route.useParams();
 
-  usePageView("arc", params.arcId);
+  usePageView("map", params.mapId);
 
-  return <div className="mt-16">Hello "/arc/$arcId"!</div>;
+  return <div>Hello "/map/$mapId"!</div>;
 }

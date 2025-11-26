@@ -285,7 +285,7 @@ function RouteComponent() {
                     return (
                       <Link
                         key={trader.traderId}
-                        to="/trader/$traderId"
+                        to="/traders/$traderId"
                         params={{ traderId: trader.traderId }}
                         className="group block"
                         aria-label={`View ${

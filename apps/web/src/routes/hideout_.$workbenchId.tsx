@@ -1,14 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { usePageView } from "@/lib/hooks/use-page-view";
 
-export const Route = createFileRoute("/quest/$questId")({
+export const Route = createFileRoute("/hideout_/$workbenchId")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
   const params = Route.useParams();
 
-  usePageView("quest", params.questId);
+  usePageView("hideout", params.workbenchId);
 
-  return <div>Hello "/quest/$questId"!</div>;
+  return <div>Hello "/hideout/$workbenchId"!</div>;
 }

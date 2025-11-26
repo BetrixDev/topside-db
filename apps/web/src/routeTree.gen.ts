@@ -9,21 +9,36 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TradersRouteImport } from './routes/traders'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as QuestsRouteImport } from './routes/quests'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as MapsRouteImport } from './routes/maps'
 import { Route as ItemsRouteImport } from './routes/items'
+import { Route as HideoutRouteImport } from './routes/hideout'
+import { Route as ArcsRouteImport } from './routes/arcs'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as TraderTraderIdRouteImport } from './routes/trader.$traderId'
-import { Route as QuestQuestIdRouteImport } from './routes/quest.$questId'
-import { Route as MapMapIdRouteImport } from './routes/map.$mapId'
+import { Route as TradersTraderIdRouteImport } from './routes/traders_.$traderId'
+import { Route as QuestsQuestIdRouteImport } from './routes/quests_.$questId'
+import { Route as MapsMapIdRouteImport } from './routes/maps_.$mapId'
 import { Route as ItemsRecyclesRouteImport } from './routes/items_.recycles'
 import { Route as ItemsItemIdRouteImport } from './routes/items_.$itemId'
-import { Route as HideoutWorkbenchIdRouteImport } from './routes/hideout.$workbenchId'
-import { Route as ArcArcIdRouteImport } from './routes/arc.$arcId'
+import { Route as HideoutWorkbenchIdRouteImport } from './routes/hideout_.$workbenchId'
+import { Route as ArcsArcIdRouteImport } from './routes/arcs_.$arcId'
 
+const TradersRoute = TradersRouteImport.update({
+  id: '/traders',
+  path: '/traders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuestsRoute = QuestsRouteImport.update({
+  id: '/quests',
+  path: '/quests',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -31,9 +46,24 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MapsRoute = MapsRouteImport.update({
+  id: '/maps',
+  path: '/maps',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ItemsRoute = ItemsRouteImport.update({
   id: '/items',
   path: '/items',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HideoutRoute = HideoutRouteImport.update({
+  id: '/hideout',
+  path: '/hideout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArcsRoute = ArcsRouteImport.update({
+  id: '/arcs',
+  path: '/arcs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -41,19 +71,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TraderTraderIdRoute = TraderTraderIdRouteImport.update({
-  id: '/trader/$traderId',
-  path: '/trader/$traderId',
+const TradersTraderIdRoute = TradersTraderIdRouteImport.update({
+  id: '/traders_/$traderId',
+  path: '/traders/$traderId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const QuestQuestIdRoute = QuestQuestIdRouteImport.update({
-  id: '/quest/$questId',
-  path: '/quest/$questId',
+const QuestsQuestIdRoute = QuestsQuestIdRouteImport.update({
+  id: '/quests_/$questId',
+  path: '/quests/$questId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MapMapIdRoute = MapMapIdRouteImport.update({
-  id: '/map/$mapId',
-  path: '/map/$mapId',
+const MapsMapIdRoute = MapsMapIdRouteImport.update({
+  id: '/maps_/$mapId',
+  path: '/maps/$mapId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ItemsRecyclesRoute = ItemsRecyclesRouteImport.update({
@@ -67,119 +97,168 @@ const ItemsItemIdRoute = ItemsItemIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const HideoutWorkbenchIdRoute = HideoutWorkbenchIdRouteImport.update({
-  id: '/hideout/$workbenchId',
+  id: '/hideout_/$workbenchId',
   path: '/hideout/$workbenchId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ArcArcIdRoute = ArcArcIdRouteImport.update({
-  id: '/arc/$arcId',
-  path: '/arc/$arcId',
+const ArcsArcIdRoute = ArcsArcIdRouteImport.update({
+  id: '/arcs_/$arcId',
+  path: '/arcs/$arcId',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/arcs': typeof ArcsRoute
+  '/hideout': typeof HideoutRoute
   '/items': typeof ItemsRoute
+  '/maps': typeof MapsRoute
   '/privacy': typeof PrivacyRoute
+  '/quests': typeof QuestsRoute
   '/terms': typeof TermsRoute
-  '/arc/$arcId': typeof ArcArcIdRoute
+  '/traders': typeof TradersRoute
+  '/arcs/$arcId': typeof ArcsArcIdRoute
   '/hideout/$workbenchId': typeof HideoutWorkbenchIdRoute
   '/items/$itemId': typeof ItemsItemIdRoute
   '/items/recycles': typeof ItemsRecyclesRoute
-  '/map/$mapId': typeof MapMapIdRoute
-  '/quest/$questId': typeof QuestQuestIdRoute
-  '/trader/$traderId': typeof TraderTraderIdRoute
+  '/maps/$mapId': typeof MapsMapIdRoute
+  '/quests/$questId': typeof QuestsQuestIdRoute
+  '/traders/$traderId': typeof TradersTraderIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/arcs': typeof ArcsRoute
+  '/hideout': typeof HideoutRoute
   '/items': typeof ItemsRoute
+  '/maps': typeof MapsRoute
   '/privacy': typeof PrivacyRoute
+  '/quests': typeof QuestsRoute
   '/terms': typeof TermsRoute
-  '/arc/$arcId': typeof ArcArcIdRoute
+  '/traders': typeof TradersRoute
+  '/arcs/$arcId': typeof ArcsArcIdRoute
   '/hideout/$workbenchId': typeof HideoutWorkbenchIdRoute
   '/items/$itemId': typeof ItemsItemIdRoute
   '/items/recycles': typeof ItemsRecyclesRoute
-  '/map/$mapId': typeof MapMapIdRoute
-  '/quest/$questId': typeof QuestQuestIdRoute
-  '/trader/$traderId': typeof TraderTraderIdRoute
+  '/maps/$mapId': typeof MapsMapIdRoute
+  '/quests/$questId': typeof QuestsQuestIdRoute
+  '/traders/$traderId': typeof TradersTraderIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/arcs': typeof ArcsRoute
+  '/hideout': typeof HideoutRoute
   '/items': typeof ItemsRoute
+  '/maps': typeof MapsRoute
   '/privacy': typeof PrivacyRoute
+  '/quests': typeof QuestsRoute
   '/terms': typeof TermsRoute
-  '/arc/$arcId': typeof ArcArcIdRoute
-  '/hideout/$workbenchId': typeof HideoutWorkbenchIdRoute
+  '/traders': typeof TradersRoute
+  '/arcs_/$arcId': typeof ArcsArcIdRoute
+  '/hideout_/$workbenchId': typeof HideoutWorkbenchIdRoute
   '/items_/$itemId': typeof ItemsItemIdRoute
   '/items_/recycles': typeof ItemsRecyclesRoute
-  '/map/$mapId': typeof MapMapIdRoute
-  '/quest/$questId': typeof QuestQuestIdRoute
-  '/trader/$traderId': typeof TraderTraderIdRoute
+  '/maps_/$mapId': typeof MapsMapIdRoute
+  '/quests_/$questId': typeof QuestsQuestIdRoute
+  '/traders_/$traderId': typeof TradersTraderIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/arcs'
+    | '/hideout'
     | '/items'
+    | '/maps'
     | '/privacy'
+    | '/quests'
     | '/terms'
-    | '/arc/$arcId'
+    | '/traders'
+    | '/arcs/$arcId'
     | '/hideout/$workbenchId'
     | '/items/$itemId'
     | '/items/recycles'
-    | '/map/$mapId'
-    | '/quest/$questId'
-    | '/trader/$traderId'
+    | '/maps/$mapId'
+    | '/quests/$questId'
+    | '/traders/$traderId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/arcs'
+    | '/hideout'
     | '/items'
+    | '/maps'
     | '/privacy'
+    | '/quests'
     | '/terms'
-    | '/arc/$arcId'
+    | '/traders'
+    | '/arcs/$arcId'
     | '/hideout/$workbenchId'
     | '/items/$itemId'
     | '/items/recycles'
-    | '/map/$mapId'
-    | '/quest/$questId'
-    | '/trader/$traderId'
+    | '/maps/$mapId'
+    | '/quests/$questId'
+    | '/traders/$traderId'
   id:
     | '__root__'
     | '/'
+    | '/arcs'
+    | '/hideout'
     | '/items'
+    | '/maps'
     | '/privacy'
+    | '/quests'
     | '/terms'
-    | '/arc/$arcId'
-    | '/hideout/$workbenchId'
+    | '/traders'
+    | '/arcs_/$arcId'
+    | '/hideout_/$workbenchId'
     | '/items_/$itemId'
     | '/items_/recycles'
-    | '/map/$mapId'
-    | '/quest/$questId'
-    | '/trader/$traderId'
+    | '/maps_/$mapId'
+    | '/quests_/$questId'
+    | '/traders_/$traderId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ArcsRoute: typeof ArcsRoute
+  HideoutRoute: typeof HideoutRoute
   ItemsRoute: typeof ItemsRoute
+  MapsRoute: typeof MapsRoute
   PrivacyRoute: typeof PrivacyRoute
+  QuestsRoute: typeof QuestsRoute
   TermsRoute: typeof TermsRoute
-  ArcArcIdRoute: typeof ArcArcIdRoute
+  TradersRoute: typeof TradersRoute
+  ArcsArcIdRoute: typeof ArcsArcIdRoute
   HideoutWorkbenchIdRoute: typeof HideoutWorkbenchIdRoute
   ItemsItemIdRoute: typeof ItemsItemIdRoute
   ItemsRecyclesRoute: typeof ItemsRecyclesRoute
-  MapMapIdRoute: typeof MapMapIdRoute
-  QuestQuestIdRoute: typeof QuestQuestIdRoute
-  TraderTraderIdRoute: typeof TraderTraderIdRoute
+  MapsMapIdRoute: typeof MapsMapIdRoute
+  QuestsQuestIdRoute: typeof QuestsQuestIdRoute
+  TradersTraderIdRoute: typeof TradersTraderIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/traders': {
+      id: '/traders'
+      path: '/traders'
+      fullPath: '/traders'
+      preLoaderRoute: typeof TradersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quests': {
+      id: '/quests'
+      path: '/quests'
+      fullPath: '/quests'
+      preLoaderRoute: typeof QuestsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -189,11 +268,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/maps': {
+      id: '/maps'
+      path: '/maps'
+      fullPath: '/maps'
+      preLoaderRoute: typeof MapsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/items': {
       id: '/items'
       path: '/items'
       fullPath: '/items'
       preLoaderRoute: typeof ItemsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hideout': {
+      id: '/hideout'
+      path: '/hideout'
+      fullPath: '/hideout'
+      preLoaderRoute: typeof HideoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/arcs': {
+      id: '/arcs'
+      path: '/arcs'
+      fullPath: '/arcs'
+      preLoaderRoute: typeof ArcsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -203,25 +303,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/trader/$traderId': {
-      id: '/trader/$traderId'
-      path: '/trader/$traderId'
-      fullPath: '/trader/$traderId'
-      preLoaderRoute: typeof TraderTraderIdRouteImport
+    '/traders_/$traderId': {
+      id: '/traders_/$traderId'
+      path: '/traders/$traderId'
+      fullPath: '/traders/$traderId'
+      preLoaderRoute: typeof TradersTraderIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/quest/$questId': {
-      id: '/quest/$questId'
-      path: '/quest/$questId'
-      fullPath: '/quest/$questId'
-      preLoaderRoute: typeof QuestQuestIdRouteImport
+    '/quests_/$questId': {
+      id: '/quests_/$questId'
+      path: '/quests/$questId'
+      fullPath: '/quests/$questId'
+      preLoaderRoute: typeof QuestsQuestIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/map/$mapId': {
-      id: '/map/$mapId'
-      path: '/map/$mapId'
-      fullPath: '/map/$mapId'
-      preLoaderRoute: typeof MapMapIdRouteImport
+    '/maps_/$mapId': {
+      id: '/maps_/$mapId'
+      path: '/maps/$mapId'
+      fullPath: '/maps/$mapId'
+      preLoaderRoute: typeof MapsMapIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/items_/recycles': {
@@ -238,18 +338,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ItemsItemIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/hideout/$workbenchId': {
-      id: '/hideout/$workbenchId'
+    '/hideout_/$workbenchId': {
+      id: '/hideout_/$workbenchId'
       path: '/hideout/$workbenchId'
       fullPath: '/hideout/$workbenchId'
       preLoaderRoute: typeof HideoutWorkbenchIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/arc/$arcId': {
-      id: '/arc/$arcId'
-      path: '/arc/$arcId'
-      fullPath: '/arc/$arcId'
-      preLoaderRoute: typeof ArcArcIdRouteImport
+    '/arcs_/$arcId': {
+      id: '/arcs_/$arcId'
+      path: '/arcs/$arcId'
+      fullPath: '/arcs/$arcId'
+      preLoaderRoute: typeof ArcsArcIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -257,16 +357,21 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ArcsRoute: ArcsRoute,
+  HideoutRoute: HideoutRoute,
   ItemsRoute: ItemsRoute,
+  MapsRoute: MapsRoute,
   PrivacyRoute: PrivacyRoute,
+  QuestsRoute: QuestsRoute,
   TermsRoute: TermsRoute,
-  ArcArcIdRoute: ArcArcIdRoute,
+  TradersRoute: TradersRoute,
+  ArcsArcIdRoute: ArcsArcIdRoute,
   HideoutWorkbenchIdRoute: HideoutWorkbenchIdRoute,
   ItemsItemIdRoute: ItemsItemIdRoute,
   ItemsRecyclesRoute: ItemsRecyclesRoute,
-  MapMapIdRoute: MapMapIdRoute,
-  QuestQuestIdRoute: QuestQuestIdRoute,
-  TraderTraderIdRoute: TraderTraderIdRoute,
+  MapsMapIdRoute: MapsMapIdRoute,
+  QuestsQuestIdRoute: QuestsQuestIdRoute,
+  TradersTraderIdRoute: TradersTraderIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
