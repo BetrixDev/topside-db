@@ -272,7 +272,7 @@ function QuestResultItem({
     <ResultItemWrapper
       id={result.id}
       name={result.name}
-      url={`/quest/${result.id}`}
+      url={`/quests/${result.id}`}
       icon={MapIcon}
       label="Quest"
       sublabel={result.trader}
@@ -312,7 +312,7 @@ function MapResultItem({
     <ResultItemWrapper
       id={result.id}
       name={result.name}
-      url={`/map/${result.id}`}
+      url={`/maps/${result.id}`}
       icon={MapIcon}
       label="Map"
       imageUrl={result.imageUrl}
@@ -332,7 +332,7 @@ function ArcResultItem({
     <ResultItemWrapper
       id={result.id}
       name={result.name}
-      url={`/arc/${result.id}`}
+      url={`/arcs/${result.id}`}
       icon={BotIcon}
       label="Arc"
       sublabel={result.threatLevel}
@@ -353,7 +353,7 @@ function TraderResultItem({
     <ResultItemWrapper
       id={result.id}
       name={result.name}
-      url={`/trader/${result.id}`}
+      url={`/traders/${result.id}`}
       icon={UserIcon}
       label="Trader"
       imageUrl={result.imageUrl}

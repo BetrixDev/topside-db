@@ -103,9 +103,7 @@ function ItemsPage() {
               <PackageIcon className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">
-                Item Database
-              </h1>
+              <h1 className="text-3xl font-bold tracking-tight">Items</h1>
               <p className="text-muted-foreground text-sm">
                 Search through all Arc Raiders items
               </p>
