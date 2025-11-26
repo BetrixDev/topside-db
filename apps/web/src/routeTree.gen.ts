@@ -11,12 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ItemsRouteImport } from './routes/items'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TraderTraderIdRouteImport } from './routes/trader.$traderId'
 import { Route as QuestQuestIdRouteImport } from './routes/quest.$questId'
 import { Route as MapMapIdRouteImport } from './routes/map.$mapId'
-import { Route as ItemsRecyclesRouteImport } from './routes/items.recycles'
-import { Route as ItemItemIdRouteImport } from './routes/item.$itemId'
+import { Route as ItemsRecyclesRouteImport } from './routes/items_.recycles'
+import { Route as ItemsItemIdRouteImport } from './routes/items_.$itemId'
 import { Route as HideoutWorkbenchIdRouteImport } from './routes/hideout.$workbenchId'
 import { Route as ArcArcIdRouteImport } from './routes/arc.$arcId'
 
@@ -28,6 +29,11 @@ const TermsRoute = TermsRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ItemsRoute = ItemsRouteImport.update({
+  id: '/items',
+  path: '/items',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -51,13 +57,13 @@ const MapMapIdRoute = MapMapIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ItemsRecyclesRoute = ItemsRecyclesRouteImport.update({
-  id: '/items/recycles',
+  id: '/items_/recycles',
   path: '/items/recycles',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ItemItemIdRoute = ItemItemIdRouteImport.update({
-  id: '/item/$itemId',
-  path: '/item/$itemId',
+const ItemsItemIdRoute = ItemsItemIdRouteImport.update({
+  id: '/items_/$itemId',
+  path: '/items/$itemId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HideoutWorkbenchIdRoute = HideoutWorkbenchIdRouteImport.update({
@@ -73,11 +79,12 @@ const ArcArcIdRoute = ArcArcIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/items': typeof ItemsRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/arc/$arcId': typeof ArcArcIdRoute
   '/hideout/$workbenchId': typeof HideoutWorkbenchIdRoute
-  '/item/$itemId': typeof ItemItemIdRoute
+  '/items/$itemId': typeof ItemsItemIdRoute
   '/items/recycles': typeof ItemsRecyclesRoute
   '/map/$mapId': typeof MapMapIdRoute
   '/quest/$questId': typeof QuestQuestIdRoute
@@ -85,11 +92,12 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/items': typeof ItemsRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/arc/$arcId': typeof ArcArcIdRoute
   '/hideout/$workbenchId': typeof HideoutWorkbenchIdRoute
-  '/item/$itemId': typeof ItemItemIdRoute
+  '/items/$itemId': typeof ItemsItemIdRoute
   '/items/recycles': typeof ItemsRecyclesRoute
   '/map/$mapId': typeof MapMapIdRoute
   '/quest/$questId': typeof QuestQuestIdRoute
@@ -98,12 +106,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/items': typeof ItemsRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/arc/$arcId': typeof ArcArcIdRoute
   '/hideout/$workbenchId': typeof HideoutWorkbenchIdRoute
-  '/item/$itemId': typeof ItemItemIdRoute
-  '/items/recycles': typeof ItemsRecyclesRoute
+  '/items_/$itemId': typeof ItemsItemIdRoute
+  '/items_/recycles': typeof ItemsRecyclesRoute
   '/map/$mapId': typeof MapMapIdRoute
   '/quest/$questId': typeof QuestQuestIdRoute
   '/trader/$traderId': typeof TraderTraderIdRoute
@@ -112,11 +121,12 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/items'
     | '/privacy'
     | '/terms'
     | '/arc/$arcId'
     | '/hideout/$workbenchId'
-    | '/item/$itemId'
+    | '/items/$itemId'
     | '/items/recycles'
     | '/map/$mapId'
     | '/quest/$questId'
@@ -124,11 +134,12 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/items'
     | '/privacy'
     | '/terms'
     | '/arc/$arcId'
     | '/hideout/$workbenchId'
-    | '/item/$itemId'
+    | '/items/$itemId'
     | '/items/recycles'
     | '/map/$mapId'
     | '/quest/$questId'
@@ -136,12 +147,13 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/items'
     | '/privacy'
     | '/terms'
     | '/arc/$arcId'
     | '/hideout/$workbenchId'
-    | '/item/$itemId'
-    | '/items/recycles'
+    | '/items_/$itemId'
+    | '/items_/recycles'
     | '/map/$mapId'
     | '/quest/$questId'
     | '/trader/$traderId'
@@ -149,11 +161,12 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ItemsRoute: typeof ItemsRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
   ArcArcIdRoute: typeof ArcArcIdRoute
   HideoutWorkbenchIdRoute: typeof HideoutWorkbenchIdRoute
-  ItemItemIdRoute: typeof ItemItemIdRoute
+  ItemsItemIdRoute: typeof ItemsItemIdRoute
   ItemsRecyclesRoute: typeof ItemsRecyclesRoute
   MapMapIdRoute: typeof MapMapIdRoute
   QuestQuestIdRoute: typeof QuestQuestIdRoute
@@ -174,6 +187,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/items': {
+      id: '/items'
+      path: '/items'
+      fullPath: '/items'
+      preLoaderRoute: typeof ItemsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -204,18 +224,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MapMapIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/items/recycles': {
-      id: '/items/recycles'
+    '/items_/recycles': {
+      id: '/items_/recycles'
       path: '/items/recycles'
       fullPath: '/items/recycles'
       preLoaderRoute: typeof ItemsRecyclesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/item/$itemId': {
-      id: '/item/$itemId'
-      path: '/item/$itemId'
-      fullPath: '/item/$itemId'
-      preLoaderRoute: typeof ItemItemIdRouteImport
+    '/items_/$itemId': {
+      id: '/items_/$itemId'
+      path: '/items/$itemId'
+      fullPath: '/items/$itemId'
+      preLoaderRoute: typeof ItemsItemIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hideout/$workbenchId': {
@@ -237,11 +257,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ItemsRoute: ItemsRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
   ArcArcIdRoute: ArcArcIdRoute,
   HideoutWorkbenchIdRoute: HideoutWorkbenchIdRoute,
-  ItemItemIdRoute: ItemItemIdRoute,
+  ItemsItemIdRoute: ItemsItemIdRoute,
   ItemsRecyclesRoute: ItemsRecyclesRoute,
   MapMapIdRoute: MapMapIdRoute,
   QuestQuestIdRoute: QuestQuestIdRoute,

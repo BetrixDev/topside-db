@@ -13,7 +13,7 @@ import {
 import { startCase } from "es-toolkit/string";
 import { usePageView } from "@/lib/hooks/use-page-view";
 
-export const Route = createFileRoute("/item/$itemId")({
+export const Route = createFileRoute("/items_/$itemId")({
   component: RouteComponent,
   loader: ({ context, params }) => {
     context.queryClient.ensureQueryData(
@@ -73,7 +73,7 @@ function RouteComponent() {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Weight</span>
                   <span className="font-medium">
-                    {data?.weightKg != null ? `${data.weightKg} kg` : "N/A"}
+                    {data?.weightKg != null ? `${data.weightKg} kg` : `N/A`}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -161,7 +161,7 @@ function RouteComponent() {
                       {data.recipes.map((recipe) => (
                         <Link
                           key={recipe.id}
-                          to="/item/$itemId"
+                          to="/items/$itemId"
                           params={{ itemId: recipe.materialId }}
                           className="flex bg-card hover:bg-background rounded-lg border border-border hover:border-primary/50 transition-colors p-2 gap-2"
                         >
@@ -222,7 +222,7 @@ function RouteComponent() {
                   {data.recycles.map((recycle) => (
                     <Link
                       key={recycle.id}
-                      to="/item/$itemId"
+                      to="/items/$itemId"
                       params={{ itemId: recycle.materialId }}
                       className="flex bg-card hover:bg-background rounded-lg border border-border hover:border-primary/50 transition-colors p-2 gap-2"
                     >

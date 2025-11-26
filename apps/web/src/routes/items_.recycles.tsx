@@ -42,7 +42,7 @@ const sortOptions = [
 
 type SortOption = (typeof sortOptions)[number]["value"];
 
-export const Route = createFileRoute("/items/recycles")({
+export const Route = createFileRoute("/items_/recycles")({
   loader: ({ context }) => {
     return context.queryClient.ensureQueryData(
       orpc.items.recycleValueList.queryOptions()
@@ -374,7 +374,7 @@ function RecycleCard({
           </div>
 
           <Link
-            to="/item/$itemId"
+            to="/items/$itemId"
             params={{ itemId: entry.itemId }}
             preload="intent"
             className="self-start"
@@ -411,7 +411,7 @@ function RecycleCard({
               return (
                 <Link
                   key={recycle.id}
-                  to="/item/$itemId"
+                  to="/items/$itemId"
                   params={{ itemId: recycle.materialId }}
                   preload="intent"
                   className="flex items-center gap-3 rounded-2xl border border-border/50 bg-background/50 p-3 hover:border-primary/60 transition-colors"

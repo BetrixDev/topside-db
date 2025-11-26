@@ -250,7 +250,7 @@ function ItemResultItem({
     <ResultItemWrapper
       id={result.id}
       name={result.name}
-      url={`/item/${result.id}`}
+      url={`/items/${result.id}`}
       icon={PackageIcon}
       label="Item"
       sublabel={result.type}

@@ -98,7 +98,7 @@ function ViewedResourceCard({
   const getResourceLink = () => {
     switch (resource.resourceType) {
       case "item":
-        return `/item/${resource.resourceId}`;
+        return `/items/${resource.resourceId}`;
       case "quest":
         return `/quest/${resource.resourceId}`;
       case "hideout":
