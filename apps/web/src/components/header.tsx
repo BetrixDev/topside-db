@@ -97,10 +97,10 @@ export default function Header() {
         <Link
           to="/"
           preload="intent"
-          className="h-8 inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 p-1.5 text-sm font-medium transition hover:border-primary/60"
+          className="h-10 inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 p-1.5 text-sm font-medium transition hover:border-primary/60"
           aria-label="Topside DB home"
         >
-          <DatabaseIcon className="h-4 w-4 text-primary ml-1" />
+          <DatabaseIcon className="h-4 w-4 text-primary md:ml-1" />
           <span className="hidden sm:inline text-[0.65rem] uppercase tracking-[0.5em] text-muted-foreground">
             Topside <span className="text-primary">DB</span>
           </span>
