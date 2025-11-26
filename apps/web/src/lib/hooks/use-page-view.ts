@@ -3,11 +3,15 @@ import { orpc } from "@/utils/orpc";
 
 type ResourceType = "item" | "quest" | "hideout" | "map" | "arc";
 
-export function usePageView(resourceType: ResourceType, resourceId: string) {
+export function usePageView(
+  resourceType: ResourceType,
+  resourceId: string,
+  isEnabled: boolean = true
+) {
   const hasTracked = useRef(false);
 
   useEffect(() => {
-    if (hasTracked.current) return;
+    if (hasTracked.current || !isEnabled) return;
 
     const trackView = async () => {
       try {
@@ -26,5 +30,5 @@ export function usePageView(resourceType: ResourceType, resourceId: string) {
     return () => {
       clearTimeout(timeout);
     };
-  }, [resourceType, resourceId]);
+  }, [resourceType, resourceId, isEnabled]);
 }

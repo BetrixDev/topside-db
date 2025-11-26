@@ -27,13 +27,13 @@ export const Route = createFileRoute("/item/$itemId")({
 function RouteComponent() {
   const params = Route.useParams();
 
-  usePageView("item", params.itemId);
-
   const { data } = useQuery(
     orpc.items.getItem.queryOptions({
       input: { id: params.itemId },
     })
   );
+
+  usePageView("item", params.itemId, !!data);
 
   const traders =
     data?.traders
@@ -45,7 +45,7 @@ function RouteComponent() {
       ) ?? [];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-8 mt-16">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -117,9 +117,9 @@ function RouteComponent() {
                 <div className="space-y-3">
                   {data.effects.map((effect, index) => (
                     <div
-                      key={effect.id}
+                      key={effect.name}
                       className={`flex justify-between items-center ${
-                        index < data.effects.length - 1
+                        index < (data?.effects?.length ?? 0) - 1
                           ? "pb-2 border-b border-border"
                           : ""
                       }`}

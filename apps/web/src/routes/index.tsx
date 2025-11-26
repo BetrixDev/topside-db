@@ -41,7 +41,7 @@ function HomeComponent() {
         <div className="w-full max-w-2xl">
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold mb-3 text-balance">
+            <h1 className="text-5xl font-bold mb-3 text-balance text-foreground">
               Topside <span className="text-primary">DB</span>
             </h1>
             <p className="text-muted-foreground text-lg leading-relaxed">
