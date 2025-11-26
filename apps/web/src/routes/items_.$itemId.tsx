@@ -210,10 +210,12 @@ function RouteComponent() {
                       {" "}
                       Selling all recyced items would yield{" "}
                       <span className="text-primary">
-                        {data.recycledValue} credits
+                        {data.recycledValue.toLocaleString()} credits
                       </span>
                       , compared to{" "}
-                      <span className="text-primary">{data.value} credits</span>{" "}
+                      <span className="text-primary">
+                        {data.value?.toLocaleString() ?? "N/A"} credits
+                      </span>{" "}
                       for the original item.
                     </div>
                   </AlertDescription>
