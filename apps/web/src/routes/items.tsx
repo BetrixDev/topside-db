@@ -23,6 +23,19 @@ const itemsSearchSchema = z.object({
 export const Route = createFileRoute("/items")({
   component: ItemsPage,
   validateSearch: zodValidator(itemsSearchSchema),
+  loaderDeps: ({ search: { q } }) => ({ q }),
+  loader: ({ context, deps: { q } }) => {
+    context.queryClient.ensureQueryData(
+      orpc.search.search.queryOptions({
+        input: {
+          query: q,
+          category: "items",
+          limit: 50,
+        },
+        staleTime: 1000 * 60 * 15,
+      })
+    );
+  },
 });
 
 function ItemsPage() {
@@ -57,7 +70,7 @@ function ItemsPage() {
         category: "items",
         limit: 50,
       },
-      staleTime: 1000 * 60 * 5,
+      staleTime: 1000 * 60 * 15,
     })
   );
 
