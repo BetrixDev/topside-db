@@ -16,12 +16,12 @@ export const arcsRouter = {
         return null;
       }
 
-      // Try to find items that match the loot names
-      // Loot is stored as string array of item names/descriptions
+      // Fetch item details for loot (stored as item names)
+      const lootNames = arc.loot || [];
       const lootItems =
-        arc.loot && arc.loot.length > 0
+        lootNames.length > 0
           ? await context.db.query.items.findMany({
-              where: inArray(Tables.items.name, arc.loot),
+              where: inArray(Tables.items.name, lootNames),
               columns: {
                 id: true,
                 name: true,
@@ -36,18 +36,14 @@ export const arcsRouter = {
       const lootItemMap = new Map(lootItems.map((i) => [i.name, i]));
 
       // Enrich loot with item details where available
-      const enrichedLoot = (arc.loot || []).map((lootName) => ({
+      const lootDetails = lootNames.map((lootName) => ({
         name: lootName,
         item: lootItemMap.get(lootName) || null,
       }));
 
-      // Calculate stats
-      const totalAttacks = (arc.attacks || []).length;
-      const totalWeaknesses = (arc.weaknesses || []).length;
-      const totalLoot = (arc.loot || []).length;
-
-      // Group attacks by type
-      const attacksByType = (arc.attacks || []).reduce((acc, attack) => {
+      // Group attacks by type for organized display
+      const attacks = arc.attacks || [];
+      const attacksByType = attacks.reduce((acc, attack) => {
         const type = attack.type || "Unknown";
         if (!acc[type]) {
           acc[type] = [];
@@ -56,14 +52,32 @@ export const arcsRouter = {
         return acc;
       }, {} as Record<string, string[]>);
 
+      // Calculate total potential loot value
+      const totalLootValue = lootDetails.reduce(
+        (total, loot) => total + (loot.item?.value ?? 0),
+        0
+      );
+
+      // Get unique loot rarities for display
+      const lootRarities = [
+        ...new Set(
+          lootDetails
+            .map((l) => l.item?.rarity)
+            .filter((r): r is string => r != null)
+        ),
+      ];
+
       return {
         ...arc,
-        lootDetails: enrichedLoot,
+        lootDetails,
         attacksByType,
+        totalLootValue,
+        lootRarities,
         stats: {
-          totalAttacks,
-          totalWeaknesses,
-          totalLoot,
+          totalAttacks: attacks.length,
+          totalWeaknesses: (arc.weaknesses || []).length,
+          totalLoot: lootNames.length,
+          matchedLootItems: lootItems.length,
           hasArmorPlating: !!arc.armorPlating,
           threatLevelKnown: !!arc.threatLevel,
         },
