@@ -110,11 +110,16 @@ export const itemsRelations = relations(items, ({ many, one }) => ({
     references: [pageViews.resourceId],
   }),
   traders: many(traderItemsForSale),
+  questsRewards: many(questRewardItems),
 }));
 
 export const itemRecipesRelations = relations(itemRecipes, ({ one }) => ({
   item: one(items, {
     fields: [itemRecipes.itemId],
+    references: [items.id],
+  }),
+  material: one(items, {
+    fields: [itemRecipes.materialId],
     references: [items.id],
   }),
 }));
@@ -124,11 +129,19 @@ export const itemRecyclesRelations = relations(itemRecycles, ({ one }) => ({
     fields: [itemRecycles.itemId],
     references: [items.id],
   }),
+  material: one(items, {
+    fields: [itemRecycles.materialId],
+    references: [items.id],
+  }),
 }));
 
 export const itemSalvagesRelations = relations(itemSalvages, ({ one }) => ({
   item: one(items, {
     fields: [itemSalvages.itemId],
+    references: [items.id],
+  }),
+  material: one(items, {
+    fields: [itemSalvages.materialId],
     references: [items.id],
   }),
 }));
@@ -250,6 +263,10 @@ export const questRewardItemsRelations = relations(
     quest: one(quests, {
       fields: [questRewardItems.questId],
       references: [quests.id],
+    }),
+    item: one(items, {
+      fields: [questRewardItems.itemId],
+      references: [items.id],
     }),
   })
 );

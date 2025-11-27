@@ -1,7 +1,15 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  SectionCard,
+  ItemCard,
+  ItemCardGrid,
+  QuestCard,
+  HideoutCard,
+  TraderCard,
+} from "@/components/resource-cards";
 import { orpc } from "@/utils/orpc";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import {
   AlertTriangleIcon,
   CheckCircleIcon,
@@ -9,6 +17,9 @@ import {
   LightbulbIcon,
   RecycleIcon,
   UsersIcon,
+  ScissorsIcon,
+  GiftIcon,
+  BuildingIcon,
 } from "lucide-react";
 import { startCase } from "es-toolkit/string";
 import { usePageView } from "@/lib/hooks/use-page-view";
@@ -44,6 +55,9 @@ function RouteComponent() {
         )
       ) ?? [];
 
+  const hideoutRequirements = data?.hideoutRequirements ?? [];
+  const questRewards = data?.questsRewards ?? [];
+
   return (
     <div className="min-h-screen">
       {/* Main Content */}
@@ -78,7 +92,11 @@ function RouteComponent() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Value</span>
-                  <span className="font-medium">{data?.value ?? "N/A"}</span>
+                  <span className="font-medium">
+                    {data?.value != null
+                      ? `${data.value.toLocaleString()} credits`
+                      : "N/A"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -91,7 +109,7 @@ function RouteComponent() {
               <h1 className="text-4xl font-bold mb-3 text-balance">
                 {data?.name ?? "Unknown"}
               </h1>
-              <div className="flex gap-2 mb-4">
+              <div className="flex flex-wrap gap-2 mb-4">
                 <span className="px-3 py-1 bg-accent text-accent-foreground text-xs font-semibold rounded-full">
                   {data?.type ?? "Unknown"}
                 </span>
@@ -109,11 +127,7 @@ function RouteComponent() {
 
             {/* Effects Section */}
             {data?.effects && data.effects.length > 0 && (
-              <div className="bg-secondary rounded-lg border border-border/50 p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <LightbulbIcon className="w-5 h-5 text-primary" />
-                  <h2 className="text-lg font-semibold">Effects</h2>
-                </div>
+              <SectionCard icon={LightbulbIcon} title="Effects">
                 <div className="space-y-3">
                   {data.effects.map((effect, index) => (
                     <div
@@ -131,18 +145,14 @@ function RouteComponent() {
                     </div>
                   ))}
                 </div>
-              </div>
+              </SectionCard>
             )}
 
             {/* Crafting Recipe Section */}
             {(data?.craftBench ||
               (data?.recipes && data.recipes.length > 0)) && (
-              <div className="bg-secondary rounded-lg border border-border/50 p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <HammerIcon className="w-5 h-5 text-primary" />
-                  <h2 className="text-lg font-semibold">Crafting Recipe</h2>
-                </div>
-                {data.craftBench && (
+              <SectionCard icon={HammerIcon} title="Crafting Recipe">
+                {data.craftBench && data.craftBench.length > 0 && (
                   <div className="mb-4">
                     <p className="text-sm text-muted-foreground mb-2">
                       Craft Bench:
@@ -157,43 +167,26 @@ function RouteComponent() {
                     <p className="text-sm text-muted-foreground mb-3">
                       Required Materials:
                     </p>
-                    <div className="flex flex-col gap-2">
+                    <ItemCardGrid>
                       {data.recipes.map((recipe) => (
-                        <Link
+                        <ItemCard
                           key={recipe.id}
-                          to="/items/$itemId"
-                          params={{ itemId: recipe.materialId }}
-                          className="flex bg-card hover:bg-background rounded-lg border border-border hover:border-primary/50 transition-colors p-2 gap-2"
-                        >
-                          <img
-                            src={recipe.material?.imageFilename ?? undefined}
-                            alt={recipe.material?.name ?? "Material"}
-                            className="w-12 h-12 object-contain"
-                          />
-                          <div className="flex flex-col gap-1 justify-center">
-                            <p className="text-xs font-medium truncate">
-                              {recipe.material?.name ?? recipe.materialId}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {recipe.quantity}x
-                            </p>
-                          </div>
-                        </Link>
+                          itemId={recipe.materialId}
+                          name={recipe.material?.name}
+                          imageUrl={recipe.material?.imageFilename}
+                          quantity={recipe.quantity}
+                        />
                       ))}
-                    </div>
+                    </ItemCardGrid>
                   </>
                 )}
-              </div>
+              </SectionCard>
             )}
 
             {/* Recycles Into */}
             {data?.recycles && data.recycles.length > 0 && (
-              <div className="bg-secondary rounded-lg border border-border/50 p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <RecycleIcon className="w-5 h-5 text-primary" />
-                  <h2 className="text-lg font-semibold">Recycles Into</h2>
-                </div>
-                <Alert className="mb-2" variant="default">
+              <SectionCard icon={RecycleIcon} title="Recycles Into">
+                <Alert className="mb-4" variant="default">
                   {!data.isRecycleWorthIt && (
                     <AlertTriangleIcon className="w-4 h-4" color="yellow" />
                   )}
@@ -205,56 +198,95 @@ function RouteComponent() {
                       ? "Recycling is worth it"
                       : "Recycling is not worth it"}
                   </AlertTitle>
-                  <AlertDescription>
-                    <div>
-                      {" "}
-                      Selling all recyced items would yield{" "}
-                      <span className="text-primary">
-                        {data.recycledValue.toLocaleString()} credits
-                      </span>
-                      , compared to{" "}
-                      <span className="text-primary">
-                        {data.value?.toLocaleString() ?? "N/A"} credits
-                      </span>{" "}
-                      for the original item.
-                    </div>
+                  <AlertDescription className="block">
+                    Selling all recycled items would yield{" "}
+                    <span className="text-primary font-medium">
+                      {data.recycledValue.toLocaleString()} credits
+                    </span>
+                    , compared to{" "}
+                    <span className="text-primary font-medium">
+                      {data.value?.toLocaleString() ?? "N/A"} credits
+                    </span>{" "}
+                    for the original item.
                   </AlertDescription>
                 </Alert>
-                <div className="flex flex-col gap-2">
+                <ItemCardGrid>
                   {data.recycles.map((recycle) => (
-                    <Link
+                    <ItemCard
                       key={recycle.id}
-                      to="/items/$itemId"
-                      params={{ itemId: recycle.materialId }}
-                      className="flex bg-card hover:bg-background rounded-lg border border-border hover:border-primary/50 transition-colors p-2 gap-2"
-                    >
-                      <div className="">
-                        <img
-                          src={recycle.material?.imageFilename ?? undefined}
-                          alt={recycle.material?.name ?? "Material"}
-                          className="w-12 h-12 object-contain"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1 justify-center">
-                        <p className="text-xs font-medium truncate">
-                          {recycle.material?.name ?? recycle.materialId}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {recycle.quantity}x
-                        </p>
-                      </div>
-                    </Link>
+                      itemId={recycle.materialId}
+                      name={recycle.material?.name}
+                      imageUrl={recycle.material?.imageFilename}
+                      quantity={recycle.quantity}
+                    />
                   ))}
-                </div>
-              </div>
+                </ItemCardGrid>
+              </SectionCard>
             )}
 
-            {traders.length > 0 && (
-              <div className="bg-secondary rounded-lg border border-border/50 p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <UsersIcon className="w-5 h-5 text-primary" />
-                  <h2 className="text-lg font-semibold">Traders</h2>
+            {/* Salvages Into */}
+            {data?.salvages && data.salvages.length > 0 && (
+              <SectionCard icon={ScissorsIcon} title="Recycles Into">
+                <ItemCardGrid>
+                  {data.salvages.map((salvage) => (
+                    <ItemCard
+                      key={salvage.id}
+                      itemId={salvage.materialId}
+                      name={salvage.material?.name}
+                      imageUrl={salvage.material?.imageFilename}
+                      quantity={salvage.quantity}
+                    />
+                  ))}
+                </ItemCardGrid>
+              </SectionCard>
+            )}
+
+            {/* Hideout Requirements */}
+            {hideoutRequirements.length > 0 && (
+              <SectionCard icon={BuildingIcon} title="Hideout Upgrades">
+                <p className="text-sm text-muted-foreground mb-3">
+                  This item is required for the following hideout upgrades:
+                </p>
+                <div className="flex flex-col gap-2">
+                  {hideoutRequirements.map((req, index) => (
+                    <HideoutCard
+                      key={`${req.hideout?.id}-${req.level}-${index}`}
+                      hideoutId={req.hideout?.id ?? ""}
+                      name={req.hideout?.name}
+                      level={req.level}
+                      quantity={req.quantity}
+                    />
+                  ))}
                 </div>
+              </SectionCard>
+            )}
+
+            {/* Quest Rewards */}
+            {questRewards.length > 0 && (
+              <SectionCard icon={GiftIcon} title="Quest Rewards">
+                <p className="text-sm text-muted-foreground mb-3">
+                  This item can be obtained as a reward from:
+                </p>
+                <div className="flex flex-col gap-2">
+                  {questRewards.map((reward, index) => (
+                    <QuestCard
+                      key={`${reward.quest?.id}-${index}`}
+                      questId={reward.quest?.id ?? ""}
+                      name={reward.quest?.name}
+                      quantity={reward.quantity}
+                      variant="reward"
+                    />
+                  ))}
+                </div>
+              </SectionCard>
+            )}
+
+            {/* Traders */}
+            {traders.length > 0 && (
+              <SectionCard icon={UsersIcon} title="Traders">
+                <p className="text-sm text-muted-foreground mb-3">
+                  Purchase this item from the following traders:
+                </p>
                 <div className="flex flex-col gap-3">
                   {traders.map((trader) => {
                     const traderInfo = trader.trader;
@@ -280,56 +312,21 @@ function RouteComponent() {
                         ? data.value * quantityPerSale
                         : null;
                     const salePrice = rawPrice ?? fallbackPrice;
-                    const currencyLabel = trader.currency
-                      ? startCase(trader.currency)
-                      : "Credits";
 
                     return (
-                      <Link
+                      <TraderCard
                         key={trader.traderId}
-                        to="/traders/$traderId"
-                        params={{ traderId: trader.traderId }}
-                        className="group block"
-                        aria-label={`View ${
-                          traderInfo?.name ?? trader.traderId
-                        } trader profile`}
-                        preload="intent"
-                      >
-                        <div className="rounded-xl border border-border/60 bg-card/80 p-4 shadow-sm transition-colors duration-200 group-hover:border-primary/50 group-hover:bg-card">
-                          <div className="flex items-center justify-between gap-4">
-                            <div className="flex min-w-0 items-center gap-3">
-                              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border/60 bg-background/70">
-                                {traderInfo?.imageUrl ? (
-                                  <img
-                                    src={traderInfo.imageUrl ?? undefined}
-                                    alt={traderInfo.name ?? "Trader"}
-                                    className="h-full w-full object-cover object-center"
-                                  />
-                                ) : (
-                                  <UsersIcon className="h-6 w-6 text-muted-foreground" />
-                                )}
-                              </div>
-                              <div className="min-w-0">
-                                <p className="truncate text-sm font-semibold">
-                                  {traderInfo?.name ??
-                                    startCase(trader.traderId)}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm font-semibold text-foreground">
-                                {salePrice != null
-                                  ? `${salePrice.toLocaleString()} ${currencyLabel}`
-                                  : "Price unavailable"}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
+                        traderId={trader.traderId}
+                        name={traderInfo?.name}
+                        imageUrl={traderInfo?.imageUrl}
+                        price={salePrice}
+                        currency={trader.currency}
+                        quantityPerSale={quantityPerSale}
+                      />
                     );
                   })}
                 </div>
-              </div>
+              </SectionCard>
             )}
           </div>
         </div>

@@ -1,6 +1,6 @@
 import z from "zod";
 import { publicProcedure } from "..";
-import { eq, Tables, inArray, sql, aliasedTable } from "@topside-db/db";
+import { eq, Tables, sql, aliasedTable } from "@topside-db/db";
 import { cacheMiddleware } from "../middleware/cache";
 
 export const itemsRouter = {
@@ -11,9 +11,40 @@ export const itemsRouter = {
       const item = await context.db.query.items.findFirst({
         where: eq(Tables.items.id, input.id),
         with: {
-          recipes: true,
-          recycles: true,
-          salvages: true,
+          recipes: {
+            with: {
+              material: {
+                columns: {
+                  name: true,
+                  id: true,
+                  imageFilename: true,
+                },
+              },
+            },
+          },
+          recycles: {
+            with: {
+              material: {
+                columns: {
+                  name: true,
+                  id: true,
+                  imageFilename: true,
+                  value: true,
+                },
+              },
+            },
+          },
+          salvages: {
+            with: {
+              material: {
+                columns: {
+                  name: true,
+                  id: true,
+                  imageFilename: true,
+                },
+              },
+            },
+          },
           traders: {
             with: {
               trader: {
@@ -25,6 +56,33 @@ export const itemsRouter = {
               },
             },
           },
+          hideoutRequirements: {
+            columns: {
+              quantity: true,
+              level: true,
+            },
+            with: {
+              hideout: {
+                columns: {
+                  name: true,
+                  id: true,
+                },
+              },
+            },
+          },
+          questsRewards: {
+            columns: {
+              quantity: true,
+            },
+            with: {
+              quest: {
+                columns: {
+                  name: true,
+                  id: true,
+                },
+              },
+            },
+          },
         },
       });
 
@@ -32,41 +90,16 @@ export const itemsRouter = {
         return null;
       }
 
-      // Fetch related items for recipes and recycles
-      const recipeMaterialIds = item.recipes.map((r) => r.materialId);
-      const recycleMaterialIds = item.recycles.map((r) => r.materialId);
-      const allMaterialIds = [
-        ...new Set([...recipeMaterialIds, ...recycleMaterialIds]),
-      ];
-
-      const relatedItems =
-        allMaterialIds.length > 0
-          ? await context.db.query.items.findMany({
-              where: inArray(Tables.items.id, allMaterialIds),
-            })
-          : [];
-
-      // Map material IDs to item details
-      const materialMap = new Map(relatedItems.map((i) => [i.id, i]));
-
-      // Calculate recycled value
-      const recycledValue = item.recycles.reduce((total, r) => {
-        const material = materialMap.get(r.materialId);
-        return total + (material?.value || 0) * r.quantity;
-      }, 0);
+      // Calculate recycled value from material relations
+      const recycledValue = item.recycles.reduce(
+        (total, r) => total + (r.material?.value ?? 0) * r.quantity,
+        0
+      );
 
       return {
         ...item,
         recycledValue,
-        isRecycleWorthIt: recycledValue > (item.value || 0),
-        recipes: item.recipes.map((r) => ({
-          ...r,
-          material: materialMap.get(r.materialId),
-        })),
-        recycles: item.recycles.map((r) => ({
-          ...r,
-          material: materialMap.get(r.materialId),
-        })),
+        isRecycleWorthIt: recycledValue > (item.value ?? 0),
       };
     }),
   recycleValueList: publicProcedure
