@@ -6,7 +6,14 @@ import { Tables, eq, and, sql } from "@topside-db/db";
 import type { Context } from "../context";
 import { cacheMiddleware } from "../middleware/cache";
 
-const resourceTypes = ["item", "quest", "hideout", "map", "arc"] as const;
+const resourceTypes = [
+  "item",
+  "quest",
+  "hideout",
+  "map",
+  "arc",
+  "trader",
+] as const;
 
 // Rate limit: 30 views per minute per IP
 const trackViewProcedure = publicProcedure.use(

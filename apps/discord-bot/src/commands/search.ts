@@ -3,6 +3,10 @@ import { Autocomplete, execute, Slash } from "sunar";
 import { api } from "../api";
 import { match } from "ts-pattern";
 import { getMapCommandEmbed } from "./maps";
+import { getItemCommandEmbed } from "./items";
+import { getArcCommandEmbed } from "./arcs";
+import { getQuestCommandEmbed } from "./quests";
+import { getTraderCommandEmbed } from "./traders";
 
 export const autocomplete = new Autocomplete({
   name: "query",
@@ -55,9 +59,27 @@ execute(slash, async (interaction) => {
 async function getSearchCommandEmbed(query: string) {
   const topResult = (await api.search.search({ query, limit: 1 })).hits[0];
 
+  if (!topResult) {
+    return new EmbedBuilder().setDescription(
+      `No results found for **${query}**`
+    );
+  }
+
   return match(topResult)
     .with({ kind: "maps" }, (map) => {
       return getMapCommandEmbed(map.id);
+    })
+    .with({ kind: "items" }, (item) => {
+      return getItemCommandEmbed(item.id);
+    })
+    .with({ kind: "arcs" }, (arc) => {
+      return getArcCommandEmbed(arc.id);
+    })
+    .with({ kind: "quests" }, (quest) => {
+      return getQuestCommandEmbed(quest.id);
+    })
+    .with({ kind: "traders" }, (trader) => {
+      return getTraderCommandEmbed(trader.id);
     })
     .otherwise(() => {
       return new EmbedBuilder().setDescription(
