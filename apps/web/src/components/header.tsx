@@ -101,7 +101,7 @@ export default function Header() {
           aria-label="Topside DB home"
         >
           <DatabaseIcon className="h-4 w-4 text-primary md:ml-1" />
-          <span className="hidden sm:inline text-[0.65rem] uppercase tracking-[0.5em] text-muted-foreground">
+          <span className="inline text-[0.65rem] uppercase tracking-[0.5em] text-muted-foreground">
             Topside <span className="text-primary">DB</span>
           </span>
         </Link>

@@ -78,7 +78,7 @@ function RouteComponent() {
   }, [recycles, search, showProfitableOnly, sortBy]);
 
   return (
-    <div className="min-h-screen bg-background mt-16">
+    <div className="min-h-screen bg-background mt-16 md:px-0 px-4">
       <main className="max-w-7xl mx-auto py-8 space-y-10">
         <HeroSection stats={stats} isLoading={isLoading} />
 

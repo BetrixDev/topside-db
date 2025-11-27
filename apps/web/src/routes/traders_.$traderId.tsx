@@ -131,7 +131,7 @@ function RouteComponent() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen md:px-0 px-4">
       <main className="max-w-7xl mx-auto py-8 mt-16">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Trader Profile */}
