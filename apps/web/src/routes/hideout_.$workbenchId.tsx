@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { usePageView } from "@/lib/hooks/use-page-view";
+import { UnderConstruction } from "@/components/under-construction";
 
 export const Route = createFileRoute("/hideout_/$workbenchId")({
   component: RouteComponent,
@@ -8,7 +9,7 @@ export const Route = createFileRoute("/hideout_/$workbenchId")({
 function RouteComponent() {
   const params = Route.useParams();
 
-  usePageView("hideout", params.workbenchId);
+  // usePageView("hideout", params.workbenchId);
 
-  return <div>Hello "/hideout/$workbenchId"!</div>;
+  return <UnderConstruction />;
 }
