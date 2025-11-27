@@ -186,7 +186,7 @@ function RouteComponent() {
             {/* Recycles Into */}
             {data?.recycles && data.recycles.length > 0 && (
               <SectionCard icon={RecycleIcon} title="Recycles Into">
-                <Alert className="mb-4" variant="default">
+                <Alert className="mb-2" variant="default">
                   {!data.isRecycleWorthIt && (
                     <AlertTriangleIcon className="w-4 h-4" color="yellow" />
                   )}
@@ -226,7 +226,7 @@ function RouteComponent() {
 
             {/* Salvages Into */}
             {data?.salvages && data.salvages.length > 0 && (
-              <SectionCard icon={ScissorsIcon} title="Recycles Into">
+              <SectionCard icon={ScissorsIcon} title="Salvages Into">
                 <ItemCardGrid>
                   {data.salvages.map((salvage) => (
                     <ItemCard

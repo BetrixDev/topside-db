@@ -101,9 +101,12 @@ export const maps = pgTable("maps", {
 
 // Relations
 export const itemsRelations = relations(items, ({ many, one }) => ({
-  recipes: many(itemRecipes),
-  recycles: many(itemRecycles),
-  salvages: many(itemSalvages),
+  recipes: many(itemRecipes, { relationName: "recipeItem" }),
+  recycles: many(itemRecycles, { relationName: "recycleItem" }),
+  salvages: many(itemSalvages, { relationName: "salvageItem" }),
+  recipeMaterials: many(itemRecipes, { relationName: "recipeMaterial" }),
+  recycleMaterials: many(itemRecycles, { relationName: "recycleMaterial" }),
+  salvageMaterials: many(itemSalvages, { relationName: "salvageMaterial" }),
   hideoutRequirements: many(hideoutLevelRequirements),
   pageViews: one(pageViews, {
     fields: [items.id],
@@ -117,10 +120,12 @@ export const itemRecipesRelations = relations(itemRecipes, ({ one }) => ({
   item: one(items, {
     fields: [itemRecipes.itemId],
     references: [items.id],
+    relationName: "recipeItem",
   }),
   material: one(items, {
     fields: [itemRecipes.materialId],
     references: [items.id],
+    relationName: "recipeMaterial",
   }),
 }));
 
@@ -128,10 +133,12 @@ export const itemRecyclesRelations = relations(itemRecycles, ({ one }) => ({
   item: one(items, {
     fields: [itemRecycles.itemId],
     references: [items.id],
+    relationName: "recycleItem",
   }),
   material: one(items, {
     fields: [itemRecycles.materialId],
     references: [items.id],
+    relationName: "recycleMaterial",
   }),
 }));
 
@@ -139,10 +146,12 @@ export const itemSalvagesRelations = relations(itemSalvages, ({ one }) => ({
   item: one(items, {
     fields: [itemSalvages.itemId],
     references: [items.id],
+    relationName: "salvageItem",
   }),
   material: one(items, {
     fields: [itemSalvages.materialId],
     references: [items.id],
+    relationName: "salvageMaterial",
   }),
 }));
 
