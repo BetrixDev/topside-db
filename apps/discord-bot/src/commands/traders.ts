@@ -60,7 +60,10 @@ export async function getTraderCommandEmbed(traderId: string) {
     return null;
   }
 
-  await api.analytics.trackView({ resourceType: "trader", resourceId: trader.id });
+  await api.analytics.trackView({
+    resourceType: "trader",
+    resourceId: trader.id,
+  });
 
   const embed = new EmbedBuilder()
     .setTitle(trader.name)
@@ -80,7 +83,7 @@ export async function getTraderCommandEmbed(traderId: string) {
     statsText.push(`**Items for Sale:** ${stats.totalItemsForSale}`);
     statsText.push(`**Quests:** ${stats.totalQuests}`);
     statsText.push(`**Categories:** ${stats.uniqueCategories}`);
-    
+
     embed.addFields({
       name: "📊 Overview",
       value: statsText.join("\n"),
@@ -106,12 +109,13 @@ export async function getTraderCommandEmbed(traderId: string) {
       .slice(0, 5)
       .map((q) => `• ${q.name}`)
       .join("\n");
-    
+
     embed.addFields({
       name: "📜 Quests",
-      value: trader.quests.length > 5
-        ? `${questsText}\n...and ${trader.quests.length - 5} more`
-        : questsText,
+      value:
+        trader.quests.length > 5
+          ? `${questsText}\n...and ${trader.quests.length - 5} more`
+          : questsText,
       inline: false,
     });
   }
@@ -120,17 +124,21 @@ export async function getTraderCommandEmbed(traderId: string) {
   const itemsByCurrency = trader.itemsByCurrency;
   if (itemsByCurrency) {
     const currencyInfo: string[] = [];
-    
+
     if (itemsByCurrency.credits.length > 0) {
-      currencyInfo.push(`💰 **Credits:** ${itemsByCurrency.credits.length} items`);
+      currencyInfo.push(
+        `💰 **Credits:** ${itemsByCurrency.credits.length} items`
+      );
     }
     if (itemsByCurrency.seeds.length > 0) {
       currencyInfo.push(`🌱 **Seeds:** ${itemsByCurrency.seeds.length} items`);
     }
     if (itemsByCurrency.augment.length > 0) {
-      currencyInfo.push(`✨ **Augment:** ${itemsByCurrency.augment.length} items`);
+      currencyInfo.push(
+        `✨ **Augment:** ${itemsByCurrency.augment.length} items`
+      );
     }
-    
+
     if (currencyInfo.length > 0) {
       embed.addFields({
         name: "🛒 Items for Sale",

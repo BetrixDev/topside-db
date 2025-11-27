@@ -60,7 +60,10 @@ export async function getQuestCommandEmbed(questId: string) {
     return null;
   }
 
-  await api.analytics.trackView({ resourceType: "quest", resourceId: quest.id });
+  await api.analytics.trackView({
+    resourceType: "quest",
+    resourceId: quest.id,
+  });
 
   const embed = new EmbedBuilder()
     .setTitle(quest.name)
@@ -71,11 +74,14 @@ export async function getQuestCommandEmbed(questId: string) {
   // Quest info
   const questInfo: string[] = [];
   if (quest.trader) questInfo.push(`**Trader:** ${quest.trader}`);
-  if (quest.xp != null) questInfo.push(`**XP Reward:** ${quest.xp.toLocaleString()}`);
+  if (quest.xp != null)
+    questInfo.push(`**XP Reward:** ${quest.xp.toLocaleString()}`);
   if (quest.totalRewardValue != null && quest.totalRewardValue > 0) {
-    questInfo.push(`**Reward Value:** ${quest.totalRewardValue.toLocaleString()} credits`);
+    questInfo.push(
+      `**Reward Value:** ${quest.totalRewardValue.toLocaleString()} credits`
+    );
   }
-  
+
   if (questInfo.length > 0) {
     embed.addFields({
       name: "📋 Quest Info",
@@ -134,4 +140,3 @@ export async function getQuestCommandEmbed(questId: string) {
 
   return embed;
 }
-

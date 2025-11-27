@@ -87,9 +87,10 @@ export async function getArcCommandEmbed(arcId: string) {
   // Stats info
   const statsInfo: string[] = [];
   if (arc.threatLevel) statsInfo.push(`**Threat Level:** ${arc.threatLevel}`);
-  if (arc.health != null) statsInfo.push(`**Health:** ${arc.health.toLocaleString()}`);
+  if (arc.health != null)
+    statsInfo.push(`**Health:** ${arc.health.toLocaleString()}`);
   if (arc.armorPlating) statsInfo.push(`**Armor:** ${arc.armorPlating}`);
-  
+
   if (statsInfo.length > 0) {
     embed.addFields({
       name: "💀 Combat Stats",
@@ -106,9 +107,11 @@ export async function getArcCommandEmbed(arcId: string) {
     quickStats.push(`**Loot Items:** ${arc.stats.totalLoot}`);
   }
   if (arc.totalLootValue != null && arc.totalLootValue > 0) {
-    quickStats.push(`**Loot Value:** ${arc.totalLootValue.toLocaleString()} cr`);
+    quickStats.push(
+      `**Loot Value:** ${arc.totalLootValue.toLocaleString()} cr`
+    );
   }
-  
+
   if (quickStats.length > 0) {
     embed.addFields({
       name: "📊 Overview",
@@ -137,7 +140,7 @@ export async function getArcCommandEmbed(arcId: string) {
         return `**${type}** (${attacks.length})`;
       })
       .join(" • ");
-    
+
     embed.addFields({
       name: "⚔️ Attack Types",
       value: attackText || "Unknown",
@@ -148,27 +151,26 @@ export async function getArcCommandEmbed(arcId: string) {
   // Loot items (show first few with item names)
   if (arc.lootDetails && arc.lootDetails.length > 0) {
     const lootWithItems = arc.lootDetails.filter((l) => l.item !== null);
-    const lootText = lootWithItems.length > 0
-      ? lootWithItems
-          .slice(0, 6)
-          .map((l) => `• ${l.item!.name}`)
-          .join("\n")
-      : arc.lootDetails
-          .slice(0, 6)
-          .map((l) => `• ${l.name}`)
-          .join("\n");
+    const lootText =
+      lootWithItems.length > 0
+        ? lootWithItems
+            .slice(0, 6)
+            .map((l) => `• ${l.item!.name}`)
+            .join("\n")
+        : arc.lootDetails
+            .slice(0, 6)
+            .map((l) => `• ${l.name}`)
+            .join("\n");
 
-    const moreCount = arc.lootDetails.length > 6 ? arc.lootDetails.length - 6 : 0;
-    
+    const moreCount =
+      arc.lootDetails.length > 6 ? arc.lootDetails.length - 6 : 0;
+
     embed.addFields({
       name: "📦 Potential Loot",
-      value: moreCount > 0 
-        ? `${lootText}\n...and ${moreCount} more`
-        : lootText,
+      value: moreCount > 0 ? `${lootText}\n...and ${moreCount} more` : lootText,
       inline: false,
     });
   }
 
   return embed;
 }
-

@@ -5,7 +5,7 @@ type TopsideDbUrlOptions = {
 
 export function createTopsideDbUrl(options: TopsideDbUrlOptions) {
   const baseUrl = "https://topside-db.com";
-  
+
   switch (options.type) {
     case "map":
       return `${baseUrl}/maps/${options.id}`;
