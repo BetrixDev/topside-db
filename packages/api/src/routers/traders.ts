@@ -1,6 +1,6 @@
 import z from "zod";
 import { publicProcedure } from "..";
-import { eq, Tables, inArray } from "@topside-db/db";
+import { eq, Tables, or } from "@topside-db/db";
 import { cacheMiddleware } from "../middleware/cache";
 
 export const tradersRouter = {
@@ -8,10 +8,25 @@ export const tradersRouter = {
     .use(cacheMiddleware({ keyPrefix: "traders" }))
     .input(z.object({ id: z.string() }))
     .handler(async ({ input, context }) => {
+      // Use relational query with nested item data
       const trader = await context.db.query.traders.findFirst({
         where: eq(Tables.traders.id, input.id),
         with: {
-          itemsForSale: true,
+          itemsForSale: {
+            with: {
+              item: {
+                columns: {
+                  id: true,
+                  name: true,
+                  imageFilename: true,
+                  rarity: true,
+                  value: true,
+                  type: true,
+                  stackSize: true,
+                },
+              },
+            },
+          },
         },
       });
 
@@ -19,58 +34,61 @@ export const tradersRouter = {
         return null;
       }
 
-      // Fetch item details for all items the trader sells
-      const itemIds = trader.itemsForSale.map((i) => i.itemId);
-      const items =
-        itemIds.length > 0
-          ? await context.db.query.items.findMany({
-              where: inArray(Tables.items.id, itemIds),
-              columns: {
-                id: true,
-                name: true,
-                imageFilename: true,
-                rarity: true,
-                value: true,
-                type: true,
-                stackSize: true,
-              },
-            })
-          : [];
-
-      const itemMap = new Map(items.map((i) => [i.id, i]));
-
-      // Group items by currency type
-      const itemsByCurrency = {
-        credits: [] as typeof enrichedItems,
-        seeds: [] as typeof enrichedItems,
-        augment: [] as typeof enrichedItems,
-      };
-
-      const enrichedItems = trader.itemsForSale.map((sale) => ({
-        ...sale,
-        item: itemMap.get(sale.itemId),
-      }));
-
-      enrichedItems.forEach((sale) => {
-        itemsByCurrency[sale.currency].push(sale);
+      // Fetch quests given by this trader (match by name or id)
+      const quests = await context.db.query.quests.findMany({
+        where: or(
+          eq(Tables.quests.trader, trader.name),
+          eq(Tables.quests.trader, trader.id)
+        ),
+        columns: {
+          id: true,
+          name: true,
+          description: true,
+          xp: true,
+        },
+        with: {
+          objectives: {
+            orderBy: (objectives, { asc }) => [asc(objectives.orderIndex)],
+            columns: {
+              text: true,
+            },
+          },
+        },
       });
 
-      // Calculate totals
+      // Group items by currency type
+      type EnrichedItem = (typeof trader.itemsForSale)[number];
+      const itemsByCurrency = {
+        credits: [] as EnrichedItem[],
+        seeds: [] as EnrichedItem[],
+        augment: [] as EnrichedItem[],
+      };
+
+      trader.itemsForSale.forEach((sale) => {
+        const bucket =
+          itemsByCurrency[sale.currency as keyof typeof itemsByCurrency];
+        bucket.push(sale);
+      });
+
+      // Sort items within each currency group by name
+      Object.values(itemsByCurrency).forEach((items) => {
+        items.sort((a, b) =>
+          (a.item?.name ?? a.itemId).localeCompare(b.item?.name ?? b.itemId)
+        );
+      });
+
+      // Calculate stats
       const totalItemsForSale = trader.itemsForSale.length;
-      const uniqueCategories = trader.sellCategories?.length || 0;
+      const uniqueCategories = trader.sellCategories?.length ?? 0;
 
       return {
         ...trader,
-        itemsForSale: enrichedItems,
         itemsByCurrency,
+        quests,
         stats: {
           totalItemsForSale,
           uniqueCategories,
-          currencyBreakdown: {
-            credits: itemsByCurrency.credits.length,
-            seeds: itemsByCurrency.seeds.length,
-            augment: itemsByCurrency.augment.length,
-          },
+          totalQuests: quests.length,
         },
       };
     }),
