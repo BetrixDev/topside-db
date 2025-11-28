@@ -12,7 +12,7 @@ import {
   createRootRouteWithContext,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import "../index.css";
+import appCss from "../index.css?url";
 import Header from "@/components/header";
 import type { ReactNode } from "react";
 
@@ -45,6 +45,23 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
         rel: "icon",
         href: "/favicon.ico",
       },
+      {
+        rel: "preconnect",
+        href: "https://fonts.googleapis.com",
+      },
+      {
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+        crossorigin: "anonymous",
+      },
+      {
+        src: "https://tweakcn.com/live-preview.min.js",
+        crossorigin: "anonymous",
+      },
+      {
+        rel: "stylesheet",
+        href: appCss,
+      },
     ],
   }),
 });
@@ -63,7 +80,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="bg-background">
         <HeadContent />
         <ThemeProvider
           attribute="class"
