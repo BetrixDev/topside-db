@@ -1,14 +1,13 @@
-import type { Context as HonoContext } from "hono";
 import { db } from "@topside-db/db";
 import { redis } from "@topside-db/redis";
 
 export type CreateContextOptions = {
-  context: HonoContext;
+  request: Request;
 };
 
-export async function createContext({ context }: CreateContextOptions) {
+export async function createContext({ request }: CreateContextOptions) {
   return {
-    headers: context.req.header(),
+    headers: request.headers,
     db,
     redis,
   };

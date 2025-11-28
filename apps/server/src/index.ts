@@ -6,68 +6,74 @@ import { RPCHandler } from "@orpc/server/fetch";
 import { onError } from "@orpc/server";
 import { createContext } from "@topside-db/api/context";
 import { appRouter } from "@topside-db/api/routers/index";
-import { Hono } from "hono";
-import { cors } from "hono/cors";
-import { logger } from "hono/logger";
-
-const app = new Hono();
-
-app.use(logger());
-app.use(
-	"/*",
-	cors({
-		origin: process.env.CORS_ORIGIN || "",
-		allowMethods: ["GET", "POST", "OPTIONS"],
-	}),
-);
+import { cors } from "@elysiajs/cors";
+import Elysia from "elysia";
+import { logger } from "@tqman/nice-logger";
 
 export const apiHandler = new OpenAPIHandler(appRouter, {
-	plugins: [
-		new OpenAPIReferencePlugin({
-			schemaConverters: [new ZodToJsonSchemaConverter()],
-		}),
-	],
-	interceptors: [
-		onError((error) => {
-			console.error(error);
-		}),
-	],
+  plugins: [
+    new OpenAPIReferencePlugin({
+      schemaConverters: [new ZodToJsonSchemaConverter()],
+    }),
+  ],
+  interceptors: [
+    onError((error) => {
+      console.error(error);
+    }),
+  ],
 });
 
 export const rpcHandler = new RPCHandler(appRouter, {
-	interceptors: [
-		onError((error) => {
-			console.error(error);
-		}),
-	],
+  interceptors: [
+    onError((error) => {
+      console.error(error);
+    }),
+  ],
 });
 
-app.use("/*", async (c, next) => {
-	const context = await createContext({ context: c });
+new Elysia()
+  .use(
+    logger({
+      withTimestamp: true,
+    })
+  )
+  .use(
+    cors({
+      origin: process.env.CORS_ORIGIN || "",
+      methods: ["GET", "POST", "OPTIONS"],
+    })
+  )
+  .get("/", () => new Response("OK", { status: 200 }))
+  .get("/health", () => new Response("OK", { status: 200 }))
+  .all(
+    "/*",
+    async ({ request }) => {
+      const context = await createContext({ request });
 
-	const rpcResult = await rpcHandler.handle(c.req.raw, {
-		prefix: "/rpc",
-		context: context,
-	});
+      const rpcResult = await rpcHandler.handle(request, {
+        prefix: "/rpc",
+        context: context,
+      });
 
-	if (rpcResult.matched) {
-		return c.newResponse(rpcResult.response.body, rpcResult.response);
-	}
+      if (rpcResult.matched) {
+        return rpcResult.response;
+      }
 
-	const apiResult = await apiHandler.handle(c.req.raw, {
-		prefix: "/api-reference",
-		context: context,
-	});
+      const apiResult = await apiHandler.handle(request, {
+        prefix: "/api-reference",
+        context: context,
+      });
 
-	if (apiResult.matched) {
-		return c.newResponse(apiResult.response.body, apiResult.response);
-	}
+      if (apiResult.matched) {
+        return apiResult.response;
+      }
 
-	await next();
-});
-
-app.get("/", (c) => {
-	return c.text("OK");
-});
-
-export default app;
+      return new Response("Not Found", { status: 404 });
+    },
+    {
+      parse: "none",
+    }
+  )
+  .listen(process.env.PORT || 3000, () => {
+    console.log(`Server is running on port ${process.env.PORT || 3000}`);
+  });

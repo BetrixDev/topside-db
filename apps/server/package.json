@@ -3,20 +3,21 @@
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "build": "tsdown",
+    "build": "bun build --compile --minify-whitespace --minify-syntax --target bun --outfile server ./src/index.ts",
     "check-types": "tsc -b",
-    "compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
     "dev": "bun run --watch src/index.ts",
-    "start": "bun run dist/index.js"
+    "start": "./server"
   },
   "dependencies": {
-    "hono": "catalog:",
-    "@orpc/server": "catalog:",
+    "@elysiajs/cors": "^1.4.0",
     "@orpc/openapi": "catalog:",
+    "@orpc/server": "catalog:",
     "@orpc/zod": "catalog:",
+    "@topside-db/api": "workspace:*",
+    "@tqman/nice-logger": "^1.1.1",
     "dotenv": "catalog:",
-    "zod": "catalog:",
-    "@topside-db/api": "workspace:*"
+    "elysia": "^1.4.16",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "typescript": "catalog:",

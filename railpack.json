@@ -1,0 +1,15 @@
+{
+    "$schema": "https://schema.railpack.com",
+    "steps": {
+      "install": {
+        "commands": ["bun install"]
+      },
+      "build": {
+        "inputs": [{ "step": "install" }],
+        "commands": ["bun build --compile --minify-whitespace --minify-syntax --target bun --outfile server ./apps/server/src/index.ts"]
+      }
+    },
+    "deploy": {
+      "startCommand": "./server"
+    }
+  }
