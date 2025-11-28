@@ -37,10 +37,10 @@ export const analyticsRouter = {
 
       // Create a session/visitor identifier
       const ip =
-        context.headers["x-forwarded-for"] ||
-        context.headers["x-real-ip"] ||
+        context.headers.get("x-forwarded-for") ||
+        context.headers.get("x-real-ip") ||
         "unknown";
-      const userAgent = context.headers["user-agent"] || "unknown";
+      const userAgent = context.headers.get("user-agent") || "unknown";
       const sessionId = createHash("sha256")
         .update(`${ip}-${userAgent}`)
         .digest("hex")

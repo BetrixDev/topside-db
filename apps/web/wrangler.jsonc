@@ -7,5 +7,8 @@
   "routes": [
     { "pattern": "topside-db.com", "custom_domain": true },
     { "pattern": "www.topside-db.com", "custom_domain": true }
-  ]
+  ],
+  "vars": {
+    "VITE_SERVER_URL": "https://api.topside-db.com"
+  }
 }

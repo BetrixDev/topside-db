@@ -14,8 +14,8 @@ export const rateLimitMiddleware = (options: RateLimitOptions) => {
   return os.$context<Context>().middleware(async ({ next, context }) => {
     // Use IP or fingerprint for rate limiting
     const ip =
-      context.headers["x-forwarded-for"] ||
-      context.headers["x-real-ip"] ||
+      context.headers.get("x-forwarded-for") ||
+      context.headers.get("x-real-ip") ||
       "unknown";
 
     // Hash the IP for privacy
