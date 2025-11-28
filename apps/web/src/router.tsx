@@ -2,6 +2,7 @@ import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 import { QueryClientProvider } from "@tanstack/react-query";
 import Loader from "./components/loader";
+import { NotFound } from "./components/not-found";
 import { orpc, queryClient } from "./utils/orpc";
 
 export function getRouter() {
@@ -17,6 +18,7 @@ export function getRouter() {
         </QueryClientProvider>
       );
     },
+    defaultNotFoundComponent: NotFound,
   });
 
   return router;
