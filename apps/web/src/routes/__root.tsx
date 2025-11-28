@@ -15,6 +15,7 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import appCss from "../index.css?url";
 import Header from "@/components/header";
 import type { ReactNode } from "react";
+import { seo } from "@/lib/seo";
 
 export interface RouterAppContext {
   orpc: typeof orpc;
@@ -32,13 +33,11 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
         name: "viewport",
         content: "width=device-width, initial-scale=1",
       },
-      {
-        title: "Topside DB",
-      },
-      {
-        name: "description",
-        content: "An Arc Raiders search engine",
-      },
+      ...seo({
+        title: "Topside DB | Arc Raiders database and search engine",
+        description: "An Arc Raiders search engine",
+        keywords: "arc raiders, database, search engine",
+      }),
     ],
     links: [
       {

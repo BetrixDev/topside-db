@@ -10,6 +10,7 @@ import type { MapSearchHit } from "@topside-db/schemas";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
+import { seo } from "@/lib/seo";
 
 const mapsSearchSchema = z.object({
   q: fallback(z.string(), "").default(""),
@@ -31,6 +32,17 @@ export const Route = createFileRoute("/maps")({
       })
     );
   },
+  head: () => ({
+    meta: [
+      ...seo({
+        title: "Maps | Topside DB",
+        description:
+          "Browse all raid locations in Arc Raiders. Find map information, time limits, and location details.",
+        keywords:
+          "arc raiders, database, maps, locations, raids, time limit, areas",
+      }),
+    ],
+  }),
 });
 
 function MapsPage() {

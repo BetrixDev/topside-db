@@ -16,6 +16,7 @@ import type { ArcSearchHit } from "@topside-db/schemas";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
+import { seo } from "@/lib/seo";
 
 const arcsSearchSchema = z.object({
   q: fallback(z.string(), "").default(""),
@@ -37,6 +38,17 @@ export const Route = createFileRoute("/arcs")({
       })
     );
   },
+  head: () => ({
+    meta: [
+      ...seo({
+        title: "Arcs | Topside DB",
+        description:
+          "Browse all Arcs (enemies) in Arc Raiders. Find threat levels, health, attacks, weaknesses, and loot drops.",
+        keywords:
+          "arc raiders, database, arcs, enemies, threat level, attacks, weaknesses, loot",
+      }),
+    ],
+  }),
 });
 
 function ArcsPage() {

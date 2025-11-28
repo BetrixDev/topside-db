@@ -15,6 +15,7 @@ import type { ItemSearchHit } from "@topside-db/schemas";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
+import { seo } from "@/lib/seo";
 
 const itemsSearchSchema = z.object({
   q: fallback(z.string(), "").default(""),
@@ -36,6 +37,17 @@ export const Route = createFileRoute("/items")({
       })
     );
   },
+  head: () => ({
+    meta: [
+      ...seo({
+        title: "Items | Topside DB",
+        description:
+          "Browse and search all items in Arc Raiders. Find weapons, gear, resources, crafting materials, and more.",
+        keywords:
+          "arc raiders, database, items, weapons, gear, resources, crafting, materials",
+      }),
+    ],
+  }),
 });
 
 function ItemsPage() {

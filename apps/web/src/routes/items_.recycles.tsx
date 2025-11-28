@@ -25,6 +25,7 @@ import {
   Sparkles,
   TrendingUpIcon,
 } from "lucide-react";
+import { seo } from "@/lib/seo";
 
 type RecycleValueQuery = ReturnType<
   typeof orpc.items.recycleValueList.queryOptions
@@ -43,6 +44,18 @@ const sortOptions = [
 type SortOption = (typeof sortOptions)[number]["value"];
 
 export const Route = createFileRoute("/items_/recycles")({
+  head: () => ({
+    meta: [
+      ...seo({
+        title: "Recycles | Topside DB",
+        description:
+          "Compare original item values with what you gain by recycling them. Spot the standouts, dive into their output breakdowns, and plan your next dismantle Arc Raiders items with confidence.",
+        keywords:
+          "arc raiders, database, search engine, recycle, profit, salvage, arc raiders recycle list",
+        image: "/og/images/recycles.png",
+      }),
+    ],
+  }),
   loader: ({ context }) => {
     return context.queryClient.ensureQueryData(
       orpc.items.recycleValueList.queryOptions()

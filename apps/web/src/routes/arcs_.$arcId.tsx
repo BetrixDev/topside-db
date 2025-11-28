@@ -25,6 +25,7 @@ import {
 import { startCase } from "es-toolkit/string";
 import { usePageView } from "@/lib/hooks/use-page-view";
 import { cn } from "@/lib/utils";
+import { seo } from "@/lib/seo";
 
 // Get icon for attack type
 function getAttackTypeIcon(type: string) {
@@ -81,13 +82,27 @@ function getRarityColor(rarity: string | null | undefined) {
 
 export const Route = createFileRoute("/arcs_/$arcId")({
   component: RouteComponent,
-  loader: ({ context, params }) => {
-    context.queryClient.ensureQueryData(
+  loader: async ({ context, params }) => {
+    return await context.queryClient.ensureQueryData(
       orpc.arcs.getArc.queryOptions({
         input: { id: params.arcId },
       })
     );
   },
+  head: ({ loaderData }) => ({
+    meta: [
+      ...seo({
+        title: `${loaderData?.name ?? "Unknown"} | Topside DB`,
+        description: `View detailed information about the Arc ${
+          loaderData?.name ?? "Unknown"
+        } in Arc Raiders. See health, attacks, weaknesses, and loot drops.`,
+        keywords: `arc raiders, database, search engine, arc, enemy, ${
+          loaderData?.name ?? "Unknown"
+        }, ${loaderData?.threatLevel ?? ""}`,
+        image: loaderData?.imageUrl ?? undefined,
+      }),
+    ],
+  }),
 });
 
 function RouteComponent() {

@@ -16,6 +16,7 @@ import type { QuestSearchHit } from "@topside-db/schemas";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
+import { seo } from "@/lib/seo";
 
 const questsSearchSchema = z.object({
   q: fallback(z.string(), "").default(""),
@@ -37,6 +38,17 @@ export const Route = createFileRoute("/quests")({
       })
     );
   },
+  head: () => ({
+    meta: [
+      ...seo({
+        title: "Quests | Topside DB",
+        description:
+          "Browse all quests in Arc Raiders. Find missions, objectives, rewards, and trader assignments.",
+        keywords:
+          "arc raiders, database, quests, missions, objectives, rewards, traders",
+      }),
+    ],
+  }),
 });
 
 function QuestsPage() {

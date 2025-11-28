@@ -14,6 +14,7 @@ import {
 import { startCase } from "es-toolkit/string";
 import { usePageView } from "@/lib/hooks/use-page-view";
 import { cn } from "@/lib/utils";
+import { seo } from "@/lib/seo";
 
 // Square grid cell for items
 interface ItemGridCellProps {
@@ -77,13 +78,27 @@ function ItemGridCell({
 
 export const Route = createFileRoute("/traders_/$traderId")({
   component: RouteComponent,
-  loader: ({ context, params }) => {
-    context.queryClient.ensureQueryData(
+  loader: async ({ context, params }) => {
+    return await context.queryClient.ensureQueryData(
       orpc.traders.getTrader.queryOptions({
         input: { id: params.traderId },
       })
     );
   },
+  head: ({ loaderData }) => ({
+    meta: [
+      ...seo({
+        title: `${loaderData?.name ?? "Unknown"} | Topside DB`,
+        description: `View detailed information about the trader ${
+          loaderData?.name ?? "Unknown"
+        } in Arc Raiders. See items for sale, quests, and more.`,
+        keywords: `arc raiders, database, search engine, trader, ${
+          loaderData?.name ?? "Unknown"
+        }`,
+        image: loaderData?.imageUrl ?? undefined,
+      }),
+    ],
+  }),
 });
 
 function RouteComponent() {

@@ -10,6 +10,7 @@ import type { TraderSearchHit } from "@topside-db/schemas";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
+import { seo } from "@/lib/seo";
 
 const tradersSearchSchema = z.object({
   q: fallback(z.string(), "").default(""),
@@ -31,6 +32,17 @@ export const Route = createFileRoute("/traders")({
       })
     );
   },
+  head: () => ({
+    meta: [
+      ...seo({
+        title: "Traders | Topside DB",
+        description:
+          "Browse all traders in Arc Raiders. Find items for sale, quests, and trading information.",
+        keywords:
+          "arc raiders, database, traders, merchants, shops, items for sale, quests",
+      }),
+    ],
+  }),
 });
 
 function TradersPage() {

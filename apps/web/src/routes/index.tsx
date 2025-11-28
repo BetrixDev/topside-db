@@ -13,9 +13,21 @@ import {
   ShoppingBagIcon,
   FlameIcon,
 } from "lucide-react";
+import { seo } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
   component: HomeComponent,
+  head: () => ({
+    meta: [
+      ...seo({
+        title: "Topside DB | Arc Raiders Database & Search Engine",
+        description:
+          "The ultimate Arc Raiders database and search engine. Browse items, traders, quests, arcs, maps, and hideout stations. Find everything you need for your Arc Raiders gameplay.",
+        keywords:
+          "arc raiders, database, search engine, items, traders, quests, arcs, enemies, maps, hideout, wiki",
+      }),
+    ],
+  }),
 });
 
 function HomeComponent() {

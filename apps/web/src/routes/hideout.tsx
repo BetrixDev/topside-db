@@ -14,6 +14,7 @@ import type { HideoutSearchHit } from "@topside-db/schemas";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
+import { seo } from "@/lib/seo";
 
 const hideoutSearchSchema = z.object({
   q: fallback(z.string(), "").default(""),
@@ -35,6 +36,17 @@ export const Route = createFileRoute("/hideout")({
       })
     );
   },
+  head: () => ({
+    meta: [
+      ...seo({
+        title: "Hideout Stations | Topside DB",
+        description:
+          "Browse all hideout workbenches and crafting stations in Arc Raiders. Find upgrade requirements and crafting information.",
+        keywords:
+          "arc raiders, database, hideout, workbench, crafting, stations, upgrades",
+      }),
+    ],
+  }),
 });
 
 function HideoutPage() {

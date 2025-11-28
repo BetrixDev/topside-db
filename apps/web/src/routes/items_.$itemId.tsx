@@ -25,16 +25,31 @@ import {
 } from "lucide-react";
 import { startCase } from "es-toolkit/string";
 import { usePageView } from "@/lib/hooks/use-page-view";
+import { seo } from "@/lib/seo";
 
 export const Route = createFileRoute("/items_/$itemId")({
   component: RouteComponent,
-  loader: ({ context, params }) => {
-    context.queryClient.ensureQueryData(
+  loader: async ({ context, params }) => {
+    return await context.queryClient.ensureQueryData(
       orpc.items.getItem.queryOptions({
         input: { id: params.itemId },
       })
     );
   },
+  head: ({ loaderData }) => ({
+    meta: [
+      ...seo({
+        title: `${loaderData?.name ?? "Unknown"} | Topside DB`,
+        description: `View detailed information about the item ${
+          loaderData?.name ?? "Unknown"
+        } in Arc Raiders.`,
+        keywords: `arc raiders, database, search engine, item, ${
+          loaderData?.name ?? "Unknown"
+        }`,
+        image: loaderData?.imageFilename ?? undefined,
+      }),
+    ],
+  }),
 });
 
 function RouteComponent() {
