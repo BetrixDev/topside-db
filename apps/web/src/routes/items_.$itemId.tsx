@@ -6,6 +6,7 @@ import {
   QuestCard,
   HideoutCard,
   TraderCard,
+  ArcCard,
 } from "@/components/resource-cards";
 import { orpc } from "@/utils/orpc";
 import { useQuery } from "@tanstack/react-query";
@@ -20,6 +21,7 @@ import {
   ScissorsIcon,
   GiftIcon,
   BuildingIcon,
+  BotIcon,
 } from "lucide-react";
 import { startCase } from "es-toolkit/string";
 import { usePageView } from "@/lib/hooks/use-page-view";
@@ -325,6 +327,22 @@ function RouteComponent() {
                     );
                   })}
                 </div>
+              </SectionCard>
+            )}
+
+            {/* Arc Loot Items */}
+            {data?.arcLootItems && data.arcLootItems.length > 0 && (
+              <SectionCard icon={BotIcon} title="Obtained from Arcs">
+                <ItemCardGrid>
+                  {data.arcLootItems.map((loot) => (
+                    <ArcCard
+                      key={loot.arcId}
+                      arcId={loot.arcId}
+                      name={loot.arc?.name}
+                      imageUrl={loot.arc?.imageUrl}
+                    />
+                  ))}
+                </ItemCardGrid>
               </SectionCard>
             )}
           </div>

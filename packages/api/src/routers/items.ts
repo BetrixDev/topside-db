@@ -83,6 +83,17 @@ export const itemsRouter = {
               },
             },
           },
+          arcLootItems: {
+            with: {
+              arc: {
+                columns: {
+                  name: true,
+                  imageUrl: true,
+                  id: true,
+                },
+              },
+            },
+          },
         },
       });
 

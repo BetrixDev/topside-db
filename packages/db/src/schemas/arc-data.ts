@@ -6,6 +6,7 @@ import {
   real,
   jsonb,
   primaryKey,
+  index,
 } from "drizzle-orm/pg-core";
 import { pageViews } from "./analytics";
 
@@ -114,6 +115,7 @@ export const itemsRelations = relations(items, ({ many, one }) => ({
   }),
   traders: many(traderItemsForSale),
   questsRewards: many(questRewardItems),
+  arcLootItems: many(arcLootItems),
 }));
 
 export const itemRecipesRelations = relations(itemRecipes, ({ one }) => ({
@@ -317,11 +319,38 @@ export const arcs = pgTable("arcs", {
   weaknesses: jsonb("weaknesses").$type<string[]>().default([]).notNull(),
 });
 
-export const arcsRelations = relations(arcs, ({ one }) => ({
+export const arcLootItems = pgTable(
+  "arc_loot_items",
+  {
+    arcId: text("arc_id")
+      .notNull()
+      .references(() => arcs.id, { onDelete: "cascade" }),
+    itemId: text("item_id").notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.arcId, t.itemId] }),
+    index("arc_loot_items_item_id_idx").on(t.itemId),
+    index("arc_loot_items_arc_id_idx").on(t.arcId),
+  ]
+);
+
+export const arcLootItemsRelations = relations(arcLootItems, ({ one }) => ({
+  arc: one(arcs, {
+    fields: [arcLootItems.arcId],
+    references: [arcs.id],
+  }),
+  item: one(items, {
+    fields: [arcLootItems.itemId],
+    references: [items.id],
+  }),
+}));
+
+export const arcsRelations = relations(arcs, ({ one, many }) => ({
   pageViews: one(pageViews, {
     fields: [arcs.id],
     references: [pageViews.resourceId],
   }),
+  arcLootItems: many(arcLootItems),
 }));
 
 export const traders = pgTable("traders", {

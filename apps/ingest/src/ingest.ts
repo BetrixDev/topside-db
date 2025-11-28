@@ -754,14 +754,17 @@ export async function ingestData() {
 
   // Collect arc data to batch insert
   const arcsToInsert: (typeof Tables.arcs.$inferInsert)[] = [];
+  const arcLootItemsToInsert: (typeof Tables.arcLootItems.$inferInsert)[] = [];
 
   await Promise.all(
     arcs.arcVariants.map(async (arc) => {
       const arcData = await scrapeArcPage(arc.wikiUrlPath);
 
+      const arcId = snakeCase(arc.name);
+
       // Collect main arc record with all data in JSON columns
       arcsToInsert.push({
-        id: snakeCase(arc.name),
+        id: arcId,
         name: arc.name,
         wikiUrl: `${BASE_WIKI_URL}${arc.wikiUrlPath}`,
         imageUrl: `${BASE_WIKI_URL}${arc.imageUrl}`,
@@ -784,6 +787,17 @@ export async function ingestData() {
         attacks: arcData.attacks,
         weaknesses: arcData.weaknesses,
       });
+
+      for (const loot of arcData.loot) {
+        const closestItem = findClosestItemMatch(loot, itemNameToId);
+
+        if (closestItem?.distance && closestItem.distance <= 3) {
+          arcLootItemsToInsert.push({
+            arcId: arcId,
+            itemId: closestItem.id,
+          });
+        }
+      }
     })
   );
 
@@ -816,6 +830,31 @@ export async function ingestData() {
             loot: sql`excluded.loot`,
             attacks: sql`excluded.attacks`,
             weaknesses: sql`excluded.weaknesses`,
+          },
+        });
+    }
+  }
+
+  if (arcLootItemsToInsert.length > 0) {
+    console.info(
+      `Inserting ${arcLootItemsToInsert.length} arc loot items in batches of ${BATCH_SIZE}`
+    );
+    const arcLootItemChunks = chunkArray(arcLootItemsToInsert, BATCH_SIZE);
+    for (let i = 0; i < arcLootItemChunks.length; i++) {
+      const chunk = arcLootItemChunks[i]!;
+
+      console.info(
+        `Inserting arc loot items batch ${i + 1}/${arcLootItemChunks.length} (${
+          chunk.length
+        } loot items)`
+      );
+      await db
+        .insert(Tables.arcLootItems)
+        .values(chunk)
+        .onConflictDoUpdate({
+          target: [Tables.arcLootItems.arcId, Tables.arcLootItems.itemId],
+          set: {
+            itemId: sql`excluded.item_id`,
           },
         });
     }
