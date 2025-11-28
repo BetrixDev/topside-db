@@ -149,8 +149,7 @@ function RouteComponent() {
             )}
 
             {/* Crafting Recipe Section */}
-            {(data?.craftBench ||
-              (data?.recipes && data.recipes.length > 0)) && (
+            {data?.recipes && data.recipes.length > 0 && (
               <SectionCard icon={HammerIcon} title="Crafting Recipe">
                 {data.craftBench && data.craftBench.length > 0 && (
                   <div className="mb-4">
