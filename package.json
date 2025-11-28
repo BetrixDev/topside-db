@@ -33,7 +33,8 @@
     "compose:start": "docker compose -f docker-compose.yml up -d",
     "compose:up": "docker compose -f docker-compose.yml up",
     "compose:stop": "docker compose -f docker-compose.yml stop",
-    "compose:down": "docker compose -f docker-compose.yml down"
+    "compose:down": "docker compose -f docker-compose.yml down",
+    "deploy": "turbo deploy"
   },
   "dependencies": {
     "@trigger.dev/sdk": "4.1.0",

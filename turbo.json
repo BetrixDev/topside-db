@@ -19,35 +19,39 @@
 		},
 		"db:push": {
 			"cache": false,
-			"persistent": true
+			"persistent": false
 		},
 		"db:studio": {
 			"cache": false,
-			"persistent": true
+			"persistent": false
 		},
 		"db:migrate": {
 			"cache": false,
-			"persistent": true
+			"persistent": false
 		},
 		"db:generate": {
 			"cache": false,
-			"persistent": true
+			"persistent": false
 		},
 		"db:start": {
 			"cache": false,
-			"persistent": true
+			"persistent": false
 		},
 		"db:stop": {
 			"cache": false,
-			"persistent": true
+			"persistent": false
 		},
 		"db:watch": {
 			"cache": false,
-			"persistent": true
+			"persistent": false
 		},
 		"db:down": {
 			"cache": false,
-			"persistent": true
+			"persistent": false
+		},
+		"deploy": {
+			"cache": false,
+			"persistent": false
 		}
 	}
 }
