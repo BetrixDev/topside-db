@@ -1,6 +1,10 @@
 import AdmZip from "adm-zip";
 import { MeiliSearch } from "meilisearch";
-import { itemSchema, hideoutSchema, questSchema } from "@topside-db/schemas";
+import {
+  itemSchema,
+  hideoutStationSchema,
+  questSchema,
+} from "@topside-db/schemas";
 import { db, Tables, sql } from "@topside-db/db";
 import {
   BASE_WIKI_URL,
@@ -364,7 +368,7 @@ export async function ingestData() {
 
   for (const hideoutEntry of hideoutEntries) {
     const hideoutData = JSON.parse(hideoutEntry.getData().toString());
-    const hideoutParseResult = hideoutSchema.safeParse(hideoutData);
+    const hideoutParseResult = hideoutStationSchema.safeParse(hideoutData);
 
     if (!hideoutParseResult.success) {
       console.error(

@@ -2,27 +2,27 @@ import { z } from "zod";
 import { localizedStringSchema } from "./common";
 
 // Schema for hideout level requirement item
-const hideoutLevelRequirementSchema = z.object({
+const hideoutStationLevelRequirementSchema = z.object({
   itemId: z.string(),
   quantity: z.number(),
 });
 
 // Schema for hideout level
-const hideoutLevelSchema = z.object({
+const hideoutStationLevelSchema = z.object({
   level: z.number(),
-  requirementItemIds: z.array(hideoutLevelRequirementSchema),
+  requirementItemIds: z.array(hideoutStationLevelRequirementSchema),
 });
 
 // Main hideout schema
-export const hideoutSchema = z.object({
+export const hideoutStationSchema = z.object({
   id: z.string(),
   name: localizedStringSchema,
   maxLevel: z.number(),
-  levels: z.array(hideoutLevelSchema),
+  levels: z.array(hideoutStationLevelSchema),
 });
 
-export type Hideout = z.infer<typeof hideoutSchema>;
-export type HideoutLevel = z.infer<typeof hideoutLevelSchema>;
-export type HideoutLevelRequirement = z.infer<
-  typeof hideoutLevelRequirementSchema
+export type HideoutStation = z.infer<typeof hideoutStationSchema>;
+export type HideoutStationLevel = z.infer<typeof hideoutStationLevelSchema>;
+export type HideoutStationLevelRequirement = z.infer<
+  typeof hideoutStationLevelRequirementSchema
 >;
