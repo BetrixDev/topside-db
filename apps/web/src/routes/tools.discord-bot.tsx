@@ -154,7 +154,7 @@ function DiscordBotPage() {
               className="group w-full sm:w-auto bg-linear-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white shadow-lg shadow-indigo-500/25 transition-all hover:shadow-xl hover:shadow-indigo-500/30"
             >
               <a
-                href="https://discord.com/oauth2/authorize?client_id=1444683621565726875"
+                href="https://discord.com/oauth2/authorize?client_id=1444683621565726875&permissions=0&integration_type=0&scope=applications.commands+bot"
                 target="_blank"
                 rel="noopener noreferrer"
               >
