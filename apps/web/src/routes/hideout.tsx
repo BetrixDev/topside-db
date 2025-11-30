@@ -25,7 +25,7 @@ export const Route = createFileRoute("/hideout")({
       orpc.search.search.queryOptions({
         input: {
           query: q,
-          category: "hideouts",
+          category: "hideoutStations",
           limit: 50,
         },
         staleTime: 1000 * 60 * 15,
@@ -71,7 +71,7 @@ function HideoutPage() {
     orpc.search.search.queryOptions({
       input: {
         query: q,
-        category: "hideouts",
+        category: "hideoutStations",
         limit: 50,
       },
       staleTime: 1000 * 60 * 15,
@@ -79,7 +79,6 @@ function HideoutPage() {
   );
 
   const hideouts = (data?.hits ?? []) as HideoutSearchHit[];
-  const hasSearched = q.length > 0;
 
   return (
     <main className="min-h-screen relative overflow-hidden pt-20 pb-12">

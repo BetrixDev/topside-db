@@ -16,7 +16,7 @@ export const questSearchHitSchema = z.object({
 });
 
 export const hideoutSearchHitSchema = z.object({
-  kind: z.literal("hideouts"),
+  kind: z.literal("hideoutStations"),
   id: z.string(),
   name: z.string(),
 });
@@ -60,7 +60,7 @@ export const searchHitSchema = z.discriminatedUnion("kind", [
 export const searchCategorySchema = z.enum([
   "items",
   "quests",
-  "hideouts",
+  "hideoutStations",
   "maps",
   "arcs",
   "traders",
@@ -86,7 +86,7 @@ export type SearchInput = z.infer<typeof searchInputSchema>;
 export type SearchHitByCategory = {
   items: ItemSearchHit;
   quests: QuestSearchHit;
-  hideouts: HideoutSearchHit;
+  hideoutStations: HideoutSearchHit;
   maps: MapSearchHit;
   arcs: ArcSearchHit;
   traders: TraderSearchHit;

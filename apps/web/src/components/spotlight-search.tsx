@@ -167,7 +167,7 @@ function SearchResultItem({
       return <ItemResultItem result={result} onSelect={onSelect} />;
     case "quests":
       return <QuestResultItem result={result} onSelect={onSelect} />;
-    case "hideouts":
+    case "hideoutStations":
       return <HideoutResultItem result={result} onSelect={onSelect} />;
     case "maps":
       return <MapResultItem result={result} onSelect={onSelect} />;
