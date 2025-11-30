@@ -21,8 +21,6 @@ interface ItemGridCellProps {
   itemId: string;
   name?: string | null;
   imageUrl?: string | null;
-  quantity?: number | null;
-  price?: string;
   className?: string;
 }
 
@@ -30,8 +28,6 @@ function ItemGridCell({
   itemId,
   name,
   imageUrl,
-  quantity,
-  price,
   className,
 }: ItemGridCellProps) {
   return (
@@ -39,38 +35,31 @@ function ItemGridCell({
       to="/items/$itemId"
       params={{ itemId }}
       className={cn(
-        "group relative aspect-square rounded-xl border border-border/60 bg-card/80 p-3 transition-all duration-200 hover:border-primary/50 hover:bg-card hover:shadow-lg hover:shadow-primary/5",
+        "group relative aspect-square rounded-lg bg-background/60 overflow-hidden transition-all duration-300 hover:bg-background/80 hover:shadow-xl hover:shadow-black/20 hover:scale-[1.02]",
         className
       )}
     >
-      {/* Quantity badge */}
-      {quantity != null && quantity > 1 && (
-        <div className="absolute top-2 right-2 z-10 px-2 py-0.5 rounded-full bg-primary/90 text-primary-foreground text-xs font-bold">
-          {quantity}x
-        </div>
-      )}
-
-      {/* Item image */}
-      <div className="relative w-full h-[60%] rounded-lg bg-background/50 border border-border/30 flex items-center justify-center overflow-hidden mb-2">
+      {/* Item image - full cell */}
+      <div className="absolute inset-0 flex items-center justify-center p-4">
         {imageUrl ? (
           <img
             src={imageUrl}
             alt={name ?? "Item"}
-            className="w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-110"
+            className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-md"
           />
         ) : (
-          <PackageIcon className="w-8 h-8 text-muted-foreground/40" />
+          <PackageIcon className="w-10 h-10 text-muted-foreground/30" />
         )}
       </div>
 
-      {/* Item info */}
-      <div className="space-y-0.5">
-        <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">
+      {/* Gradient overlay for text readability */}
+      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black/70 via-black/30 to-transparent pointer-events-none" />
+
+      {/* Item name overlay */}
+      <div className="absolute inset-x-0 bottom-0 p-2">
+        <p className="text-xs font-medium text-white/90 truncate text-center drop-shadow-sm group-hover:text-white transition-colors">
           {name ?? itemId}
         </p>
-        {price && (
-          <p className="text-xs text-muted-foreground truncate">{price}</p>
-        )}
       </div>
     </Link>
   );
@@ -253,23 +242,13 @@ function RouteComponent() {
                 icon={currencyConfig.credits.icon}
                 title={`Items for Credits (${itemsByCurrency.credits.length})`}
               >
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                   {itemsByCurrency.credits.map((sale) => (
                     <ItemGridCell
                       key={sale.itemId}
                       itemId={sale.itemId}
                       name={sale.item?.name}
                       imageUrl={sale.item?.imageFilename}
-                      quantity={
-                        sale.quantityPerSale > 1
-                          ? sale.quantityPerSale
-                          : undefined
-                      }
-                      price={
-                        sale.item?.value
-                          ? `${sale.item.value.toLocaleString()} credits`
-                          : undefined
-                      }
                     />
                   ))}
                 </div>
@@ -282,19 +261,13 @@ function RouteComponent() {
                 icon={currencyConfig.seeds.icon}
                 title={`Items for Seeds (${itemsByCurrency.seeds.length})`}
               >
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                   {itemsByCurrency.seeds.map((sale) => (
                     <ItemGridCell
                       key={sale.itemId}
                       itemId={sale.itemId}
                       name={sale.item?.name}
                       imageUrl={sale.item?.imageFilename}
-                      quantity={
-                        sale.quantityPerSale > 1
-                          ? sale.quantityPerSale
-                          : undefined
-                      }
-                      price="Seeds"
                     />
                   ))}
                 </div>
@@ -307,19 +280,13 @@ function RouteComponent() {
                 icon={currencyConfig.augment.icon}
                 title={`Items for Augment (${itemsByCurrency.augment.length})`}
               >
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                   {itemsByCurrency.augment.map((sale) => (
                     <ItemGridCell
                       key={sale.itemId}
                       itemId={sale.itemId}
                       name={sale.item?.name}
                       imageUrl={sale.item?.imageFilename}
-                      quantity={
-                        sale.quantityPerSale > 1
-                          ? sale.quantityPerSale
-                          : undefined
-                      }
-                      price="Augment"
                     />
                   ))}
                 </div>

@@ -19,7 +19,7 @@ export const Route = createFileRoute("/hideout_/$workbenchId")({
 function RouteComponent() {
   const params = Route.useParams();
 
-  // usePageView("hideout", params.workbenchId);
+  // usePageView("hideoutStation", params.workbenchId);
 
   return <UnderConstruction />;
 }

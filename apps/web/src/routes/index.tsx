@@ -148,7 +148,7 @@ function ViewedResourceCard({
         return `/items/${resource.resourceId}`;
       case "quest":
         return `/quests/${resource.resourceId}`;
-      case "hideout":
+      case "hideoutStation":
         return `/hideout/${resource.resourceId}`;
       case "map":
         return `/maps/${resource.resourceId}`;
@@ -167,7 +167,7 @@ function ViewedResourceCard({
         return ArchiveIcon;
       case "quest":
         return MapIcon;
-      case "hideout":
+      case "hideoutStation":
         return HammerIcon;
       case "map":
         return MapIcon;
@@ -186,8 +186,8 @@ function ViewedResourceCard({
         return "Item";
       case "quest":
         return "Quest";
-      case "hideout":
-        return "Hideout";
+      case "hideoutStation":
+        return "Hideout Station";
       case "map":
         return "Map";
       case "arc":

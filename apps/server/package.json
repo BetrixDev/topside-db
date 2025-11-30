@@ -17,6 +17,7 @@
     "@tqman/nice-logger": "^1.1.1",
     "dotenv": "catalog:",
     "elysia": "^1.4.16",
+    "undici-types": "^7.16.0",
     "zod": "catalog:"
   },
   "devDependencies": {

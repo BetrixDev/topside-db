@@ -13,8 +13,8 @@ import { pageViews } from "./analytics";
 // Main items table
 export const items = pgTable("items", {
   id: text("id").primaryKey(),
-  name: text("name"),
-  description: text("description"),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
   type: text("type"),
   value: real("value"),
   rarity: text("rarity"),
@@ -29,61 +29,103 @@ export const items = pgTable("items", {
 });
 
 // Item recipes (crafting ingredients)
-export const itemRecipes = pgTable("item_recipes", {
-  id: text("id").primaryKey(), // composite: itemId-materialId
-  itemId: text("item_id")
-    .notNull()
-    .references(() => items.id, { onDelete: "cascade" }),
-  materialId: text("material_id").notNull(), // e.g., "chemicals", "plastic_parts"
-  quantity: integer("quantity").notNull(),
-});
+export const itemRecipes = pgTable(
+  "item_recipes",
+  {
+    itemId: text("item_id")
+      .notNull()
+      .references(() => items.id, { onDelete: "cascade" }),
+    materialId: text("material_id").notNull(), // e.g., "chemicals", "plastic_parts"
+    craftBench: text("craft_bench").notNull(),
+    quantity: integer("quantity").notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.itemId, t.materialId] }),
+    index("item_recipes_item_id_idx").on(t.itemId),
+    index("item_recipes_material_id_idx").on(t.materialId),
+    index("item_recipes_craft_bench_idx").on(t.craftBench),
+  ]
+);
 
 // Item recycles (what you get from recycling)
-export const itemRecycles = pgTable("item_recycles", {
-  id: text("id").primaryKey(), // composite: itemId-materialId
-  itemId: text("item_id")
-    .notNull()
-    .references(() => items.id, { onDelete: "cascade" }),
-  materialId: text("material_id").notNull(),
-  quantity: integer("quantity").notNull(),
-});
+export const itemRecycles = pgTable(
+  "item_recycles",
+  {
+    itemId: text("item_id")
+      .notNull()
+      .references(() => items.id, { onDelete: "cascade" }),
+    materialId: text("material_id").notNull(),
+    quantity: integer("quantity").notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.itemId, t.materialId] }),
+    index("item_recycles_item_id_idx").on(t.itemId),
+    index("item_recycles_material_id_idx").on(t.materialId),
+  ]
+);
 
 // Item salvages (what you get from salvaging)
-export const itemSalvages = pgTable("item_salvages", {
-  id: text("id").primaryKey(), // composite: itemId-materialId
-  itemId: text("item_id")
-    .notNull()
-    .references(() => items.id, { onDelete: "cascade" }),
-  materialId: text("material_id").notNull(),
-  quantity: integer("quantity").notNull(),
-});
+export const itemSalvages = pgTable(
+  "item_salvages",
+  {
+    itemId: text("item_id")
+      .notNull()
+      .references(() => items.id, { onDelete: "cascade" }),
+    materialId: text("material_id").notNull(),
+    quantity: integer("quantity").notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.itemId, t.materialId] }),
+    index("item_salvages_item_id_idx").on(t.itemId),
+    index("item_salvages_material_id_idx").on(t.materialId),
+  ]
+);
 
 // Hideouts table
-export const hideouts = pgTable("hideouts", {
+export const hideoutStations = pgTable("hideout_stations", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   maxLevel: integer("max_level").notNull(),
 });
 
 // Hideout levels
-export const hideoutLevels = pgTable("hideout_levels", {
-  id: text("id").primaryKey(), // composite: hideoutId-level
-  hideoutId: text("hideout_id")
-    .notNull()
-    .references(() => hideouts.id, { onDelete: "cascade" }),
-  level: integer("level").notNull(),
-});
+export const hideoutStationLevels = pgTable(
+  "hideout_station_levels",
+  {
+    hideoutStationId: text("hideout_station_id")
+      .notNull()
+      .references(() => hideoutStations.id, { onDelete: "cascade" }),
+    level: integer("level").notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.hideoutStationId, t.level] }),
+    index("hideout_station_levels_hideout_station_id_idx").on(
+      t.hideoutStationId
+    ),
+    index("hideout_station_levels_level_idx").on(t.level),
+  ]
+);
 
 // Hideout level requirements (items needed to upgrade)
-export const hideoutLevelRequirements = pgTable("hideout_level_requirements", {
-  id: text("id").primaryKey(), // composite: hideoutId-level-itemId
-  hideoutId: text("hideout_id")
-    .notNull()
-    .references(() => hideouts.id, { onDelete: "cascade" }),
-  level: integer("level").notNull(),
-  itemId: text("item_id").notNull(),
-  quantity: integer("quantity").notNull(),
-});
+export const hideoutStationLevelRequirements = pgTable(
+  "hideout_station_level_requirements",
+  {
+    hideoutStationId: text("hideout_station_id")
+      .notNull()
+      .references(() => hideoutStations.id, { onDelete: "cascade" }),
+    level: integer("level").notNull(),
+    itemId: text("item_id").notNull(),
+    quantity: integer("quantity").notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.hideoutStationId, t.level, t.itemId] }),
+    index("hideout_station_level_requirements_hideout_station_id_idx").on(
+      t.hideoutStationId
+    ),
+    index("hideout_station_level_requirements_level_idx").on(t.level),
+    index("hideout_station_level_requirements_item_id_idx").on(t.itemId),
+  ]
+);
 
 export const maps = pgTable("maps", {
   id: text("id").primaryKey(),
@@ -108,7 +150,7 @@ export const itemsRelations = relations(items, ({ many, one }) => ({
   recipeMaterials: many(itemRecipes, { relationName: "recipeMaterial" }),
   recycleMaterials: many(itemRecycles, { relationName: "recycleMaterial" }),
   salvageMaterials: many(itemSalvages, { relationName: "salvageMaterial" }),
-  hideoutRequirements: many(hideoutLevelRequirements),
+  hideoutRequirements: many(hideoutStationLevelRequirements),
   pageViews: one(pageViews, {
     fields: [items.id],
     references: [pageViews.resourceId],
@@ -157,42 +199,48 @@ export const itemSalvagesRelations = relations(itemSalvages, ({ one }) => ({
   }),
 }));
 
-export const hideoutsRelations = relations(hideouts, ({ many, one }) => ({
-  levels: many(hideoutLevels),
-  requirements: many(hideoutLevelRequirements),
-  pageViews: one(pageViews, {
-    fields: [hideouts.id],
-    references: [pageViews.resourceId],
-  }),
-}));
-
-export const hideoutLevelsRelations = relations(
-  hideoutLevels,
-  ({ one, many }) => ({
-    hideout: one(hideouts, {
-      fields: [hideoutLevels.hideoutId],
-      references: [hideouts.id],
+export const hideoutStationsRelations = relations(
+  hideoutStations,
+  ({ many, one }) => ({
+    levels: many(hideoutStationLevels),
+    requirements: many(hideoutStationLevelRequirements),
+    pageViews: one(pageViews, {
+      fields: [hideoutStations.id],
+      references: [pageViews.resourceId],
     }),
-    requirements: many(hideoutLevelRequirements),
   })
 );
 
-export const hideoutLevelRequirementsRelations = relations(
-  hideoutLevelRequirements,
-  ({ one }) => ({
-    hideout: one(hideouts, {
-      fields: [hideoutLevelRequirements.hideoutId],
-      references: [hideouts.id],
+export const hideoutStationLevelsRelations = relations(
+  hideoutStationLevels,
+  ({ one, many }) => ({
+    hideoutStation: one(hideoutStations, {
+      fields: [hideoutStationLevels.hideoutStationId],
+      references: [hideoutStations.id],
     }),
-    level: one(hideoutLevels, {
+    requirements: many(hideoutStationLevelRequirements),
+  })
+);
+
+export const hideoutStationLevelRequirementsRelations = relations(
+  hideoutStationLevelRequirements,
+  ({ one }) => ({
+    hideoutStation: one(hideoutStations, {
+      fields: [hideoutStationLevelRequirements.hideoutStationId],
+      references: [hideoutStations.id],
+    }),
+    level: one(hideoutStationLevels, {
       fields: [
-        hideoutLevelRequirements.hideoutId,
-        hideoutLevelRequirements.level,
+        hideoutStationLevelRequirements.hideoutStationId,
+        hideoutStationLevelRequirements.level,
       ],
-      references: [hideoutLevels.hideoutId, hideoutLevels.level],
+      references: [
+        hideoutStationLevels.hideoutStationId,
+        hideoutStationLevels.level,
+      ],
     }),
     item: one(items, {
-      fields: [hideoutLevelRequirements.itemId],
+      fields: [hideoutStationLevelRequirements.itemId],
       references: [items.id],
     }),
   })
@@ -219,23 +267,39 @@ export const questObjectives = pgTable("quest_objectives", {
 });
 
 // Quest reward items
-export const questRewardItems = pgTable("quest_reward_items", {
-  id: text("id").primaryKey(), // composite: questId-itemId
-  questId: text("quest_id")
-    .notNull()
-    .references(() => quests.id, { onDelete: "cascade" }),
-  itemId: text("item_id").notNull(),
-  quantity: integer("quantity").notNull(),
-});
+export const questRewardItems = pgTable(
+  "quest_reward_items",
+  {
+    questId: text("quest_id")
+      .notNull()
+      .references(() => quests.id, { onDelete: "cascade" }),
+    itemId: text("item_id").notNull(),
+    quantity: integer("quantity").notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.questId, t.itemId] }),
+    index("quest_reward_items_quest_id_idx").on(t.questId),
+    index("quest_reward_items_item_id_idx").on(t.itemId),
+  ]
+);
 
 // Quest prerequisites (previous quests required)
-export const questPrerequisites = pgTable("quest_prerequisites", {
-  id: text("id").primaryKey(), // composite: questId-prerequisiteQuestId
-  questId: text("quest_id")
-    .notNull()
-    .references(() => quests.id, { onDelete: "cascade" }),
-  prerequisiteQuestId: text("prerequisite_quest_id").notNull(),
-});
+export const questPrerequisites = pgTable(
+  "quest_prerequisites",
+  {
+    questId: text("quest_id")
+      .notNull()
+      .references(() => quests.id, { onDelete: "cascade" }),
+    prerequisiteQuestId: text("prerequisite_quest_id").notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.questId, t.prerequisiteQuestId] }),
+    index("quest_prerequisites_quest_id_idx").on(t.questId),
+    index("quest_prerequisites_prerequisite_quest_id_idx").on(
+      t.prerequisiteQuestId
+    ),
+  ]
+);
 
 // Quest next quests (unlocked after completion)
 export const questNextQuests = pgTable("quest_next_quests", {
@@ -311,12 +375,21 @@ export const arcs = pgTable("arcs", {
   health: integer("health"),
   armorPlating: text("armor_plating"),
   threatLevel: text("threat_level"),
-  loot: jsonb("loot").$type<string[]>().default([]).notNull(),
   attacks: jsonb("attacks")
     .$type<{ type: string; description: string }[]>()
     .default([])
     .notNull(),
-  weaknesses: jsonb("weaknesses").$type<string[]>().default([]).notNull(),
+  weaknesses: jsonb("weaknesses")
+    .$type<
+      { name: string; description: string; type: "armor" | "intelligence" }[]
+    >()
+    .default([])
+    .notNull(),
+  destroyXp: integer("destroy_xp"),
+  lootXp: jsonb("loot_xp")
+    .$type<Record<string, number>>()
+    .default({})
+    .notNull(),
 });
 
 export const arcLootItems = pgTable(
@@ -378,13 +451,15 @@ export const traderItemsForSale = pgTable(
     itemId: text("item_id")
       .notNull()
       .references(() => items.id, { onDelete: "cascade" }),
-    quantity: integer("quantity"),
-    quantityPerSale: integer("quantity_per_sale").notNull().default(1),
     currency: text("currency", {
       enum: ["credits", "seeds", "augment"],
     }).notNull(),
   },
-  (t) => [primaryKey({ columns: [t.traderId, t.itemId] })]
+  (t) => [
+    primaryKey({ columns: [t.traderId, t.itemId] }),
+    index("trader_items_for_sale_trader_id_idx").on(t.traderId),
+    index("trader_items_for_sale_item_id_idx").on(t.itemId),
+  ]
 );
 
 export const traderItemsForSaleRelations = relations(

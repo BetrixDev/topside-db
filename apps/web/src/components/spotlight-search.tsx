@@ -294,7 +294,7 @@ function HideoutResultItem({
       name={result.name}
       url={`/hideout/${result.id}`}
       icon={HammerIcon}
-      label="Hideout"
+      label="Hideout Station"
       sublabel="Module"
       onSelect={onSelect}
     />

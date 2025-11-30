@@ -1,1 +1,0 @@
-CREATE INDEX "idx_view_count" ON "page_views" USING btree ("view_count");

@@ -1,11 +1,6 @@
 import { z } from "zod";
 import { localizedStringSchema } from "./common";
 
-// Schema for effect with localized name and value
-const effectSchema = localizedStringSchema.extend({
-  value: z.coerce.string().optional().nullable(),
-});
-
 // Schema for material quantities (recipes, recycles, salvages)
 const materialsSchema = z.record(z.string(), z.number());
 
@@ -20,7 +15,7 @@ export const itemSchema = z.object({
   recyclesInto: materialsSchema.optional(),
   weightKg: z.number().optional(),
   stackSize: z.number().optional(),
-  effects: z.record(z.string(), effectSchema.nullable()).optional(),
+  effects: z.record(z.string(), localizedStringSchema.nullable()).optional(),
   imageFilename: z.string().optional(),
   updatedAt: z.string(),
   recipe: materialsSchema.optional(),

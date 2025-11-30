@@ -1,1 +1,0 @@
-ALTER TABLE "map_difficulties" ADD COLUMN "rating" real NOT NULL;

@@ -23,6 +23,7 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "undici-types": "^7.16.0",
     "@orpc/client": "catalog:",
     "@orpc/openapi": "catalog:",
     "@orpc/server": "catalog:",

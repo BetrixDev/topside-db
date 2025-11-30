@@ -1,11 +1,89 @@
 {
-  "id": "f7f11b90-0bf5-4753-bceb-2dbfafd8c234",
+  "id": "96fb9112-77db-4aca-9dc9-8e97792613be",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.hideout_level_requirements": {
-      "name": "hideout_level_requirements",
+    "public.arc_loot_items": {
+      "name": "arc_loot_items",
+      "schema": "",
+      "columns": {
+        "arc_id": {
+          "name": "arc_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "item_id": {
+          "name": "item_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "arc_loot_items_item_id_idx": {
+          "name": "arc_loot_items_item_id_idx",
+          "columns": [
+            {
+              "expression": "item_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "arc_loot_items_arc_id_idx": {
+          "name": "arc_loot_items_arc_id_idx",
+          "columns": [
+            {
+              "expression": "arc_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "arc_loot_items_arc_id_arcs_id_fk": {
+          "name": "arc_loot_items_arc_id_arcs_id_fk",
+          "tableFrom": "arc_loot_items",
+          "tableTo": "arcs",
+          "columnsFrom": [
+            "arc_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "arc_loot_items_arc_id_item_id_pk": {
+          "name": "arc_loot_items_arc_id_item_id_pk",
+          "columns": [
+            "arc_id",
+            "item_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.arcs": {
+      "name": "arcs",
       "schema": "",
       "columns": {
         "id": {
@@ -14,8 +92,90 @@
           "primaryKey": true,
           "notNull": true
         },
-        "hideout_id": {
-          "name": "hideout_id",
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "wiki_url": {
+          "name": "wiki_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "image_url": {
+          "name": "image_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "health": {
+          "name": "health",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "armor_plating": {
+          "name": "armor_plating",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "threat_level": {
+          "name": "threat_level",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "attacks": {
+          "name": "attacks",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "weaknesses": {
+          "name": "weaknesses",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "destroy_xp": {
+          "name": "destroy_xp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "loot_xp": {
+          "name": "loot_xp",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.hideout_station_level_requirements": {
+      "name": "hideout_station_level_requirements",
+      "schema": "",
+      "columns": {
+        "hideout_station_id": {
+          "name": "hideout_station_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -39,14 +199,60 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "hideout_station_level_requirements_hideout_station_id_idx": {
+          "name": "hideout_station_level_requirements_hideout_station_id_idx",
+          "columns": [
+            {
+              "expression": "hideout_station_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "hideout_station_level_requirements_level_idx": {
+          "name": "hideout_station_level_requirements_level_idx",
+          "columns": [
+            {
+              "expression": "level",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "hideout_station_level_requirements_item_id_idx": {
+          "name": "hideout_station_level_requirements_item_id_idx",
+          "columns": [
+            {
+              "expression": "item_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
-        "hideout_level_requirements_hideout_id_hideouts_id_fk": {
-          "name": "hideout_level_requirements_hideout_id_hideouts_id_fk",
-          "tableFrom": "hideout_level_requirements",
-          "tableTo": "hideouts",
+        "hideout_station_level_requirements_hideout_station_id_hideout_stations_id_fk": {
+          "name": "hideout_station_level_requirements_hideout_station_id_hideout_stations_id_fk",
+          "tableFrom": "hideout_station_level_requirements",
+          "tableTo": "hideout_stations",
           "columnsFrom": [
-            "hideout_id"
+            "hideout_station_id"
           ],
           "columnsTo": [
             "id"
@@ -55,24 +261,27 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "hideout_station_level_requirements_hideout_station_id_level_item_id_pk": {
+          "name": "hideout_station_level_requirements_hideout_station_id_level_item_id_pk",
+          "columns": [
+            "hideout_station_id",
+            "level",
+            "item_id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.hideout_levels": {
-      "name": "hideout_levels",
+    "public.hideout_station_levels": {
+      "name": "hideout_station_levels",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "hideout_id": {
-          "name": "hideout_id",
+        "hideout_station_id": {
+          "name": "hideout_station_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -84,14 +293,45 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "hideout_station_levels_hideout_station_id_idx": {
+          "name": "hideout_station_levels_hideout_station_id_idx",
+          "columns": [
+            {
+              "expression": "hideout_station_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "hideout_station_levels_level_idx": {
+          "name": "hideout_station_levels_level_idx",
+          "columns": [
+            {
+              "expression": "level",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
-        "hideout_levels_hideout_id_hideouts_id_fk": {
-          "name": "hideout_levels_hideout_id_hideouts_id_fk",
-          "tableFrom": "hideout_levels",
-          "tableTo": "hideouts",
+        "hideout_station_levels_hideout_station_id_hideout_stations_id_fk": {
+          "name": "hideout_station_levels_hideout_station_id_hideout_stations_id_fk",
+          "tableFrom": "hideout_station_levels",
+          "tableTo": "hideout_stations",
           "columnsFrom": [
-            "hideout_id"
+            "hideout_station_id"
           ],
           "columnsTo": [
             "id"
@@ -100,14 +340,22 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "hideout_station_levels_hideout_station_id_level_pk": {
+          "name": "hideout_station_levels_hideout_station_id_level_pk",
+          "columns": [
+            "hideout_station_id",
+            "level"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.hideouts": {
-      "name": "hideouts",
+    "public.hideout_stations": {
+      "name": "hideout_stations",
       "schema": "",
       "columns": {
         "id": {
@@ -137,67 +385,10 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.item_effects": {
-      "name": "item_effects",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "item_id": {
-          "name": "item_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "value": {
-          "name": "value",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "item_effects_item_id_items_id_fk": {
-          "name": "item_effects_item_id_items_id_fk",
-          "tableFrom": "item_effects",
-          "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.item_recipes": {
       "name": "item_recipes",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
         "item_id": {
           "name": "item_id",
           "type": "text",
@@ -210,6 +401,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "craft_bench": {
+          "name": "craft_bench",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "quantity": {
           "name": "quantity",
           "type": "integer",
@@ -217,7 +414,53 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "item_recipes_item_id_idx": {
+          "name": "item_recipes_item_id_idx",
+          "columns": [
+            {
+              "expression": "item_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "item_recipes_material_id_idx": {
+          "name": "item_recipes_material_id_idx",
+          "columns": [
+            {
+              "expression": "material_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "item_recipes_craft_bench_idx": {
+          "name": "item_recipes_craft_bench_idx",
+          "columns": [
+            {
+              "expression": "craft_bench",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "item_recipes_item_id_items_id_fk": {
           "name": "item_recipes_item_id_items_id_fk",
@@ -233,7 +476,15 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "item_recipes_item_id_material_id_pk": {
+          "name": "item_recipes_item_id_material_id_pk",
+          "columns": [
+            "item_id",
+            "material_id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -243,12 +494,6 @@
       "name": "item_recycles",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
         "item_id": {
           "name": "item_id",
           "type": "text",
@@ -268,7 +513,38 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "item_recycles_item_id_idx": {
+          "name": "item_recycles_item_id_idx",
+          "columns": [
+            {
+              "expression": "item_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "item_recycles_material_id_idx": {
+          "name": "item_recycles_material_id_idx",
+          "columns": [
+            {
+              "expression": "material_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "item_recycles_item_id_items_id_fk": {
           "name": "item_recycles_item_id_items_id_fk",
@@ -284,7 +560,15 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "item_recycles_item_id_material_id_pk": {
+          "name": "item_recycles_item_id_material_id_pk",
+          "columns": [
+            "item_id",
+            "material_id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -294,12 +578,6 @@
       "name": "item_salvages",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
         "item_id": {
           "name": "item_id",
           "type": "text",
@@ -319,7 +597,38 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "item_salvages_item_id_idx": {
+          "name": "item_salvages_item_id_idx",
+          "columns": [
+            {
+              "expression": "item_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "item_salvages_material_id_idx": {
+          "name": "item_salvages_material_id_idx",
+          "columns": [
+            {
+              "expression": "material_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "item_salvages_item_id_items_id_fk": {
           "name": "item_salvages_item_id_items_id_fk",
@@ -335,7 +644,15 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "item_salvages_item_id_material_id_pk": {
+          "name": "item_salvages_item_id_material_id_pk",
+          "columns": [
+            "item_id",
+            "material_id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -355,13 +672,13 @@
           "name": "name",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "description": {
           "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "type": {
           "name": "type",
@@ -412,123 +729,18 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "effects": {
+          "name": "effects",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[]'::jsonb"
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.map_difficulties": {
-      "name": "map_difficulties",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "map_id": {
-          "name": "map_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "map_difficulties_map_id_maps_id_fk": {
-          "name": "map_difficulties_map_id_maps_id_fk",
-          "tableFrom": "map_difficulties",
-          "tableTo": "maps",
-          "columnsFrom": [
-            "map_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "map_difficulties_map_id_name_pk": {
-          "name": "map_difficulties_map_id_name_pk",
-          "columns": [
-            "map_id",
-            "name"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.map_requirements": {
-      "name": "map_requirements",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "map_id": {
-          "name": "map_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "value": {
-          "name": "value",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "map_requirements_map_id_maps_id_fk": {
-          "name": "map_requirements_map_id_maps_id_fk",
-          "tableFrom": "map_requirements",
-          "tableTo": "maps",
-          "columnsFrom": [
-            "map_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "map_requirements_map_id_name_pk": {
-          "name": "map_requirements_map_id_name_pk",
-          "columns": [
-            "map_id",
-            "name"
-          ]
-        }
-      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -573,6 +785,20 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true
+        },
+        "requirements": {
+          "name": "requirements",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[]'::jsonb"
+        },
+        "difficulties": {
+          "name": "difficulties",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[]'::jsonb"
         }
       },
       "indexes": {},
@@ -683,12 +909,6 @@
       "name": "quest_prerequisites",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
         "quest_id": {
           "name": "quest_id",
           "type": "text",
@@ -702,7 +922,38 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "quest_prerequisites_quest_id_idx": {
+          "name": "quest_prerequisites_quest_id_idx",
+          "columns": [
+            {
+              "expression": "quest_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "quest_prerequisites_prerequisite_quest_id_idx": {
+          "name": "quest_prerequisites_prerequisite_quest_id_idx",
+          "columns": [
+            {
+              "expression": "prerequisite_quest_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "quest_prerequisites_quest_id_quests_id_fk": {
           "name": "quest_prerequisites_quest_id_quests_id_fk",
@@ -718,7 +969,15 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "quest_prerequisites_quest_id_prerequisite_quest_id_pk": {
+          "name": "quest_prerequisites_quest_id_prerequisite_quest_id_pk",
+          "columns": [
+            "quest_id",
+            "prerequisite_quest_id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -728,12 +987,6 @@
       "name": "quest_reward_items",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
         "quest_id": {
           "name": "quest_id",
           "type": "text",
@@ -753,7 +1006,38 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "quest_reward_items_quest_id_idx": {
+          "name": "quest_reward_items_quest_id_idx",
+          "columns": [
+            {
+              "expression": "quest_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "quest_reward_items_item_id_idx": {
+          "name": "quest_reward_items_item_id_idx",
+          "columns": [
+            {
+              "expression": "item_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "quest_reward_items_quest_id_quests_id_fk": {
           "name": "quest_reward_items_quest_id_quests_id_fk",
@@ -769,7 +1053,15 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "quest_reward_items_quest_id_item_id_pk": {
+          "name": "quest_reward_items_quest_id_item_id_pk",
+          "columns": [
+            "quest_id",
+            "item_id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -818,6 +1110,249 @@
         }
       },
       "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.trader_items_for_sale": {
+      "name": "trader_items_for_sale",
+      "schema": "",
+      "columns": {
+        "trader_id": {
+          "name": "trader_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "item_id": {
+          "name": "item_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "trader_items_for_sale_trader_id_idx": {
+          "name": "trader_items_for_sale_trader_id_idx",
+          "columns": [
+            {
+              "expression": "trader_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "trader_items_for_sale_item_id_idx": {
+          "name": "trader_items_for_sale_item_id_idx",
+          "columns": [
+            {
+              "expression": "item_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "trader_items_for_sale_trader_id_traders_id_fk": {
+          "name": "trader_items_for_sale_trader_id_traders_id_fk",
+          "tableFrom": "trader_items_for_sale",
+          "tableTo": "traders",
+          "columnsFrom": [
+            "trader_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "trader_items_for_sale_item_id_items_id_fk": {
+          "name": "trader_items_for_sale_item_id_items_id_fk",
+          "tableFrom": "trader_items_for_sale",
+          "tableTo": "items",
+          "columnsFrom": [
+            "item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "trader_items_for_sale_trader_id_item_id_pk": {
+          "name": "trader_items_for_sale_trader_id_item_id_pk",
+          "columns": [
+            "trader_id",
+            "item_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.traders": {
+      "name": "traders",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "wiki_url": {
+          "name": "wiki_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "image_url": {
+          "name": "image_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sell_categories": {
+          "name": "sell_categories",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.page_views": {
+      "name": "page_views",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "resource_type": {
+          "name": "resource_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "resource_id": {
+          "name": "resource_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "view_count": {
+          "name": "view_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "unique_views": {
+          "name": "unique_views",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "last_updated": {
+          "name": "last_updated",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_unique_resource_type_resource_id": {
+          "name": "idx_unique_resource_type_resource_id",
+          "columns": [
+            {
+              "expression": "resource_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "resource_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_view_count": {
+          "name": "idx_view_count",
+          "columns": [
+            {
+              "expression": "view_count",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},

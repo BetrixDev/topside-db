@@ -56,7 +56,7 @@ const databasePages: ReadonlyArray<PageItem> = [
     icon: BotIcon,
   },
   {
-    title: "Hideout",
+    title: "Hideout Stations",
     href: "/hideout",
     description: "Workbench upgrades and crafting station details",
     icon: HammerIcon,

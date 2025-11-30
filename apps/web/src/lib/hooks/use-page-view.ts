@@ -1,7 +1,13 @@
 import { useEffect, useRef } from "react";
 import { orpc } from "@/utils/orpc";
 
-type ResourceType = "item" | "quest" | "hideout" | "map" | "arc" | "trader";
+type ResourceType =
+  | "item"
+  | "quest"
+  | "hideoutStation"
+  | "map"
+  | "arc"
+  | "trader";
 
 export function usePageView(
   resourceType: ResourceType,

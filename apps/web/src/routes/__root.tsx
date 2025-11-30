@@ -16,6 +16,7 @@ import appCss from "../index.css?url";
 import Header from "@/components/header";
 import type { ReactNode } from "react";
 import { seo } from "@/lib/seo";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export interface RouterAppContext {
   orpc: typeof orpc;
@@ -51,11 +52,11 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
       {
         rel: "preconnect",
         href: "https://fonts.gstatic.com",
-        crossorigin: "anonymous",
+        crossOrigin: "anonymous",
       },
       {
         src: "https://tweakcn.com/live-preview.min.js",
-        crossorigin: "anonymous",
+        crossOrigin: "anonymous",
       },
       {
         rel: "stylesheet",
@@ -87,32 +88,34 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
           disableTransitionOnChange
           storageKey="vite-ui-theme"
         >
-          <SpotlightProvider>
-            <Header />
-            {children}
-            <footer className="border-t border-border/50 mt-16 py-6 px-4 text-center text-xs text-muted-foreground">
-              <p className="mb-2">
-                Game content and materials are trademarks and copyrights of
-                Embark Studios and its licensors. All rights reserved.
-              </p>
-              <div className="flex justify-center gap-4">
-                <Link
-                  to="/terms"
-                  className="hover:text-foreground transition-colors"
-                >
-                  Terms of Service
-                </Link>
-                <span>•</span>
-                <Link
-                  to="/privacy"
-                  className="hover:text-foreground transition-colors"
-                >
-                  Privacy Policy
-                </Link>
-              </div>
-            </footer>
-            <Toaster richColors />
-          </SpotlightProvider>
+          <TooltipProvider>
+            <SpotlightProvider>
+              <Header />
+              {children}
+              <footer className="border-t border-border/50 mt-16 py-6 px-4 text-center text-xs text-muted-foreground">
+                <p className="mb-2">
+                  Game content and materials are trademarks and copyrights of
+                  Embark Studios and its licensors. All rights reserved.
+                </p>
+                <div className="flex justify-center gap-4">
+                  <Link
+                    to="/terms"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Terms of Service
+                  </Link>
+                  <span>•</span>
+                  <Link
+                    to="/privacy"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Privacy Policy
+                  </Link>
+                </div>
+              </footer>
+              <Toaster richColors />
+            </SpotlightProvider>
+          </TooltipProvider>
         </ThemeProvider>
         <TanStackRouterDevtools position="bottom-left" />
         <ReactQueryDevtools position="bottom" buttonPosition="bottom-right" />

@@ -406,9 +406,6 @@ function RecycleCard({
             <RecycleIcon className="w-4 h-4 text-primary" />
             Recycles into
           </div>
-          <span className="text-xs text-muted-foreground">
-            {data?.recycles?.length ?? 0} outputs
-          </span>
         </div>
 
         {isLoading ? (
@@ -423,7 +420,7 @@ function RecycleCard({
               const totalMaterialValue = materialValue * recycle.quantity;
               return (
                 <Link
-                  key={recycle.id}
+                  key={`${recycle.itemId}-${recycle.materialId}`}
                   to="/items/$itemId"
                   params={{ itemId: recycle.materialId }}
                   preload="intent"
