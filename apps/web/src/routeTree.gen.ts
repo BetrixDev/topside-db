@@ -19,6 +19,7 @@ import { Route as HideoutRouteImport } from './routes/hideout'
 import { Route as ArcsRouteImport } from './routes/arcs'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TradersTraderIdRouteImport } from './routes/traders_.$traderId'
+import { Route as ToolsDiscordBotRouteImport } from './routes/tools.discord-bot'
 import { Route as QuestsQuestIdRouteImport } from './routes/quests_.$questId'
 import { Route as MapsMapIdRouteImport } from './routes/maps_.$mapId'
 import { Route as ItemsRecyclesRouteImport } from './routes/items_.recycles'
@@ -76,6 +77,11 @@ const TradersTraderIdRoute = TradersTraderIdRouteImport.update({
   path: '/traders/$traderId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ToolsDiscordBotRoute = ToolsDiscordBotRouteImport.update({
+  id: '/tools/discord-bot',
+  path: '/tools/discord-bot',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QuestsQuestIdRoute = QuestsQuestIdRouteImport.update({
   id: '/quests_/$questId',
   path: '/quests/$questId',
@@ -123,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/items/recycles': typeof ItemsRecyclesRoute
   '/maps/$mapId': typeof MapsMapIdRoute
   '/quests/$questId': typeof QuestsQuestIdRoute
+  '/tools/discord-bot': typeof ToolsDiscordBotRoute
   '/traders/$traderId': typeof TradersTraderIdRoute
 }
 export interface FileRoutesByTo {
@@ -141,6 +148,7 @@ export interface FileRoutesByTo {
   '/items/recycles': typeof ItemsRecyclesRoute
   '/maps/$mapId': typeof MapsMapIdRoute
   '/quests/$questId': typeof QuestsQuestIdRoute
+  '/tools/discord-bot': typeof ToolsDiscordBotRoute
   '/traders/$traderId': typeof TradersTraderIdRoute
 }
 export interface FileRoutesById {
@@ -160,6 +168,7 @@ export interface FileRoutesById {
   '/items_/recycles': typeof ItemsRecyclesRoute
   '/maps_/$mapId': typeof MapsMapIdRoute
   '/quests_/$questId': typeof QuestsQuestIdRoute
+  '/tools/discord-bot': typeof ToolsDiscordBotRoute
   '/traders_/$traderId': typeof TradersTraderIdRoute
 }
 export interface FileRouteTypes {
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/items/recycles'
     | '/maps/$mapId'
     | '/quests/$questId'
+    | '/tools/discord-bot'
     | '/traders/$traderId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -198,6 +208,7 @@ export interface FileRouteTypes {
     | '/items/recycles'
     | '/maps/$mapId'
     | '/quests/$questId'
+    | '/tools/discord-bot'
     | '/traders/$traderId'
   id:
     | '__root__'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/items_/recycles'
     | '/maps_/$mapId'
     | '/quests_/$questId'
+    | '/tools/discord-bot'
     | '/traders_/$traderId'
   fileRoutesById: FileRoutesById
 }
@@ -235,6 +247,7 @@ export interface RootRouteChildren {
   ItemsRecyclesRoute: typeof ItemsRecyclesRoute
   MapsMapIdRoute: typeof MapsMapIdRoute
   QuestsQuestIdRoute: typeof QuestsQuestIdRoute
+  ToolsDiscordBotRoute: typeof ToolsDiscordBotRoute
   TradersTraderIdRoute: typeof TradersTraderIdRoute
 }
 
@@ -310,6 +323,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TradersTraderIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tools/discord-bot': {
+      id: '/tools/discord-bot'
+      path: '/tools/discord-bot'
+      fullPath: '/tools/discord-bot'
+      preLoaderRoute: typeof ToolsDiscordBotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/quests_/$questId': {
       id: '/quests_/$questId'
       path: '/quests/$questId'
@@ -371,6 +391,7 @@ const rootRouteChildren: RootRouteChildren = {
   ItemsRecyclesRoute: ItemsRecyclesRoute,
   MapsMapIdRoute: MapsMapIdRoute,
   QuestsQuestIdRoute: QuestsQuestIdRoute,
+  ToolsDiscordBotRoute: ToolsDiscordBotRoute,
   TradersTraderIdRoute: TradersTraderIdRoute,
 }
 export const routeTree = rootRouteImport
