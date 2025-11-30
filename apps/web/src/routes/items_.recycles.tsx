@@ -423,7 +423,7 @@ function RecycleCard({
               const totalMaterialValue = materialValue * recycle.quantity;
               return (
                 <Link
-                  key={recycle.id}
+                  key={`${recycle.itemId}-${recycle.materialId}`}
                   to="/items/$itemId"
                   params={{ itemId: recycle.materialId }}
                   preload="intent"

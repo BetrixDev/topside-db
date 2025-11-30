@@ -21,8 +21,6 @@ interface ItemGridCellProps {
   itemId: string;
   name?: string | null;
   imageUrl?: string | null;
-  quantity?: number | null;
-  price?: string;
   className?: string;
 }
 
@@ -30,8 +28,6 @@ function ItemGridCell({
   itemId,
   name,
   imageUrl,
-  quantity,
-  price,
   className,
 }: ItemGridCellProps) {
   return (
@@ -43,13 +39,6 @@ function ItemGridCell({
         className
       )}
     >
-      {/* Quantity badge */}
-      {quantity != null && quantity > 1 && (
-        <div className="absolute top-2 right-2 z-10 px-2 py-0.5 rounded-full bg-primary/90 text-primary-foreground text-xs font-bold">
-          {quantity}x
-        </div>
-      )}
-
       {/* Item image */}
       <div className="relative w-full h-[60%] rounded-lg bg-background/50 border border-border/30 flex items-center justify-center overflow-hidden mb-2">
         {imageUrl ? (
@@ -68,9 +57,6 @@ function ItemGridCell({
         <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">
           {name ?? itemId}
         </p>
-        {price && (
-          <p className="text-xs text-muted-foreground truncate">{price}</p>
-        )}
       </div>
     </Link>
   );
@@ -260,16 +246,6 @@ function RouteComponent() {
                       itemId={sale.itemId}
                       name={sale.item?.name}
                       imageUrl={sale.item?.imageFilename}
-                      quantity={
-                        sale.quantityPerSale > 1
-                          ? sale.quantityPerSale
-                          : undefined
-                      }
-                      price={
-                        sale.item?.value
-                          ? `${sale.item.value.toLocaleString()} credits`
-                          : undefined
-                      }
                     />
                   ))}
                 </div>
@@ -289,12 +265,6 @@ function RouteComponent() {
                       itemId={sale.itemId}
                       name={sale.item?.name}
                       imageUrl={sale.item?.imageFilename}
-                      quantity={
-                        sale.quantityPerSale > 1
-                          ? sale.quantityPerSale
-                          : undefined
-                      }
-                      price="Seeds"
                     />
                   ))}
                 </div>
@@ -314,12 +284,6 @@ function RouteComponent() {
                       itemId={sale.itemId}
                       name={sale.item?.name}
                       imageUrl={sale.item?.imageFilename}
-                      quantity={
-                        sale.quantityPerSale > 1
-                          ? sale.quantityPerSale
-                          : undefined
-                      }
-                      price="Augment"
                     />
                   ))}
                 </div>

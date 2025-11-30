@@ -5,11 +5,7 @@ import { orpc } from "@/utils/orpc";
 import { FlickeringGrid } from "@/components/ui/flickering-grid";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  SearchIcon,
-  HomeIcon,
-  ArrowRightIcon,
-} from "lucide-react";
+import { SearchIcon, HomeIcon, ArrowRightIcon } from "lucide-react";
 import type { HideoutSearchHit } from "@topside-db/schemas";
 import { cn } from "@/lib/utils";
 import { z } from "zod";

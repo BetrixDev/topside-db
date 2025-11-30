@@ -1,45 +1,41 @@
 import z from "zod";
 import { publicProcedure } from "..";
-import { eq, Tables, inArray } from "@topside-db/db";
+import { eq, Tables } from "@topside-db/db";
 import { cacheMiddleware } from "../middleware/cache";
 
-export const hideoutsRouter = {
+const hideoutsRouterImpl = {
   getHideout: publicProcedure
     .use(cacheMiddleware({ keyPrefix: "hideouts" }))
     .input(z.object({ id: z.string() }))
     .handler(async ({ input, context }) => {
-      const hideout = await context.db.query.hideouts.findFirst({
-        where: eq(Tables.hideouts.id, input.id),
+      const hideoutStation = await context.db.query.hideoutStations.findFirst({
+        where: eq(Tables.hideoutStations.id, input.id),
         with: {
           levels: {
             orderBy: (levels, { asc }) => [asc(levels.level)],
           },
-          requirements: true,
+          requirements: {
+            with: {
+              item: {
+                columns: {
+                  id: true,
+                  name: true,
+                  imageFilename: true,
+                  rarity: true,
+                  value: true,
+                  type: true,
+                },
+              },
+            },
+          },
         },
       });
 
-      if (!hideout) {
+      if (!hideoutStation) {
         return null;
       }
 
-      // Fetch item details for all required items
-      const itemIds = [...new Set(hideout.requirements.map((r) => r.itemId))];
-      const items =
-        itemIds.length > 0
-          ? await context.db.query.items.findMany({
-              where: inArray(Tables.items.id, itemIds),
-              columns: {
-                id: true,
-                name: true,
-                imageFilename: true,
-                rarity: true,
-                value: true,
-                type: true,
-              },
-            })
-          : [];
-
-      const itemMap = new Map(items.map((i) => [i.id, i]));
+      const requirements = hideoutStation.requirements ?? [];
 
       // Group requirements by level
       const requirementsByLevel = new Map<
@@ -47,51 +43,52 @@ export const hideoutsRouter = {
         Array<{
           itemId: string;
           quantity: number;
-          item: (typeof items)[0] | undefined;
+          item: (typeof hideoutStation.requirements)[number]["item"] | null;
         }>
       >();
 
-      hideout.requirements.forEach((req) => {
+      requirements.forEach((req) => {
         const levelReqs = requirementsByLevel.get(req.level) || [];
         levelReqs.push({
           itemId: req.itemId,
           quantity: req.quantity,
-          item: itemMap.get(req.itemId),
+          item: req.item ?? null,
         });
         requirementsByLevel.set(req.level, levelReqs);
       });
 
       // Calculate total items needed across all levels
-      const totalItemsRequired = hideout.requirements.reduce(
+      const totalItemsRequired = requirements.reduce(
         (sum, r) => sum + r.quantity,
         0
       );
 
       // Calculate total value of all required items
-      const totalValueRequired = hideout.requirements.reduce((sum, r) => {
-        const item = itemMap.get(r.itemId);
-        return sum + (item?.value || 0) * r.quantity;
-      }, 0);
+      const totalValueRequired = requirements.reduce(
+        (sum, r) => sum + (r.item?.value || 0) * r.quantity,
+        0
+      );
 
       // Unique items required
-      const uniqueItemsRequired = itemIds.length;
+      const uniqueItemsRequired = new Set(requirements.map((r) => r.itemId))
+        .size;
 
       // Build levels with their requirements
-      const levelsWithRequirements = hideout.levels.map((level) => ({
-        ...level,
-        requirements: requirementsByLevel.get(level.level) || [],
-        totalItemsForLevel: (requirementsByLevel.get(level.level) || []).reduce(
-          (sum, r) => sum + r.quantity,
-          0
-        ),
-        totalValueForLevel: (requirementsByLevel.get(level.level) || []).reduce(
-          (sum, r) => sum + (r.item?.value || 0) * r.quantity,
-          0
-        ),
-      }));
+      const levelsWithRequirements = hideoutStation.levels.map((level) => {
+        const levelReqs = requirementsByLevel.get(level.level) || [];
+        return {
+          ...level,
+          requirements: levelReqs,
+          totalItemsForLevel: levelReqs.reduce((sum, r) => sum + r.quantity, 0),
+          totalValueForLevel: levelReqs.reduce(
+            (sum, r) => sum + (r.item?.value || 0) * r.quantity,
+            0
+          ),
+        };
+      });
 
       return {
-        ...hideout,
+        ...hideoutStation,
         levels: levelsWithRequirements,
         stats: {
           totalItemsRequired,
@@ -101,3 +98,5 @@ export const hideoutsRouter = {
       };
     }),
 };
+
+export const hideoutsRouter: typeof hideoutsRouterImpl = hideoutsRouterImpl;

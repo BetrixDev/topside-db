@@ -23,12 +23,15 @@ import {
 } from "@topside-db/schemas";
 import { prettifyError } from "zod";
 import { LanguageModel } from "@effect/ai";
-import { isEmpty } from "@topside-db/utils";
+import { isEmpty, onlyPrimitiveValues } from "@topside-db/utils";
 import { WikiService, WikiServiceLive } from "./wiki-service";
 import { snakeCase } from "es-toolkit";
 import { FuzzyMatcher, makeFuzzyMatcherService } from "./fuzzy-matcher";
-import * as fs from "node:fs/promises";
 import { DatabaseService, DatabaseServiceLive } from "./db-service";
+import {
+  MeilisearchService,
+  MeilisearchServiceLive,
+} from "./meilisearch-service";
 
 const TranslationModel = OpenRouterLanguageModel.model(
   "google/gemini-2.0-flash-001"
@@ -621,6 +624,9 @@ const makeScrapeArcVariantTask = (arcVariant: ArcVariant) =>
                 description:
                   "A short description of what this weakness means in relation to the arc variant",
               }),
+              type: Schema.Literal("armor", "intelligence").annotations({
+                description: "The type of weakness",
+              }),
             })
           ).annotations({
             description: "The weaknesses of the arc variant",
@@ -1106,6 +1112,72 @@ const updateTraderItemsForSaleInDatabase = Effect.gen(function* () {
   yield* databaseService.traderItemsForSale.sync(traderItemsForSale);
 });
 
+const syncMeilisearchIndexes = Effect.gen(function* () {
+  yield* Effect.log("Syncing meilisearch indexes");
+
+  const context = yield* IngestionDataContext;
+  const meilisearchService = yield* MeilisearchService;
+
+  const items = yield* Ref.get(context.data.items);
+  const quests = yield* Ref.get(context.data.quests);
+  const hideoutStations = yield* Ref.get(context.data.hideoutStations);
+  const maps = yield* Ref.get(context.data.maps);
+  const arcs = yield* Ref.get(context.data.arcs);
+  const traders = yield* Ref.get(context.data.traders);
+
+  yield* meilisearchService.syncIndex(
+    "items",
+    items.map((item) => onlyPrimitiveValues(item)),
+    {
+      searchableAttributes: ["name", "description", "category"],
+    }
+  );
+
+  yield* meilisearchService.syncIndex(
+    "quests",
+    quests.map((quest) => onlyPrimitiveValues(quest)),
+    {
+      searchableAttributes: ["name", "description"],
+    }
+  );
+
+  yield* meilisearchService.syncIndex(
+    "hideoutStations",
+    hideoutStations.map((hideoutStation) =>
+      onlyPrimitiveValues(hideoutStation)
+    ),
+    {
+      searchableAttributes: ["name", "description"],
+    }
+  );
+
+  yield* meilisearchService.syncIndex(
+    "maps",
+    maps.map((map) => onlyPrimitiveValues(map)),
+    {
+      searchableAttributes: ["name", "description"],
+    }
+  );
+
+  yield* meilisearchService.syncIndex(
+    "arcs",
+    arcs.map((arc) => onlyPrimitiveValues(arc)),
+    {
+      searchableAttributes: ["name", "description", "threatLevel"],
+    }
+  );
+
+  yield* meilisearchService.syncIndex(
+    "traders",
+    traders.map((trader) => onlyPrimitiveValues(trader)),
+    {
+      searchableAttributes: ["name", "description"],
+    }
+  );
+
+  yield* Effect.log("Meilisearch indexes synced");
+});
+
 const program = Effect.gen(function* () {
   yield* Effect.log("Starting ingestion program");
 
@@ -1153,6 +1225,8 @@ const program = Effect.gen(function* () {
     updateTraderItemsForSaleInDatabase,
   ]);
 
+  yield* syncMeilisearchIndexes;
+
   yield* Effect.log("Ingestion program completed");
 });
 
@@ -1168,7 +1242,8 @@ const MainLive = Layer.mergeAll(
   OpenRouterLive,
   HttpLive,
   WikiServiceLive.pipe(Layer.provide(HttpLive)),
-  DatabaseServiceLive
+  DatabaseServiceLive,
+  MeilisearchServiceLive
 );
 
 Effect.runPromise(program.pipe(Effect.provide(MainLive)));

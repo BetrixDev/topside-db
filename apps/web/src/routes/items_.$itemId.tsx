@@ -186,7 +186,7 @@ function RouteComponent() {
                     <ItemCardGrid>
                       {data.recipes.map((recipe) => (
                         <ItemCard
-                          key={recipe.id}
+                          key={`${recipe.itemId}-${recipe.materialId}`}
                           itemId={recipe.materialId}
                           name={recipe.material?.name}
                           imageUrl={recipe.material?.imageFilename}
@@ -229,7 +229,7 @@ function RouteComponent() {
                 <ItemCardGrid>
                   {data.recycles.map((recycle) => (
                     <ItemCard
-                      key={recycle.id}
+                      key={`${recycle.itemId}-${recycle.materialId}`}
                       itemId={recycle.materialId}
                       name={recycle.material?.name}
                       imageUrl={recycle.material?.imageFilename}
@@ -246,7 +246,7 @@ function RouteComponent() {
                 <ItemCardGrid>
                   {data.salvages.map((salvage) => (
                     <ItemCard
-                      key={salvage.id}
+                      key={`${salvage.itemId}-${salvage.materialId}`}
                       itemId={salvage.materialId}
                       name={salvage.material?.name}
                       imageUrl={salvage.material?.imageFilename}
@@ -266,9 +266,9 @@ function RouteComponent() {
                 <div className="flex flex-col gap-2">
                   {hideoutRequirements.map((req, index) => (
                     <HideoutCard
-                      key={`${req.hideout?.id}-${req.level}-${index}`}
-                      hideoutId={req.hideout?.id ?? ""}
-                      name={req.hideout?.name}
+                      key={`${req.hideoutStation?.id}-${req.level}-${index}`}
+                      hideoutId={req.hideoutStation?.id ?? ""}
+                      name={req.hideoutStation?.name}
                       level={req.level}
                       quantity={req.quantity}
                     />
@@ -306,28 +306,6 @@ function RouteComponent() {
                 <div className="flex flex-col gap-3">
                   {traders.map((trader) => {
                     const traderInfo = trader.trader;
-                    const quantityPerSale = Math.max(
-                      trader.quantityPerSale ?? 1,
-                      1
-                    );
-                    const traderRecord = trader as Record<string, unknown>;
-                    const rawPrice =
-                      typeof traderRecord.pricePerSale === "number"
-                        ? (traderRecord.pricePerSale as number)
-                        : typeof traderRecord.salePrice === "number"
-                        ? (traderRecord.salePrice as number)
-                        : typeof traderRecord.itemPrice === "number"
-                        ? (traderRecord.itemPrice as number)
-                        : typeof traderRecord.price === "number"
-                        ? (traderRecord.price as number)
-                        : null;
-                    const fallbackPrice =
-                      rawPrice == null &&
-                      trader.currency === "credits" &&
-                      data?.value != null
-                        ? data.value * quantityPerSale
-                        : null;
-                    const salePrice = rawPrice ?? fallbackPrice;
 
                     return (
                       <TraderCard
@@ -335,9 +313,7 @@ function RouteComponent() {
                         traderId={trader.traderId}
                         name={traderInfo?.name}
                         imageUrl={traderInfo?.imageUrl}
-                        price={salePrice}
                         currency={trader.currency}
-                        quantityPerSale={quantityPerSale}
                       />
                     );
                   })}

@@ -21,11 +21,17 @@ import {
   SparklesIcon,
   BombIcon,
   TargetIcon,
+  BrainIcon,
 } from "lucide-react";
 import { startCase } from "es-toolkit/string";
 import { usePageView } from "@/lib/hooks/use-page-view";
 import { cn } from "@/lib/utils";
 import { seo } from "@/lib/seo";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Get icon for attack type
 function getAttackTypeIcon(type: string) {
@@ -282,17 +288,26 @@ function RouteComponent() {
             {data?.weaknesses && data.weaknesses.length > 0 && (
               <SectionCard icon={TargetIcon} title="Weaknesses">
                 <p className="text-sm text-muted-foreground mb-3">
-                  Target these areas for increased damage:
+                  {data.name} has weaknesses you should be aware of:
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {data.weaknesses.map((weakness, index) => (
-                    <span
-                      key={index}
-                      className="px-4 py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-lg text-sm font-medium flex items-center gap-2"
-                    >
-                      <CrosshairIcon className="w-4 h-4" />
-                      {weakness}
-                    </span>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <span
+                          key={index}
+                          className="px-4 py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-lg text-sm font-medium flex items-center gap-2"
+                        >
+                          {weakness.type === "armor" ? (
+                            <CrosshairIcon className="w-4 h-4" />
+                          ) : (
+                            <BrainIcon className="w-4 h-4" />
+                          )}
+                          {weakness.name}
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>{weakness.description}</TooltipContent>
+                    </Tooltip>
                   ))}
                 </div>
               </SectionCard>

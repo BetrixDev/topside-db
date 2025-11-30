@@ -9,7 +9,7 @@ import { cacheMiddleware } from "../middleware/cache";
 const resourceTypes = [
   "item",
   "quest",
-  "hideout",
+  "hideoutStation",
   "map",
   "arc",
   "trader",
@@ -199,22 +199,24 @@ export const analyticsRouter = {
         };
       }
 
-      if (resourceType === "hideout") {
-        const hideout = await context.db.query.hideouts.findFirst({
-          where: eq(Tables.hideouts.id, resourceId),
-          columns: {
-            id: true,
-            name: true,
-          },
-        });
+      if (resourceType === "hideoutStation") {
+        const hideoutStation = await context.db.query.hideoutStations.findFirst(
+          {
+            where: eq(Tables.hideoutStations.id, resourceId),
+            columns: {
+              id: true,
+              name: true,
+            },
+          }
+        );
 
-        if (!hideout) {
+        if (!hideoutStation) {
           return null;
         }
 
         return {
-          id: hideout.id,
-          name: hideout.name,
+          id: hideoutStation.id,
+          name: hideoutStation.name,
           imageUrl: null,
         };
       }

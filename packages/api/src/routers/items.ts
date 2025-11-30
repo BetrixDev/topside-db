@@ -62,7 +62,7 @@ export const itemsRouter = {
               level: true,
             },
             with: {
-              hideout: {
+              hideoutStation: {
                 columns: {
                   name: true,
                   id: true,

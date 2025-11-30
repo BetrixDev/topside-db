@@ -380,7 +380,9 @@ export const arcs = pgTable("arcs", {
     .default([])
     .notNull(),
   weaknesses: jsonb("weaknesses")
-    .$type<{ name: string; description: string }[]>()
+    .$type<
+      { name: string; description: string; type: "armor" | "intelligence" }[]
+    >()
     .default([])
     .notNull(),
   destroyXp: integer("destroy_xp"),

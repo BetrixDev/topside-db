@@ -1,45 +1,43 @@
 import z from "zod";
 import { publicProcedure } from "..";
-import { eq, Tables, inArray } from "@topside-db/db";
+import { eq, Tables } from "@topside-db/db";
 import { cacheMiddleware } from "../middleware/cache";
 
-export const arcsRouter = {
+const arcsRouterImpl = {
   getArc: publicProcedure
     .use(cacheMiddleware({ keyPrefix: "arcs" }))
     .input(z.object({ id: z.string() }))
     .handler(async ({ input, context }) => {
       const arc = await context.db.query.arcs.findFirst({
         where: eq(Tables.arcs.id, input.id),
+        with: {
+          arcLootItems: {
+            with: {
+              item: {
+                columns: {
+                  id: true,
+                  name: true,
+                  imageFilename: true,
+                  rarity: true,
+                  value: true,
+                  type: true,
+                },
+              },
+            },
+          },
+        },
       });
 
       if (!arc) {
         return null;
       }
 
-      // Fetch item details for loot (stored as item names)
-      const lootNames = arc.loot || [];
-      const lootItems =
-        lootNames.length > 0
-          ? await context.db.query.items.findMany({
-              where: inArray(Tables.items.name, lootNames),
-              columns: {
-                id: true,
-                name: true,
-                imageFilename: true,
-                rarity: true,
-                value: true,
-                type: true,
-              },
-            })
-          : [];
-
-      const lootItemMap = new Map(lootItems.map((i) => [i.name, i]));
-
-      // Enrich loot with item details where available
-      const lootDetails = lootNames.map((lootName) => ({
-        name: lootName,
-        item: lootItemMap.get(lootName) || null,
-      }));
+      // Build loot details directly from related items
+      const lootDetails =
+        arc.arcLootItems?.map((loot) => ({
+          name: loot.item?.name ?? "Unknown item",
+          item: loot.item ?? null,
+        })) ?? [];
 
       // Group attacks by type for organized display
       const attacks = arc.attacks || [];
@@ -76,11 +74,13 @@ export const arcsRouter = {
         stats: {
           totalAttacks: attacks.length,
           totalWeaknesses: (arc.weaknesses || []).length,
-          totalLoot: lootNames.length,
-          matchedLootItems: lootItems.length,
+          totalLoot: lootDetails.length,
+          matchedLootItems: lootDetails.filter((l) => l.item !== null).length,
           hasArmorPlating: !!arc.armorPlating,
           threatLevelKnown: !!arc.threatLevel,
         },
       };
     }),
 };
+
+export const arcsRouter: typeof arcsRouterImpl = arcsRouterImpl;

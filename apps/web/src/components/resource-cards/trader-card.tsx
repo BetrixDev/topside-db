@@ -1,4 +1,3 @@
-import * as React from "react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { UsersIcon } from "lucide-react";
@@ -8,9 +7,7 @@ interface TraderCardProps {
   traderId: string;
   name?: string | null;
   imageUrl?: string | null;
-  price?: number | null;
   currency?: string | null;
-  quantityPerSale?: number | null;
   className?: string;
 }
 
@@ -18,9 +15,7 @@ export function TraderCard({
   traderId,
   name,
   imageUrl,
-  price,
   currency,
-  quantityPerSale,
   className,
 }: TraderCardProps) {
   const currencyLabel = currency ? startCase(currency) : "Credits";
@@ -51,23 +46,10 @@ export function TraderCard({
               <p className="truncate text-sm font-semibold">
                 {name ?? startCase(traderId)}
               </p>
-              {quantityPerSale != null && quantityPerSale > 1 && (
-                <p className="text-xs text-muted-foreground">
-                  {quantityPerSale}x per purchase
-                </p>
-              )}
             </div>
-          </div>
-          <div className="text-right">
-            <p className="text-sm font-semibold text-foreground">
-              {price != null
-                ? `${price.toLocaleString()} ${currencyLabel}`
-                : "Price unavailable"}
-            </p>
           </div>
         </div>
       </div>
     </Link>
   );
 }
-
