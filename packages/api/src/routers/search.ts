@@ -31,7 +31,7 @@ const INDEX_CONFIGS: IndexConfig[] = [
     weight: 1.0,
   },
   {
-    indexUid: "hideouts",
+    indexUid: "hideoutStations",
     attributesToSearchOn: ["name"],
     weight: 1.0,
   },
