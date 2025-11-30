@@ -3,7 +3,7 @@ import { publicProcedure } from "..";
 import { eq, Tables } from "@topside-db/db";
 import { cacheMiddleware } from "../middleware/cache";
 
-const arcsRouterImpl = {
+export const arcsRouter = {
   getArc: publicProcedure
     .use(cacheMiddleware({ keyPrefix: "arcs" }))
     .input(z.object({ id: z.string() }))
@@ -82,5 +82,3 @@ const arcsRouterImpl = {
       };
     }),
 };
-
-export const arcsRouter: typeof arcsRouterImpl = arcsRouterImpl;

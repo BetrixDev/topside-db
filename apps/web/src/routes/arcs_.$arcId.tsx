@@ -292,12 +292,9 @@ function RouteComponent() {
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {data.weaknesses.map((weakness, index) => (
-                    <Tooltip>
+                    <Tooltip key={index}>
                       <TooltipTrigger>
-                        <span
-                          key={index}
-                          className="px-4 py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-lg text-sm font-medium flex items-center gap-2"
-                        >
+                        <span className="px-4 py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-lg text-sm font-medium flex items-center gap-2">
                           {weakness.type === "armor" ? (
                             <CrosshairIcon className="w-4 h-4" />
                           ) : (

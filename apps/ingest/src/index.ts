@@ -237,9 +237,19 @@ const makeIngestItemTask = (entry: AdmZip.IZipEntry) =>
     );
 
     if (!itemName || !itemDescription) {
-      return yield* Effect.fail(
-        `No name or description translations available for item: ${item.id}`
+      yield* Effect.log(
+        `Skipping item ${item.id}: No name or description translations available`
       );
+
+      yield* Ref.update(context.repoParseFails, (fails) => [
+        ...fails,
+        {
+          entryName: entry.entryName,
+          errorMessage: `No name or description translations available for item: ${item.id}`,
+        },
+      ]);
+
+      return;
     }
 
     yield* Ref.update(context.data.items, (items) => [
@@ -255,7 +265,6 @@ const makeIngestItemTask = (entry: AdmZip.IZipEntry) =>
         stackSize: item.stackSize,
         imageFilename: item.imageFilename,
         updatedAt: item.updatedAt,
-        salvagesInto: item.salvagesInto,
       },
     ]);
 
@@ -1251,4 +1260,14 @@ const MainLive = Layer.mergeAll(
   MeilisearchServiceLive
 );
 
-Effect.runPromise(program.pipe(Effect.provide(MainLive)));
+Effect.runPromise(
+  program.pipe(
+    Effect.provide(MainLive),
+    Effect.catchAllCause((cause) =>
+      Effect.gen(function* () {
+        yield* Effect.logError("Ingestion failed", cause);
+        process.exit(1);
+      })
+    )
+  )
+);

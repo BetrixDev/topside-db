@@ -5,9 +5,13 @@ import { load } from "cheerio";
 export const BASE_WIKI_URL = "https://arcraiders.wiki";
 
 export function getFullWikiUrl(urlOrPath: string): string {
-  return urlOrPath.startsWith("http")
-    ? urlOrPath
-    : `${BASE_WIKI_URL}${urlOrPath}`;
+  if (urlOrPath.startsWith("http")) {
+    return urlOrPath;
+  }
+
+  const path = urlOrPath.startsWith("/") ? urlOrPath : `/${urlOrPath}`;
+
+  return `${BASE_WIKI_URL}${path}`;
 }
 
 export class WikiContentNotFoundError extends Data.TaggedClass(
