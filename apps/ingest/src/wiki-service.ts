@@ -4,6 +4,12 @@ import { load } from "cheerio";
 
 export const BASE_WIKI_URL = "https://arcraiders.wiki";
 
+export function getFullWikiUrl(urlOrPath: string): string {
+  return urlOrPath.startsWith("http")
+    ? urlOrPath
+    : `${BASE_WIKI_URL}${urlOrPath}`;
+}
+
 export class WikiContentNotFoundError extends Data.TaggedClass(
   "WikiContentNotFoundError"
 )<{
@@ -35,9 +41,7 @@ export const WikiServiceLive = Layer.effect(
     return {
       getPageContent: (urlOrPath: string) =>
         Effect.gen(function* () {
-          const fullUrl = urlOrPath.startsWith("http")
-            ? urlOrPath
-            : `${BASE_WIKI_URL}${urlOrPath}`;
+          const fullUrl = getFullWikiUrl(urlOrPath);
 
           const cached = cache.get(fullUrl);
           if (cached) {

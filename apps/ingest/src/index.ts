@@ -24,7 +24,7 @@ import {
 import { prettifyError } from "zod";
 import { LanguageModel } from "@effect/ai";
 import { isEmpty, onlyPrimitiveValues } from "@topside-db/utils";
-import { WikiService, WikiServiceLive } from "./wiki-service";
+import { getFullWikiUrl, WikiService, WikiServiceLive } from "./wiki-service";
 import { snakeCase } from "es-toolkit";
 import { FuzzyMatcher, makeFuzzyMatcherService } from "./fuzzy-matcher";
 import { DatabaseService, DatabaseServiceLive } from "./db-service";
@@ -251,6 +251,11 @@ const makeIngestItemTask = (entry: AdmZip.IZipEntry) =>
         type: item.type,
         value: item.value,
         rarity: item.rarity,
+        weightKg: item.weightKg,
+        stackSize: item.stackSize,
+        imageFilename: item.imageFilename,
+        updatedAt: item.updatedAt,
+        salvagesInto: item.salvagesInto,
       },
     ]);
 
@@ -597,7 +602,7 @@ const makeScrapeArcVariantTask = (arcVariant: ArcVariant) =>
           }),
           generalSummary: Schema.String.annotations({
             description:
-              "A short markdown formatted summary of the arc variant, tips and tricks, etc. It should be no more than 100 words.",
+              "A short summary of the arc variant, tips and tricks, etc. It should be no more than 100 words.",
           }),
           threatLevel: Schema.String.annotations({
             description: "The threat level of the arc variant",
@@ -649,8 +654,8 @@ const makeScrapeArcVariantTask = (arcVariant: ArcVariant) =>
         description: response?.value?.generalSummary ?? "",
         name: arcVariant.name,
         id: arcId,
-        wikiUrl: arcVariant.wikiPageUrl,
-        imageUrl: arcVariant.fullImageUrl,
+        wikiUrl: getFullWikiUrl(arcVariant.wikiPageUrl),
+        imageUrl: getFullWikiUrl(arcVariant.fullImageUrl),
         destroyXp: arcVariant.destroyXp,
         lootXp: arcVariant.lootXp,
         threatLevel: response?.value?.threatLevel,
@@ -790,8 +795,8 @@ const makeScrapeMapTask = (mapInfo: MapInfo) =>
       {
         id: mapId,
         name: mapInfo.name,
-        wikiUrl: mapInfo.wikiUrl,
-        imageUrl: mapInfo.imageUrl,
+        wikiUrl: getFullWikiUrl(mapInfo.wikiUrl),
+        imageUrl: getFullWikiUrl(mapInfo.imageUrl),
         description: mapInfo.description,
         maximumTimeMinutes: mapInfo.maximumTimeMinutes,
         requirements: [...mapInfo.requirements],
@@ -854,7 +859,7 @@ const getTradersFromTradersWikiPage = Effect.gen(function* () {
 
 const TraderPageDetails = Schema.Struct({
   description: Schema.String.annotations({
-    description: "A brief markdown formatted summary of the trader",
+    description: "A brief summary of the trader",
   }),
   itemsForSale: Schema.Array(
     Schema.Struct({
@@ -906,8 +911,8 @@ const makeScrapeTraderTask = (traderInfo: TraderInfo) =>
       {
         id: traderId,
         name: traderInfo.name,
-        wikiUrl: traderInfo.wikiUrl,
-        imageUrl: traderInfo.imageUrl,
+        wikiUrl: getFullWikiUrl(traderInfo.wikiUrl),
+        imageUrl: getFullWikiUrl(traderInfo.imageUrl),
         description: response?.value?.description ?? "",
         sellCategories: [...traderInfo.sells],
       },

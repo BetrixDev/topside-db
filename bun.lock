@@ -72,6 +72,7 @@
         "@tqman/nice-logger": "^1.1.1",
         "dotenv": "catalog:",
         "elysia": "^1.4.16",
+        "undici-types": "^7.16.0",
         "zod": "catalog:",
       },
       "devDependencies": {
@@ -144,13 +145,13 @@
         "@topside-db/schemas": "workspace:*",
         "dotenv": "catalog:",
         "meilisearch": "^0.54.0",
+        "undici-types": "^7.16.0",
         "zod": "catalog:",
       },
       "devDependencies": {
         "@topside-db/config": "workspace:*",
         "@types/pg": "^8.15.6",
         "tsdown": "catalog:",
-        "undici-types": "^7.16.0",
       },
       "peerDependencies": {
         "typescript": "^5",

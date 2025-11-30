@@ -2,8 +2,6 @@ import { onError, ORPCError, os, ValidationError } from "@orpc/server";
 import type { Context } from "./context";
 import z from "zod";
 
-import "undici-types";
-
 export const o = os.$context<Context>().use(
   onError((error) => {
     if (

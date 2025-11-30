@@ -406,9 +406,6 @@ function RecycleCard({
             <RecycleIcon className="w-4 h-4 text-primary" />
             Recycles into
           </div>
-          <span className="text-xs text-muted-foreground">
-            {data?.recycles?.length ?? 0} outputs
-          </span>
         </div>
 
         {isLoading ? (
