@@ -137,7 +137,7 @@ export async function getArcCommandEmbed(arcId: string) {
       .slice(0, 3)
       .map((type) => {
         const attacks = arc.attacksByType![type];
-        return `**${type}** (${attacks.length})`;
+        return `**${type}** (${attacks?.join(", ") ?? "Unknown"})`;
       })
       .join(" • ");
 
