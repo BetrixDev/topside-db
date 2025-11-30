@@ -5,7 +5,7 @@ import { cacheMiddleware } from "../middleware/cache";
 
 const hideoutsRouterImpl = {
   getHideout: publicProcedure
-    .use(cacheMiddleware({ keyPrefix: "hideouts" }))
+    .use(cacheMiddleware({ keyPrefix: "hideoutStations" }))
     .input(z.object({ id: z.string() }))
     .handler(async ({ input, context }) => {
       const hideoutStation = await context.db.query.hideoutStations.findFirst({
