@@ -1,4 +1,13 @@
-import { Config, Context, Data, Effect, Layer, Ref } from "effect";
+import {
+  Config,
+  Context,
+  Data,
+  Effect,
+  Layer,
+  Option,
+  Ref,
+  Schema,
+} from "effect";
 import { Tables } from "@topside-db/db";
 import { FetchHttpClient, HttpClient, HttpClientError } from "@effect/platform";
 import {
@@ -15,8 +24,20 @@ import {
 import { prettifyError } from "zod";
 import { LanguageModel } from "@effect/ai";
 import { isEmpty } from "@topside-db/utils";
+import { WikiService, WikiServiceLive } from "./wiki-service";
+import { snakeCase } from "es-toolkit";
+import { FuzzyMatcher, makeFuzzyMatcherService } from "./fuzzy-matcher";
+import * as fs from "node:fs/promises";
+import { DatabaseService, DatabaseServiceLive } from "./db-service";
 
-const TranslationModel = OpenRouterLanguageModel.model("");
+const TranslationModel = OpenRouterLanguageModel.model(
+  "google/gemini-2.0-flash-001"
+);
+const WikiScrapingModel = OpenRouterLanguageModel.model(
+  "google/gemini-2.5-flash"
+);
+const WikiScrapingModelFallback =
+  OpenRouterLanguageModel.model("openai/gpt-5-mini");
 
 type Item = typeof Tables.items.$inferInsert;
 type ItemRecipe = typeof Tables.itemRecipes.$inferInsert;
@@ -31,6 +52,11 @@ type HideoutStation = typeof Tables.hideoutStations.$inferInsert;
 type HideoutStationLevel = typeof Tables.hideoutStationLevels.$inferInsert;
 type HideoutStationLevelRequirement =
   typeof Tables.hideoutStationLevelRequirements.$inferInsert;
+type Arc = typeof Tables.arcs.$inferInsert;
+type ArcLootItem = typeof Tables.arcLootItems.$inferInsert;
+type Map = typeof Tables.maps.$inferInsert;
+type Trader = typeof Tables.traders.$inferInsert;
+type TraderItemForSale = typeof Tables.traderItemsForSale.$inferInsert;
 
 type RepoParseFail = {
   entryName: string;
@@ -56,6 +82,11 @@ class IngestionDataContext extends Context.Tag("IngestionDataContext")<
       hideoutStationLevelRequirements: Ref.Ref<
         HideoutStationLevelRequirement[]
       >;
+      arcs: Ref.Ref<Arc[]>;
+      arcLootItems: Ref.Ref<ArcLootItem[]>;
+      maps: Ref.Ref<Map[]>;
+      traders: Ref.Ref<Trader[]>;
+      traderItemsForSale: Ref.Ref<TraderItemForSale[]>;
     };
   }
 >() {}
@@ -80,10 +111,28 @@ const IngestionDataContextLive = Layer.effect(
         hideoutStationLevelRequirements: yield* Ref.make<
           HideoutStationLevelRequirement[]
         >([]),
+        arcs: yield* Ref.make<Arc[]>([]),
+        arcLootItems: yield* Ref.make<ArcLootItem[]>([]),
+        maps: yield* Ref.make<Map[]>([]),
+        traders: yield* Ref.make<Trader[]>([]),
+        traderItemsForSale: yield* Ref.make<TraderItemForSale[]>([]),
       },
     };
   })
 );
+
+const FuzzyMatcherLive = Layer.effect(
+  FuzzyMatcher,
+  Effect.gen(function* () {
+    const ctx = yield* IngestionDataContext;
+    return makeFuzzyMatcherService({
+      items: ctx.data.items,
+      quests: ctx.data.quests,
+      hideoutStations: ctx.data.hideoutStations,
+      arcs: ctx.data.arcs,
+    });
+  })
+).pipe(Layer.provide(IngestionDataContextLive));
 
 class JsonParseError extends Data.TaggedClass("JsonParseError")<{
   entryName: string;
@@ -472,6 +521,591 @@ const makeIngestHideoutStationTask = (entry: AdmZip.IZipEntry) =>
     }
   });
 
+const ArcVariant = Schema.Struct({
+  name: Schema.String.annotations({
+    description: "The name of the arc variant",
+  }),
+  wikiPageUrl: Schema.String.annotations({
+    description: "The URL of the arc variant wiki page",
+  }),
+  fullImageUrl: Schema.String.annotations({
+    description: "The full URL of the arc variant image",
+  }),
+  drops: Schema.Array(
+    Schema.String.annotations({
+      description: "The items that the arc variant drops",
+    })
+  ),
+  destroyXp: Schema.Number.annotations({
+    description: "The XP reward for destroying the arc variant",
+  }),
+  lootXp: Schema.Record({
+    key: Schema.String.annotations({
+      description:
+        "What is being looted (e.g. 'Core', 'Part') or 'Arc' if it's not specified",
+    }),
+    value: Schema.Number.annotations({
+      description: "The XP reward for looting the item",
+    }),
+  }),
+});
+
+type ArcVariant = Schema.Schema.Type<typeof ArcVariant>;
+
+const getArcVariantsFromArcWikiPage = Effect.gen(function* () {
+  yield* Effect.log("Getting arc variants from arc wiki page");
+
+  const wikiService = yield* WikiService;
+
+  const arcPageWikiContent = yield* wikiService.getPageContent("/wiki/ARC");
+
+  const response = yield* Effect.retry(
+    LanguageModel.generateObject({
+      prompt: `Extract the arcs from the variants section of this wiki page according to the json schema: ${arcPageWikiContent}`,
+      schema: Schema.Struct({
+        arcVariants: Schema.Array(ArcVariant).annotations({
+          description:
+            "The arcs from the variants section of the wiki page. Do not includes Arc Husks or Arc Probes",
+        }),
+      }),
+    }).pipe(Effect.provide(WikiScrapingModel)),
+    { times: 2 }
+  );
+
+  return response?.value?.arcVariants ?? [];
+});
+
+const makeScrapeArcVariantTask = (arcVariant: ArcVariant) =>
+  Effect.gen(function* () {
+    yield* Effect.log(`Scraping arc variant: ${arcVariant.name}`);
+
+    const wikiService = yield* WikiService;
+
+    const arcPageWikiContent = yield* wikiService.getPageContent(
+      arcVariant.wikiPageUrl
+    );
+
+    const response = yield* Effect.retry(
+      LanguageModel.generateObject({
+        prompt: `Extract the arc information from this webpage: ${arcPageWikiContent}`,
+        schema: Schema.Struct({
+          loot: Schema.Array(Schema.String).annotations({
+            description: "The items described in the Loot section",
+          }),
+          generalSummary: Schema.String.annotations({
+            description:
+              "A short markdown formatted summary of the arc variant, tips and tricks, etc. It should be no more than 100 words.",
+          }),
+          threatLevel: Schema.String.annotations({
+            description: "The threat level of the arc variant",
+          }),
+          armorPlating: Schema.String.annotations({
+            description: "The armor plating of the arc variant",
+          }),
+          attacks: Schema.Array(
+            Schema.Struct({
+              type: Schema.String.annotations({
+                description: "The type of attack",
+              }),
+              description: Schema.String.annotations({
+                description: "The description of the attack",
+              }),
+            })
+          ),
+          weaknesses: Schema.Array(
+            Schema.Struct({
+              name: Schema.String.annotations({
+                description: "The name of the weakness",
+              }),
+              description: Schema.String.annotations({
+                description:
+                  "A short description of what this weakness means in relation to the arc variant",
+              }),
+            })
+          ).annotations({
+            description: "The weaknesses of the arc variant",
+          }),
+          health: Schema.Number.annotations({
+            description: "The health of the arc variant",
+          }),
+        }),
+      }).pipe(Effect.provide(WikiScrapingModel)),
+      { times: 2 }
+    );
+
+    const context = yield* IngestionDataContext;
+
+    const arcId = snakeCase(arcVariant.name);
+
+    yield* Ref.update(context.data.arcs, (arcs) => [
+      ...arcs,
+      {
+        description: response?.value?.generalSummary ?? "",
+        name: arcVariant.name,
+        id: arcId,
+        wikiUrl: arcVariant.wikiPageUrl,
+        imageUrl: arcVariant.fullImageUrl,
+        destroyXp: arcVariant.destroyXp,
+        lootXp: arcVariant.lootXp,
+        threatLevel: response?.value?.threatLevel,
+        armorPlating: response?.value?.armorPlating,
+        attacks: response?.value?.attacks as any,
+        weaknesses: response?.value?.weaknesses as any,
+      },
+    ]);
+
+    const fuzzyMatcher = yield* FuzzyMatcher;
+
+    for (const loot of response?.value?.loot ?? []) {
+      const closestItem = yield* fuzzyMatcher.findItem(loot, {
+        maxDistance: 2,
+      });
+
+      if (Option.isNone(closestItem)) {
+        yield* Effect.log(`No closest item found for loot: ${loot}`);
+        continue;
+      }
+
+      yield* Ref.update(context.data.arcLootItems, (lootItems) => [
+        ...lootItems,
+        {
+          arcId,
+          itemId: closestItem.value.item.id,
+        },
+      ]);
+    }
+
+    yield* Effect.log(`Scraped arc variant: ${arcVariant.name}`);
+  });
+
+const scrapeArcsFromWiki = Effect.gen(function* () {
+  yield* Effect.log("Scraping arcs from wiki");
+
+  const arcVariants = yield* getArcVariantsFromArcWikiPage;
+
+  yield* Effect.all(arcVariants.map(makeScrapeArcVariantTask), {
+    concurrency: 10,
+  });
+});
+
+const MapInfo = Schema.Struct({
+  name: Schema.String.annotations({
+    description: "The name of the map",
+  }),
+  wikiUrl: Schema.String.annotations({
+    description: "The URL path of the map wiki page (e.g., /wiki/Scrapyard)",
+  }),
+  imageUrl: Schema.String.annotations({
+    description: "The full URL of the map image",
+  }),
+  description: Schema.NullOr(Schema.String).annotations({
+    description: "A brief description of the map",
+  }),
+  maximumTimeMinutes: Schema.Number.annotations({
+    description: "The maximum time allowed in the map in minutes",
+  }),
+  requirements: Schema.Array(
+    Schema.Struct({
+      name: Schema.String.annotations({
+        description: "The name of the requirement",
+      }),
+      value: Schema.String.annotations({
+        description: "The value of the requirement",
+      }),
+    })
+  ).annotations({
+    description: "The requirements for the map. Empty if none.",
+  }),
+});
+
+type MapInfo = Schema.Schema.Type<typeof MapInfo>;
+
+const getMapsFromMapsWikiPage = Effect.gen(function* () {
+  yield* Effect.log("Getting maps from maps wiki page");
+
+  const wikiService = yield* WikiService;
+
+  const mapsPageContent = yield* wikiService.getPageContent("/wiki/Maps");
+
+  const response = yield* Effect.retry(
+    LanguageModel.generateObject({
+      prompt: `Extract the maps from this webpage: ${mapsPageContent}`,
+      schema: Schema.Struct({
+        maps: Schema.Array(MapInfo).annotations({
+          description: "The maps listed on the page in the first table",
+        }),
+      }),
+    }).pipe(Effect.provide(WikiScrapingModel)),
+    { times: 2 }
+  );
+
+  return response?.value?.maps ?? [];
+});
+
+const MapPageDetails = Schema.Struct({
+  mapImageUrl: Schema.String.annotations({
+    description: "The URL of the map image on the page",
+  }),
+  difficulties: Schema.Array(
+    Schema.Struct({
+      name: Schema.String.annotations({
+        description: "The difficulty id/name",
+      }),
+      rating: Schema.Number.annotations({
+        description:
+          "The rating of the difficulty in the form of a percentage of the fraction displayed on the page",
+      }),
+    })
+  ),
+});
+
+const makeScrapeMapTask = (mapInfo: MapInfo) =>
+  Effect.gen(function* () {
+    yield* Effect.log(`Scraping map: ${mapInfo.name}`);
+
+    const wikiService = yield* WikiService;
+
+    const mapPageContent = yield* wikiService.getPageContent(mapInfo.wikiUrl);
+
+    const response = yield* Effect.retry(
+      LanguageModel.generateObject({
+        prompt: `Extract the map information from this webpage: ${mapPageContent}`,
+        schema: MapPageDetails,
+      }).pipe(Effect.provide(WikiScrapingModel)),
+      { times: 2 }
+    );
+
+    const context = yield* IngestionDataContext;
+
+    const mapId = snakeCase(mapInfo.name);
+
+    yield* Ref.update(context.data.maps, (maps) => [
+      ...maps,
+      {
+        id: mapId,
+        name: mapInfo.name,
+        wikiUrl: mapInfo.wikiUrl,
+        imageUrl: mapInfo.imageUrl,
+        description: mapInfo.description,
+        maximumTimeMinutes: mapInfo.maximumTimeMinutes,
+        requirements: [...mapInfo.requirements],
+        difficulties: [...(response?.value?.difficulties ?? [])],
+      },
+    ]);
+
+    yield* Effect.log(`Scraped map: ${mapInfo.name}`);
+  });
+
+const scrapeMapsFromWiki = Effect.gen(function* () {
+  yield* Effect.log("Scraping maps from wiki");
+
+  const maps = yield* getMapsFromMapsWikiPage;
+
+  yield* Effect.all(maps.map(makeScrapeMapTask), {
+    concurrency: 10,
+  });
+});
+
+const TraderInfo = Schema.Struct({
+  name: Schema.String.annotations({
+    description: "The name of the trader",
+  }),
+  wikiUrl: Schema.String.annotations({
+    description:
+      "The URL path of the trader wiki page (e.g., /wiki/Trader_Name)",
+  }),
+  imageUrl: Schema.String.annotations({
+    description: "The full URL of the trader image",
+  }),
+  sells: Schema.Array(Schema.String).annotations({
+    description: "Categories of items the trader sells",
+  }),
+});
+
+type TraderInfo = Schema.Schema.Type<typeof TraderInfo>;
+
+const getTradersFromTradersWikiPage = Effect.gen(function* () {
+  yield* Effect.log("Getting traders from traders wiki page");
+
+  const wikiService = yield* WikiService;
+
+  const tradersPageContent = yield* wikiService.getPageContent("/wiki/Traders");
+
+  const response = yield* Effect.retry(
+    LanguageModel.generateObject({
+      prompt: `Extract the list of traders from this webpage: ${tradersPageContent}`,
+      schema: Schema.Struct({
+        traders: Schema.Array(TraderInfo).annotations({
+          description: "The traders listed on the page",
+        }),
+      }),
+    }).pipe(Effect.provide(WikiScrapingModel)),
+    { times: 2 }
+  );
+
+  return response?.value?.traders ?? [];
+});
+
+const TraderPageDetails = Schema.Struct({
+  description: Schema.String.annotations({
+    description: "A brief markdown formatted summary of the trader",
+  }),
+  itemsForSale: Schema.Array(
+    Schema.Struct({
+      itemName: Schema.String.annotations({
+        description: "The name of the item",
+      }),
+      itemPrice: Schema.Number.annotations({
+        description: "The price of the item",
+      }),
+      itemPriceCurrency: Schema.Literal(
+        "credits",
+        "nature",
+        "augment"
+      ).annotations({
+        description:
+          "The currency the item is sold for. This can be found in the .template-price looking at the img src",
+      }),
+    })
+  ).annotations({
+    description: "The items the trader sells in their shop",
+  }),
+});
+
+const makeScrapeTraderTask = (traderInfo: TraderInfo) =>
+  Effect.gen(function* () {
+    yield* Effect.log(`Scraping trader: ${traderInfo.name}`);
+
+    const wikiService = yield* WikiService;
+
+    const traderPageContent = yield* wikiService.getPageContent(
+      traderInfo.wikiUrl
+    );
+
+    const response = yield* Effect.retry(
+      LanguageModel.generateObject({
+        prompt: `Extract the trader information from this webpage: ${traderPageContent}`,
+        schema: TraderPageDetails,
+      }).pipe(Effect.provide(WikiScrapingModel)),
+      { times: 2 }
+    );
+
+    const context = yield* IngestionDataContext;
+    const fuzzyMatcher = yield* FuzzyMatcher;
+
+    const traderId = snakeCase(traderInfo.name);
+
+    yield* Ref.update(context.data.traders, (traders) => [
+      ...traders,
+      {
+        id: traderId,
+        name: traderInfo.name,
+        wikiUrl: traderInfo.wikiUrl,
+        imageUrl: traderInfo.imageUrl,
+        description: response?.value?.description ?? "",
+        sellCategories: [...traderInfo.sells],
+      },
+    ]);
+
+    for (const item of response?.value?.itemsForSale ?? []) {
+      const closestItem = yield* fuzzyMatcher.findItem(item.itemName, {
+        maxDistance: 2,
+      });
+
+      if (Option.isNone(closestItem)) {
+        yield* Effect.log(
+          `No closest item found for trader item: ${item.itemName}`
+        );
+        continue;
+      }
+
+      const currency =
+        item.itemPriceCurrency === "nature" ? "seeds" : item.itemPriceCurrency;
+
+      yield* Ref.update(context.data.traderItemsForSale, (itemsForSale) => [
+        ...itemsForSale,
+        {
+          traderId,
+          itemId: closestItem.value.item.id,
+          currency: currency as "credits" | "seeds" | "augment",
+        },
+      ]);
+    }
+
+    yield* Effect.log(`Scraped trader: ${traderInfo.name}`);
+  });
+
+const scrapeTradersFromWiki = Effect.gen(function* () {
+  yield* Effect.log("Scraping traders from wiki");
+
+  const traders = yield* getTradersFromTradersWikiPage;
+
+  yield* Effect.all(traders.map(makeScrapeTraderTask), {
+    concurrency: 10,
+  });
+});
+
+const updateItemsInDatabase = Effect.gen(function* () {
+  const databaseService = yield* DatabaseService;
+  const context = yield* IngestionDataContext;
+
+  const items = yield* Ref.get(context.data.items);
+
+  yield* databaseService.items.sync(items);
+});
+
+const updateItemRecipesInDatabase = Effect.gen(function* () {
+  const databaseService = yield* DatabaseService;
+  const context = yield* IngestionDataContext;
+
+  const itemRecipes = yield* Ref.get(context.data.itemRecipes);
+
+  yield* databaseService.itemRecipes.sync(itemRecipes);
+});
+
+const updateItemRecyclesInDatabase = Effect.gen(function* () {
+  const databaseService = yield* DatabaseService;
+  const context = yield* IngestionDataContext;
+
+  const itemRecycles = yield* Ref.get(context.data.itemRecycles);
+
+  yield* databaseService.itemRecycles.sync(itemRecycles);
+});
+
+const updateItemSalvagesInDatabase = Effect.gen(function* () {
+  const databaseService = yield* DatabaseService;
+  const context = yield* IngestionDataContext;
+
+  const itemSalvages = yield* Ref.get(context.data.itemSalvages);
+
+  yield* databaseService.itemSalvages.sync(itemSalvages);
+});
+
+const updateQuestsInDatabase = Effect.gen(function* () {
+  const databaseService = yield* DatabaseService;
+  const context = yield* IngestionDataContext;
+
+  const quests = yield* Ref.get(context.data.quests);
+
+  yield* databaseService.quests.sync(quests);
+});
+
+const updateQuestObjectivesInDatabase = Effect.gen(function* () {
+  const databaseService = yield* DatabaseService;
+  const context = yield* IngestionDataContext;
+
+  const questObjectives = yield* Ref.get(context.data.questObjectives);
+
+  yield* databaseService.questObjectives.sync(questObjectives);
+});
+
+const updateQuestRewardItemsInDatabase = Effect.gen(function* () {
+  const databaseService = yield* DatabaseService;
+  const context = yield* IngestionDataContext;
+
+  const questRewardItems = yield* Ref.get(context.data.questRewardItems);
+
+  yield* databaseService.questRewardItems.sync(questRewardItems);
+});
+
+const updateQuestPrerequisitesInDatabase = Effect.gen(function* () {
+  const databaseService = yield* DatabaseService;
+  const context = yield* IngestionDataContext;
+
+  const questPrerequisites = yield* Ref.get(context.data.questPrerequisites);
+
+  yield* databaseService.questPrerequisites.sync(questPrerequisites);
+});
+
+const updateQuestNextQuestsInDatabase = Effect.gen(function* () {
+  const databaseService = yield* DatabaseService;
+  const context = yield* IngestionDataContext;
+
+  const questNextQuests = yield* Ref.get(context.data.questNextQuests);
+
+  yield* databaseService.questNextQuests.sync(questNextQuests);
+});
+
+const updateHideoutStationsInDatabase = Effect.gen(function* () {
+  const databaseService = yield* DatabaseService;
+  const context = yield* IngestionDataContext;
+
+  const hideoutStations = yield* Ref.get(context.data.hideoutStations);
+
+  yield* databaseService.hideoutStations.sync(hideoutStations);
+});
+
+const updateHideoutStationLevelsInDatabase = Effect.gen(function* () {
+  const databaseService = yield* DatabaseService;
+  const context = yield* IngestionDataContext;
+
+  const hideoutStationLevels = yield* Ref.get(
+    context.data.hideoutStationLevels
+  );
+
+  yield* databaseService.hideoutStationLevels.sync(hideoutStationLevels);
+});
+
+const updateHideoutStationLevelRequirementsInDatabase = Effect.gen(
+  function* () {
+    const databaseService = yield* DatabaseService;
+    const context = yield* IngestionDataContext;
+
+    const hideoutStationLevelRequirements = yield* Ref.get(
+      context.data.hideoutStationLevelRequirements
+    );
+
+    yield* databaseService.hideoutStationLevelRequirements.sync(
+      hideoutStationLevelRequirements
+    );
+  }
+);
+
+const updateMapsInDatabase = Effect.gen(function* () {
+  const databaseService = yield* DatabaseService;
+  const context = yield* IngestionDataContext;
+
+  const maps = yield* Ref.get(context.data.maps);
+
+  yield* databaseService.maps.sync(maps);
+});
+
+const updateArcsInDatabase = Effect.gen(function* () {
+  const databaseService = yield* DatabaseService;
+  const context = yield* IngestionDataContext;
+
+  const arcs = yield* Ref.get(context.data.arcs);
+
+  yield* databaseService.arcs.sync(arcs);
+});
+
+const updateArcLootItemsInDatabase = Effect.gen(function* () {
+  const databaseService = yield* DatabaseService;
+  const context = yield* IngestionDataContext;
+
+  const arcLootItems = yield* Ref.get(context.data.arcLootItems);
+
+  yield* databaseService.arcLootItems.sync(arcLootItems);
+});
+
+const updateTradersInDatabase = Effect.gen(function* () {
+  const databaseService = yield* DatabaseService;
+  const context = yield* IngestionDataContext;
+
+  const traders = yield* Ref.get(context.data.traders);
+
+  yield* databaseService.traders.sync(traders);
+});
+
+const updateTraderItemsForSaleInDatabase = Effect.gen(function* () {
+  const databaseService = yield* DatabaseService;
+  const context = yield* IngestionDataContext;
+
+  const traderItemsForSale = yield* Ref.get(context.data.traderItemsForSale);
+
+  yield* databaseService.traderItemsForSale.sync(traderItemsForSale);
+});
+
 const program = Effect.gen(function* () {
   yield* Effect.log("Starting ingestion program");
 
@@ -494,42 +1128,32 @@ const program = Effect.gen(function* () {
     concurrency: 10,
   });
 
-  const context = yield* IngestionDataContext;
-
-  const items = yield* Ref.get(context.data.items);
-  const itemRecipes = yield* Ref.get(context.data.itemRecipes);
-  const itemRecycles = yield* Ref.get(context.data.itemRecycles);
-  const itemSalvages = yield* Ref.get(context.data.itemSalvages);
-  const parseFails = yield* Ref.get(context.repoParseFails);
-  const quests = yield* Ref.get(context.data.quests);
-  const questObjectives = yield* Ref.get(context.data.questObjectives);
-  const questRewardItems = yield* Ref.get(context.data.questRewardItems);
-  const questPrerequisites = yield* Ref.get(context.data.questPrerequisites);
-  const questNextQuests = yield* Ref.get(context.data.questNextQuests);
-  const hideoutStations = yield* Ref.get(context.data.hideoutStations);
-  const hideoutStationLevels = yield* Ref.get(
-    context.data.hideoutStationLevels
-  );
-  const hideoutStationLevelRequirements = yield* Ref.get(
-    context.data.hideoutStationLevelRequirements
+  yield* Effect.all(
+    [scrapeArcsFromWiki, scrapeMapsFromWiki, scrapeTradersFromWiki],
+    { concurrency: "unbounded" }
   );
 
-  yield* Effect.log(`Ingestion complete:`);
-  yield* Effect.log(`  Items: ${items.length}`);
-  yield* Effect.log(`  Item Recipes: ${itemRecipes.length}`);
-  yield* Effect.log(`  Item Recycles: ${itemRecycles.length}`);
-  yield* Effect.log(`  Item Salvages: ${itemSalvages.length}`);
-  yield* Effect.log(`  Quests: ${quests.length}`);
-  yield* Effect.log(`  Quest Objectives: ${questObjectives.length}`);
-  yield* Effect.log(`  Quest Reward Items: ${questRewardItems.length}`);
-  yield* Effect.log(`  Quest Prerequisites: ${questPrerequisites.length}`);
-  yield* Effect.log(`  Quest Next Quests: ${questNextQuests.length}`);
-  yield* Effect.log(`  Hideout Stations: ${hideoutStations.length}`);
-  yield* Effect.log(`  Hideout Station Levels: ${hideoutStationLevels.length}`);
-  yield* Effect.log(
-    `  Hideout Station Level Requirements: ${hideoutStationLevelRequirements.length}`
-  );
-  yield* Effect.log(`  Parse Failures: ${parseFails.length}`);
+  yield* Effect.all([
+    updateItemsInDatabase,
+    updateItemRecipesInDatabase,
+    updateItemRecyclesInDatabase,
+    updateItemSalvagesInDatabase,
+    updateQuestsInDatabase,
+    updateQuestObjectivesInDatabase,
+    updateQuestRewardItemsInDatabase,
+    updateQuestPrerequisitesInDatabase,
+    updateQuestNextQuestsInDatabase,
+    updateHideoutStationsInDatabase,
+    updateHideoutStationLevelsInDatabase,
+    updateHideoutStationLevelRequirementsInDatabase,
+    updateMapsInDatabase,
+    updateArcsInDatabase,
+    updateArcLootItemsInDatabase,
+    updateTradersInDatabase,
+    updateTraderItemsForSaleInDatabase,
+  ]);
+
+  yield* Effect.log("Ingestion program completed");
 });
 
 const HttpLive = FetchHttpClient.layer;
@@ -540,8 +1164,11 @@ const OpenRouterLive = OpenRouterClient.layerConfig({
 
 const MainLive = Layer.mergeAll(
   IngestionDataContextLive,
+  FuzzyMatcherLive,
   OpenRouterLive,
-  HttpLive
+  HttpLive,
+  WikiServiceLive.pipe(Layer.provide(HttpLive)),
+  DatabaseServiceLive
 );
 
 Effect.runPromise(program.pipe(Effect.provide(MainLive)));

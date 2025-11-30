@@ -5,64 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1763822289792,
-      "tag": "0000_redundant_lily_hollister",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1763822590782,
-      "tag": "0001_lyrical_human_fly",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1763871158998,
-      "tag": "0002_rare_zarda",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1763872808266,
-      "tag": "0003_slim_lake",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1763909555054,
-      "tag": "0004_famous_wolfsbane",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1763910681886,
-      "tag": "0005_heavy_cerise",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1763920127713,
-      "tag": "0006_dark_umar",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1764004308656,
-      "tag": "0007_rainy_mesmero",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1764297399783,
-      "tag": "0008_quiet_polaris",
+      "when": 1764461868131,
+      "tag": "0000_curious_moondragon",
       "breakpoints": true
     }
   ]

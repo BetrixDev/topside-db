@@ -375,12 +375,19 @@ export const arcs = pgTable("arcs", {
   health: integer("health"),
   armorPlating: text("armor_plating"),
   threatLevel: text("threat_level"),
-  loot: jsonb("loot").$type<string[]>().default([]).notNull(),
   attacks: jsonb("attacks")
     .$type<{ type: string; description: string }[]>()
     .default([])
     .notNull(),
-  weaknesses: jsonb("weaknesses").$type<string[]>().default([]).notNull(),
+  weaknesses: jsonb("weaknesses")
+    .$type<{ name: string; description: string }[]>()
+    .default([])
+    .notNull(),
+  destroyXp: integer("destroy_xp"),
+  lootXp: jsonb("loot_xp")
+    .$type<Record<string, number>>()
+    .default({})
+    .notNull(),
 });
 
 export const arcLootItems = pgTable(
@@ -442,13 +449,15 @@ export const traderItemsForSale = pgTable(
     itemId: text("item_id")
       .notNull()
       .references(() => items.id, { onDelete: "cascade" }),
-    quantity: integer("quantity"),
-    quantityPerSale: integer("quantity_per_sale").notNull().default(1),
     currency: text("currency", {
       enum: ["credits", "seeds", "augment"],
     }).notNull(),
   },
-  (t) => [primaryKey({ columns: [t.traderId, t.itemId] })]
+  (t) => [
+    primaryKey({ columns: [t.traderId, t.itemId] }),
+    index("trader_items_for_sale_trader_id_idx").on(t.traderId),
+    index("trader_items_for_sale_item_id_idx").on(t.itemId),
+  ]
 );
 
 export const traderItemsForSaleRelations = relations(
