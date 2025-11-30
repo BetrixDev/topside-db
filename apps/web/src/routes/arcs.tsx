@@ -132,7 +132,7 @@ function ArcsPage() {
             </div>
             <Input
               type="text"
-              placeholder="Search for Arcs by name or threat level..."
+              placeholder="Search for Arcs..."
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               className="w-full h-14 pl-12 pr-4 text-lg rounded-2xl border-2 border-border/50 bg-card/80 backdrop-blur-sm shadow-lg focus-visible:border-red-500/50 focus-visible:ring-red-500/20 transition-all placeholder:text-muted-foreground/60"

@@ -19,7 +19,7 @@ export const Route = createFileRoute("/tools/discord-bot")({
 
 function DiscordBotPage() {
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden bg-linear-to-br from-indigo-950/30 via-background to-violet-950/20">
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-linear-to-br from-indigo-950/30 via-background to-violet-950/20">
       {/* Animated circuit/data lines */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
@@ -190,7 +190,9 @@ function FeatureCard({
   return (
     <div className="flex flex-col items-center gap-2 rounded-xl border border-indigo-500/10 bg-indigo-500/5 p-3 transition-colors hover:border-indigo-500/20 hover:bg-indigo-500/10">
       <div className="text-indigo-400">{icon}</div>
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
+      <span className="text-xs font-medium text-center text-muted-foreground">
+        {label}
+      </span>
     </div>
   );
 }

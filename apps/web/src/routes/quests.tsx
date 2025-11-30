@@ -132,7 +132,7 @@ function QuestsPage() {
             </div>
             <Input
               type="text"
-              placeholder="Search for quests by name or trader..."
+              placeholder="Search for quests..."
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               className="w-full h-14 pl-12 pr-4 text-lg rounded-2xl border-2 border-border/50 bg-card/80 backdrop-blur-sm shadow-lg focus-visible:border-emerald-500/50 focus-visible:ring-emerald-500/20 transition-all placeholder:text-muted-foreground/60"
@@ -159,19 +159,6 @@ function QuestsPage() {
                 Search through all available quests. Find missions by name or
                 filter by the trader who assigns them.
               </p>
-              <div className="mt-8 flex flex-wrap gap-2 justify-center">
-                {["Supply", "Rescue", "Eliminate", "Extract", "Recover"].map(
-                  (suggestion) => (
-                    <button
-                      key={suggestion}
-                      onClick={() => setInputValue(suggestion.toLowerCase())}
-                      className="px-4 py-2 rounded-full bg-card border border-border/50 text-sm text-muted-foreground hover:text-foreground hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all duration-200"
-                    >
-                      {suggestion}
-                    </button>
-                  )
-                )}
-              </div>
             </div>
           ) : isLoading ? (
             <div className="space-y-3">

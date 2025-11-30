@@ -13,7 +13,7 @@ import { Link } from "@tanstack/react-router";
 
 export function NotFound() {
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden bg-linear-to-br from-primary/10 via-background to-destructive/5">
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-linear-to-br from-primary/10 via-background to-destructive/5">
       {/* Animated scan lines */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div

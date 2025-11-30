@@ -126,7 +126,7 @@ function TradersPage() {
             </div>
             <Input
               type="text"
-              placeholder="Search for traders by name..."
+              placeholder="Search for traders..."
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               className="w-full h-14 pl-12 pr-4 text-lg rounded-2xl border-2 border-border/50 bg-card/80 backdrop-blur-sm shadow-lg focus-visible:border-amber-500/50 focus-visible:ring-amber-500/20 transition-all placeholder:text-muted-foreground/60"

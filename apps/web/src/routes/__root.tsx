@@ -80,7 +80,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
       <head>
         <HeadContent />
       </head>
-      <body className="bg-background">
+      <body className="min-h-screen bg-background">
         <HeadContent />
         <ThemeProvider
           attribute="class"
@@ -92,7 +92,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
             <SpotlightProvider>
               <Header />
               {children}
-              <footer className="border-t border-border/50 mt-16 py-6 px-4 text-center text-xs text-muted-foreground">
+              <footer className="border-t border-border/50 py-6 px-4 text-center text-xs text-muted-foreground">
                 <p className="mb-2">
                   Game content and materials are trademarks and copyrights of
                   Embark Studios and its licensors. All rights reserved.

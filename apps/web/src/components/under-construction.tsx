@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 export function UnderConstruction() {
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden bg-gradient-to-br from-amber-950/20 via-background to-orange-950/10">
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-amber-950/20 via-background to-orange-950/10">
       {/* Animated caution tape strips */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         {/* Top left diagonal strip */}

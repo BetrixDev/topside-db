@@ -28,6 +28,7 @@ import {
   NavigationMenuTrigger,
 } from "./ui/navigation-menu";
 import { Button } from "./ui/button";
+import { BlurFade } from "./ui/blur-fade";
 
 type PageItem = {
   title: string;
@@ -70,7 +71,7 @@ const databasePages: ReadonlyArray<PageItem> = [
   {
     title: "Maps",
     href: "/maps",
-    description: "",
+    description: "View basic map information and locations",
     icon: MapIcon,
   },
 ];
@@ -82,7 +83,13 @@ const toolPages: ReadonlyArray<PageItem> = [
     description: "Calculate optimal recycling profits and scrap margins",
     icon: RecycleIcon,
   },
-  // Add more tools here in the future
+  {
+    title: "Discord Bot",
+    href: "/tools/discord-bot",
+    description:
+      "Use the Topside DB Discord bot for instant access to Arc Raiders information",
+    icon: BotIcon,
+  },
 ];
 
 export default function Header() {
@@ -92,7 +99,7 @@ export default function Header() {
 
   return (
     <div className="top-0 z-30 relative flex justify-center">
-      <header className="fixed w-full max-w-7xl border border-border/60 bg-background/80 backdrop-blur-sm flex items-center justify-between p-2 mt-2 mx-2 rounded-full">
+      <header className="fixed w-full max-w-7xl border-b lg:border border-border/60 bg-background/80 backdrop-blur-sm flex items-center justify-between p-2 lg:mt-2 mx-2 lg:rounded-full">
         {/* Logo */}
         <Link
           to="/"
@@ -237,25 +244,33 @@ export default function Header() {
                 Database
               </h3>
               <ul className="space-y-1">
-                {databasePages.map((page) => (
-                  <li key={page.title}>
-                    <Link
-                      to={page.href}
-                      preload="intent"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 rounded-lg px-3 py-3 text-foreground transition hover:bg-primary/10 hover:text-primary"
-                    >
-                      <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-card/60">
-                        <page.icon className="h-4 w-4 text-primary" />
-                      </span>
-                      <div>
-                        <div className="font-medium">{page.title}</div>
-                        <div className="text-xs text-muted-foreground line-clamp-1">
-                          {page.description}
+                {databasePages.map((page, i) => (
+                  <BlurFade
+                    key={page.title}
+                    direction="right"
+                    offset={10}
+                    delay={i * 0.02}
+                    duration={0.2}
+                  >
+                    <li>
+                      <Link
+                        to={page.href}
+                        preload="intent"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-3 rounded-lg px-3 py-3 text-foreground transition hover:bg-primary/10 hover:text-primary"
+                      >
+                        <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-card/60">
+                          <page.icon className="h-4 w-4 text-primary" />
+                        </span>
+                        <div>
+                          <div className="font-medium">{page.title}</div>
+                          <div className="text-xs text-muted-foreground line-clamp-1">
+                            {page.description}
+                          </div>
                         </div>
-                      </div>
-                    </Link>
-                  </li>
+                      </Link>
+                    </li>
+                  </BlurFade>
                 ))}
               </ul>
             </div>
@@ -266,25 +281,33 @@ export default function Header() {
                 Tools
               </h3>
               <ul className="space-y-1">
-                {toolPages.map((page) => (
-                  <li key={page.title}>
-                    <Link
-                      to={page.href}
-                      preload="intent"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 rounded-lg px-3 py-3 text-foreground transition hover:bg-primary/10 hover:text-primary"
-                    >
-                      <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-card/60">
-                        <page.icon className="h-4 w-4 text-primary" />
-                      </span>
-                      <div>
-                        <div className="font-medium">{page.title}</div>
-                        <div className="text-xs text-muted-foreground line-clamp-1">
-                          {page.description}
+                {toolPages.map((page, i) => (
+                  <BlurFade
+                    key={page.title}
+                    direction="right"
+                    offset={10}
+                    delay={(i + databasePages.length) * 0.02}
+                    duration={0.2}
+                  >
+                    <li>
+                      <Link
+                        to={page.href}
+                        preload="intent"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-3 rounded-lg px-3 py-3 text-foreground transition hover:bg-primary/10 hover:text-primary"
+                      >
+                        <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-card/60">
+                          <page.icon className="h-4 w-4 text-primary" />
+                        </span>
+                        <div>
+                          <div className="font-medium">{page.title}</div>
+                          <div className="text-xs text-muted-foreground line-clamp-1">
+                            {page.description}
+                          </div>
                         </div>
-                      </div>
-                    </Link>
-                  </li>
+                      </Link>
+                    </li>
+                  </BlurFade>
                 ))}
               </ul>
             </div>
