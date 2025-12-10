@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
   ArchiveIcon,
+  BookIcon,
   BotIcon,
   DatabaseIcon,
   HammerIcon,
@@ -89,6 +90,12 @@ const toolPages: ReadonlyArray<PageItem> = [
     description:
       "Use the Topside DB Discord bot for instant access to Arc Raiders information",
     icon: BotIcon,
+  },
+  {
+    title: "Attributions",
+    href: "/attributions",
+    description: "Giving credit where credit is due",
+    icon: BookIcon,
   },
 ];
 
