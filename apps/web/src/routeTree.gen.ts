@@ -16,6 +16,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as MapsRouteImport } from './routes/maps'
 import { Route as ItemsRouteImport } from './routes/items'
 import { Route as HideoutRouteImport } from './routes/hideout'
+import { Route as AttributionsRouteImport } from './routes/attributions'
 import { Route as ArcsRouteImport } from './routes/arcs'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TradersTraderIdRouteImport } from './routes/traders_.$traderId'
@@ -60,6 +61,11 @@ const ItemsRoute = ItemsRouteImport.update({
 const HideoutRoute = HideoutRouteImport.update({
   id: '/hideout',
   path: '/hideout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AttributionsRoute = AttributionsRouteImport.update({
+  id: '/attributions',
+  path: '/attributions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArcsRoute = ArcsRouteImport.update({
@@ -116,6 +122,7 @@ const ArcsArcIdRoute = ArcsArcIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/arcs': typeof ArcsRoute
+  '/attributions': typeof AttributionsRoute
   '/hideout': typeof HideoutRoute
   '/items': typeof ItemsRoute
   '/maps': typeof MapsRoute
@@ -135,6 +142,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/arcs': typeof ArcsRoute
+  '/attributions': typeof AttributionsRoute
   '/hideout': typeof HideoutRoute
   '/items': typeof ItemsRoute
   '/maps': typeof MapsRoute
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/arcs': typeof ArcsRoute
+  '/attributions': typeof AttributionsRoute
   '/hideout': typeof HideoutRoute
   '/items': typeof ItemsRoute
   '/maps': typeof MapsRoute
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/arcs'
+    | '/attributions'
     | '/hideout'
     | '/items'
     | '/maps'
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/arcs'
+    | '/attributions'
     | '/hideout'
     | '/items'
     | '/maps'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/arcs'
+    | '/attributions'
     | '/hideout'
     | '/items'
     | '/maps'
@@ -234,6 +246,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ArcsRoute: typeof ArcsRoute
+  AttributionsRoute: typeof AttributionsRoute
   HideoutRoute: typeof HideoutRoute
   ItemsRoute: typeof ItemsRoute
   MapsRoute: typeof MapsRoute
@@ -300,6 +313,13 @@ declare module '@tanstack/react-router' {
       path: '/hideout'
       fullPath: '/hideout'
       preLoaderRoute: typeof HideoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/attributions': {
+      id: '/attributions'
+      path: '/attributions'
+      fullPath: '/attributions'
+      preLoaderRoute: typeof AttributionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/arcs': {
@@ -378,6 +398,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ArcsRoute: ArcsRoute,
+  AttributionsRoute: AttributionsRoute,
   HideoutRoute: HideoutRoute,
   ItemsRoute: ItemsRoute,
   MapsRoute: MapsRoute,

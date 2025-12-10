@@ -111,6 +111,13 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
                   >
                     Privacy Policy
                   </Link>
+                  <span>•</span>
+                  <Link
+                    to="/attributions"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Attributions
+                  </Link>
                 </div>
               </footer>
               <Toaster richColors />
