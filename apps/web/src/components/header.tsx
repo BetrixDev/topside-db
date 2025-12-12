@@ -85,6 +85,12 @@ const toolPages: ReadonlyArray<PageItem> = [
     icon: RecycleIcon,
   },
   {
+    title: "Crafting Profit",
+    href: "/tools/craft-profit",
+    description: "Find the most profitable items to craft at hideout stations",
+    icon: HammerIcon,
+  },
+  {
     title: "Discord Bot",
     href: "/tools/discord-bot",
     description:
