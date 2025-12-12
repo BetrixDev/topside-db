@@ -1,6 +1,6 @@
 import z from "zod";
 import { publicProcedure } from "..";
-import { eq, Tables, sql, aliasedTable } from "@topside-db/db";
+import { eq, Tables, sql, aliasedTable, isNotNull } from "@topside-db/db";
 import { cacheMiddleware } from "../middleware/cache";
 
 export const itemsRouter = {
@@ -18,6 +18,7 @@ export const itemsRouter = {
                   name: true,
                   id: true,
                   imageFilename: true,
+                  value: true,
                 },
               },
             },
@@ -159,6 +160,69 @@ export const itemsRouter = {
         .leftJoin(materials, eq(materials.id, Tables.itemRecycles.materialId))
         .groupBy(Tables.items.id, Tables.items.name, Tables.items.value)
         .orderBy(sql`${recycleYieldPct} DESC NULLS LAST`);
+
+      return rows;
+    }),
+  craftingProfitList: publicProcedure
+    .use(cacheMiddleware({ keyPrefix: "items:crafting" }))
+    .output(
+      z.array(
+        z.object({
+          itemId: z.string(),
+          itemName: z.string(),
+          craftBench: z.array(z.string()).nullish(),
+          craftedValue: z.number().nullish(),
+          materialCost: z.number().nullish(),
+          profit: z.number().nullish(),
+          profitMarginPct: z.coerce.number().nullish(),
+        })
+      )
+    )
+    .handler(async ({ context }) => {
+      const materials = aliasedTable(Tables.items, "materials");
+
+      const materialCost = sql<number>`
+        COALESCE(SUM(${Tables.itemRecipes.quantity} * ${materials.value}), 0)
+      `;
+
+      const profit = sql<number>`
+        ${Tables.items.value} - ${materialCost}
+      `;
+
+      const profitMarginPct = sql<number>`
+        ROUND(
+          (
+            (${Tables.items.value} - ${materialCost})
+            / NULLIF(${materialCost}, 0)
+          )::numeric,
+          2
+        )
+      `;
+
+      const rows = await context.db
+        .select({
+          itemId: Tables.items.id,
+          itemName: Tables.items.name,
+          craftBench: Tables.items.craftBench,
+          craftedValue: Tables.items.value,
+          materialCost: materialCost,
+          profit: profit,
+          profitMarginPct: profitMarginPct,
+        })
+        .from(Tables.items)
+        .innerJoin(
+          Tables.itemRecipes,
+          eq(Tables.itemRecipes.itemId, Tables.items.id)
+        )
+        .leftJoin(materials, eq(materials.id, Tables.itemRecipes.materialId))
+        .where(isNotNull(Tables.items.value))
+        .groupBy(
+          Tables.items.id,
+          Tables.items.name,
+          Tables.items.value,
+          Tables.items.craftBench
+        )
+        .orderBy(sql`${profit} DESC NULLS LAST`);
 
       return rows;
     }),

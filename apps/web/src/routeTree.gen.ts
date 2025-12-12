@@ -25,6 +25,7 @@ import { Route as QuestsQuestIdRouteImport } from './routes/quests_.$questId'
 import { Route as MapsMapIdRouteImport } from './routes/maps_.$mapId'
 import { Route as ItemsRecyclesRouteImport } from './routes/items_.recycles'
 import { Route as ItemsItemIdRouteImport } from './routes/items_.$itemId'
+import { Route as HideoutCraftsRouteImport } from './routes/hideout_.crafts'
 import { Route as HideoutWorkbenchIdRouteImport } from './routes/hideout_.$workbenchId'
 import { Route as ArcsArcIdRouteImport } from './routes/arcs_.$arcId'
 
@@ -108,6 +109,11 @@ const ItemsItemIdRoute = ItemsItemIdRouteImport.update({
   path: '/items/$itemId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HideoutCraftsRoute = HideoutCraftsRouteImport.update({
+  id: '/hideout_/crafts',
+  path: '/hideout/crafts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HideoutWorkbenchIdRoute = HideoutWorkbenchIdRouteImport.update({
   id: '/hideout_/$workbenchId',
   path: '/hideout/$workbenchId',
@@ -132,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/traders': typeof TradersRoute
   '/arcs/$arcId': typeof ArcsArcIdRoute
   '/hideout/$workbenchId': typeof HideoutWorkbenchIdRoute
+  '/hideout/crafts': typeof HideoutCraftsRoute
   '/items/$itemId': typeof ItemsItemIdRoute
   '/items/recycles': typeof ItemsRecyclesRoute
   '/maps/$mapId': typeof MapsMapIdRoute
@@ -152,6 +159,7 @@ export interface FileRoutesByTo {
   '/traders': typeof TradersRoute
   '/arcs/$arcId': typeof ArcsArcIdRoute
   '/hideout/$workbenchId': typeof HideoutWorkbenchIdRoute
+  '/hideout/crafts': typeof HideoutCraftsRoute
   '/items/$itemId': typeof ItemsItemIdRoute
   '/items/recycles': typeof ItemsRecyclesRoute
   '/maps/$mapId': typeof MapsMapIdRoute
@@ -173,6 +181,7 @@ export interface FileRoutesById {
   '/traders': typeof TradersRoute
   '/arcs_/$arcId': typeof ArcsArcIdRoute
   '/hideout_/$workbenchId': typeof HideoutWorkbenchIdRoute
+  '/hideout_/crafts': typeof HideoutCraftsRoute
   '/items_/$itemId': typeof ItemsItemIdRoute
   '/items_/recycles': typeof ItemsRecyclesRoute
   '/maps_/$mapId': typeof MapsMapIdRoute
@@ -195,6 +204,7 @@ export interface FileRouteTypes {
     | '/traders'
     | '/arcs/$arcId'
     | '/hideout/$workbenchId'
+    | '/hideout/crafts'
     | '/items/$itemId'
     | '/items/recycles'
     | '/maps/$mapId'
@@ -215,6 +225,7 @@ export interface FileRouteTypes {
     | '/traders'
     | '/arcs/$arcId'
     | '/hideout/$workbenchId'
+    | '/hideout/crafts'
     | '/items/$itemId'
     | '/items/recycles'
     | '/maps/$mapId'
@@ -235,6 +246,7 @@ export interface FileRouteTypes {
     | '/traders'
     | '/arcs_/$arcId'
     | '/hideout_/$workbenchId'
+    | '/hideout_/crafts'
     | '/items_/$itemId'
     | '/items_/recycles'
     | '/maps_/$mapId'
@@ -256,6 +268,7 @@ export interface RootRouteChildren {
   TradersRoute: typeof TradersRoute
   ArcsArcIdRoute: typeof ArcsArcIdRoute
   HideoutWorkbenchIdRoute: typeof HideoutWorkbenchIdRoute
+  HideoutCraftsRoute: typeof HideoutCraftsRoute
   ItemsItemIdRoute: typeof ItemsItemIdRoute
   ItemsRecyclesRoute: typeof ItemsRecyclesRoute
   MapsMapIdRoute: typeof MapsMapIdRoute
@@ -378,6 +391,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ItemsItemIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hideout_/crafts': {
+      id: '/hideout_/crafts'
+      path: '/hideout/crafts'
+      fullPath: '/hideout/crafts'
+      preLoaderRoute: typeof HideoutCraftsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hideout_/$workbenchId': {
       id: '/hideout_/$workbenchId'
       path: '/hideout/$workbenchId'
@@ -408,6 +428,7 @@ const rootRouteChildren: RootRouteChildren = {
   TradersRoute: TradersRoute,
   ArcsArcIdRoute: ArcsArcIdRoute,
   HideoutWorkbenchIdRoute: HideoutWorkbenchIdRoute,
+  HideoutCraftsRoute: HideoutCraftsRoute,
   ItemsItemIdRoute: ItemsItemIdRoute,
   ItemsRecyclesRoute: ItemsRecyclesRoute,
   MapsMapIdRoute: MapsMapIdRoute,
