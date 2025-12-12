@@ -1,5 +1,5 @@
 type TopsideDbUrlOptions = {
-  type: "map" | "item" | "arc" | "quest" | "trader";
+  type: "map" | "item" | "arc" | "quest" | "trader" | "hideout";
   id: string;
 };
 
@@ -17,6 +17,8 @@ export function createTopsideDbUrl(options: TopsideDbUrlOptions) {
       return `${baseUrl}/quests/${options.id}`;
     case "trader":
       return `${baseUrl}/traders/${options.id}`;
+    case "hideout":
+      return `${baseUrl}/hideout/${options.id}`;
     default:
       throw new Error(`Invalid options: ${JSON.stringify(options)}`);
   }
