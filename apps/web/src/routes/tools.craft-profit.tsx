@@ -20,45 +20,46 @@ import {
   ArrowUpIcon,
   ArrowUpRightIcon,
   FilterIcon,
-  RecycleIcon,
+  HammerIcon,
   SearchIcon,
   Sparkles,
   TrendingUpIcon,
+  WrenchIcon,
 } from "lucide-react";
 import { seo } from "@/lib/seo";
 
-type RecycleValueQuery = ReturnType<
-  typeof orpc.items.recycleValueList.queryOptions
+type CraftingProfitQuery = ReturnType<
+  typeof orpc.items.craftingProfitList.queryOptions
 >;
-type RecycleValueEntry = Awaited<
-  ReturnType<NonNullable<RecycleValueQuery["queryFn"]>>
+type CraftingProfitEntry = Awaited<
+  ReturnType<NonNullable<CraftingProfitQuery["queryFn"]>>
 >[number];
 
 const sortOptions = [
-  { label: "Highest yield", value: "yield" },
-  { label: "Largest profit", value: "profit" },
-  { label: "Recycled value", value: "value" },
+  { label: "Highest profit", value: "profit" },
+  { label: "Best margin", value: "margin" },
+  { label: "Sell value", value: "value" },
   { label: "Name A → Z", value: "name" },
 ] as const;
 
 type SortOption = (typeof sortOptions)[number]["value"];
 
-export const Route = createFileRoute("/items_/recycles")({
+export const Route = createFileRoute("/tools/craft-profit")({
   head: () => ({
     meta: [
       ...seo({
-        title: "Recycles | Topside DB",
+        title: "Crafting Profit | Topside DB",
         description:
-          "Compare original item values with what you gain by recycling them. Spot the standouts, dive into their output breakdowns, and plan your next dismantle Arc Raiders items with confidence.",
+          "Calculate the profit potential of crafting items at hideout stations. Compare material costs vs sell value to find the most profitable crafts in Arc Raiders.",
         keywords:
-          "arc raiders, database, search engine, recycle, profit, salvage, arc raiders recycle list",
-        image: "/og/images/recycles.png",
+          "arc raiders, database, crafting, profit, hideout, workbench, materials, arc raiders crafting guide",
+        image: "/og/images/crafts.png",
       }),
     ],
   }),
   loader: ({ context }) => {
     return context.queryClient.ensureQueryData(
-      orpc.items.recycleValueList.queryOptions()
+      orpc.items.craftingProfitList.queryOptions()
     );
   },
   component: RouteComponent,
@@ -66,29 +67,29 @@ export const Route = createFileRoute("/items_/recycles")({
 
 function RouteComponent() {
   const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState<SortOption>("yield");
+  const [sortBy, setSortBy] = useState<SortOption>("profit");
   const [showProfitableOnly, setShowProfitableOnly] = useState(true);
   const queryClient = useQueryClient();
 
   const {
-    data: recycles = [],
+    data: crafts = [],
     isLoading,
     isError,
-  } = useQuery(orpc.items.recycleValueList.queryOptions());
+  } = useQuery(orpc.items.craftingProfitList.queryOptions());
 
-  const stats = useMemo(() => computeStats(recycles), [recycles]);
+  const stats = useMemo(() => computeStats(crafts), [crafts]);
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
-    return [...recycles]
+    return [...crafts]
       .filter((entry) =>
         term ? entry.itemName.toLowerCase().includes(term) : true
       )
       .filter((entry) =>
-        showProfitableOnly ? (entry.recycleYieldPct ?? 0) >= 1 : true
+        showProfitableOnly ? (entry.profit ?? 0) > 0 : true
       )
       .sort((a, b) => sortEntries(a, b, sortBy));
-  }, [recycles, search, showProfitableOnly, sortBy]);
+  }, [crafts, search, showProfitableOnly, sortBy]);
 
   return (
     <div className="min-h-screen mt-16 md:px-0 px-4">
@@ -100,7 +101,7 @@ function RouteComponent() {
             <div className="relative flex-1">
               <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search for an item to recycle..."
+                placeholder="Search for an item to craft..."
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 className="pl-9"
@@ -151,8 +152,8 @@ function RouteComponent() {
                     Something went wrong
                   </CardTitle>
                   <CardDescription className="text-destructive/80">
-                    Unable to load recycle data right now. Please try again in a
-                    moment.
+                    Unable to load crafting data right now. Please try again in
+                    a moment.
                   </CardDescription>
                 </div>
                 <Button
@@ -160,7 +161,7 @@ function RouteComponent() {
                   size="sm"
                   onClick={() =>
                     queryClient.invalidateQueries({
-                      queryKey: orpc.items.recycleValueList.queryKey(),
+                      queryKey: orpc.items.craftingProfitList.queryKey(),
                     })
                   }
                   className="text-destructive border-destructive/40"
@@ -171,7 +172,7 @@ function RouteComponent() {
             </Card>
           )}
 
-          {isLoading && recycles.length === 0 ? (
+          {isLoading && crafts.length === 0 ? (
             <Loader />
           ) : filtered.length === 0 ? (
             <EmptyState
@@ -181,7 +182,7 @@ function RouteComponent() {
           ) : (
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
               {filtered.map((entry, index) => (
-                <RecycleCard
+                <CraftingCard
                   key={entry.itemId}
                   entry={entry}
                   index={index + 1}
@@ -202,7 +203,7 @@ function HeroSection({
   stats: ReturnType<typeof computeStats>;
   isLoading: boolean;
 }) {
-  const avgYieldPercent = stats.avgYield * 100;
+  const avgMarginPercent = stats.avgMargin * 100;
 
   return (
     <section className="bg-secondary/60 border border-border/60 rounded-3xl p-6 md:p-8 relative overflow-hidden">
@@ -214,17 +215,17 @@ function HeroSection({
         <div className="flex flex-col gap-4">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 px-3 py-1 text-xs font-semibold text-primary w-fit bg-primary/10">
             <Sparkles className="w-4 h-4" />
-            Recycle smarter, profit faster
+            Craft smarter, profit faster
           </div>
           <div className="space-y-2">
             <h1 className="text-4xl md:text-5xl font-bold text-balance">
-              Visualize every <span className="text-primary">salvage</span>{" "}
-              opportunity
+              Discover your best{" "}
+              <span className="text-primary">crafts</span>
             </h1>
             <p className="text-muted-foreground text-base md:text-lg max-w-3xl">
-              Compare original item values with what you gain by recycling them.
-              Spot the standouts, dive into their output breakdowns, and plan
-              your next dismantle with confidence.
+              Compare the cost of materials against what you can sell crafted
+              items for. Find the most profitable crafts, analyze material
+              requirements, and maximize your hideout efficiency.
             </p>
           </div>
         </div>
@@ -241,19 +242,19 @@ function HeroSection({
             <>
               <StatsCard
                 icon={TrendingUpIcon}
-                label="Avg recycle yield"
+                label="Avg profit margin"
                 value={
-                  avgYieldPercent > 0
-                    ? `${avgYieldPercent.toFixed(
-                        avgYieldPercent >= 150 ? 0 : 1
+                  avgMarginPercent > 0
+                    ? `${avgMarginPercent.toFixed(
+                        avgMarginPercent >= 100 ? 0 : 1
                       )}%`
                     : "—"
                 }
-                helper="Across all tracked items"
+                helper="Across all craftable items"
               />
               <StatsCard
                 icon={ArrowUpIcon}
-                label="Profitable items"
+                label="Profitable crafts"
                 value={
                   stats.total > 0
                     ? `${stats.profitableCount}/${stats.total}`
@@ -261,15 +262,15 @@ function HeroSection({
                 }
                 helper={
                   stats.total > 0
-                    ? `${Math.round(stats.profitableShare)}% of catalog`
+                    ? `${Math.round(stats.profitableShare)}% of craftable items`
                     : "No data indexed"
                 }
               />
               <StatsCard
-                icon={RecycleIcon}
-                label="Total recycled value"
-                value={`${formatCredits(stats.totalRecycledValue)}`}
-                helper="If you dismantle every item once"
+                icon={HammerIcon}
+                label="Total potential profit"
+                value={`${formatCredits(stats.totalPotentialProfit)}`}
+                helper="If you craft every item once"
               />
               <StatsCard
                 icon={ArrowUpRightIcon}
@@ -293,11 +294,11 @@ function HeroSection({
   );
 }
 
-function RecycleCard({
+function CraftingCard({
   entry,
   index,
 }: {
-  entry: RecycleValueEntry;
+  entry: CraftingProfitEntry;
   index: number;
 }) {
   const { data, isLoading } = useQuery(
@@ -306,16 +307,18 @@ function RecycleCard({
     })
   );
 
-  const originalValue = entry.originalValue ?? 0;
-  const recycledValue = entry.recycledValue ?? 0;
-  const yieldPct = (entry.recycleYieldPct ?? 0) * 100;
-  const profit = recycledValue - originalValue;
-  const isPositive = profit >= 0;
+  const materialCost = entry.materialCost ?? 0;
+  const craftedValue = entry.craftedValue ?? 0;
+  const profit = entry.profit ?? 0;
+  const marginPct = (entry.profitMarginPct ?? 0) * 100;
+  const isPositive = profit > 0;
+
+  const craftBenches = entry.craftBench ?? [];
 
   return (
     <Card className="relative border-border/60 bg-card/80">
       <CardHeader className="flex flex-col gap-4">
-        <div className="flex items-start gap-4">
+        <div className="flex items-start justify-between gap-4 w-full" style={{ width: '100%' }}>
           <div className="relative w-20 h-20 rounded-2xl bg-background border border-border/60 flex items-center justify-center overflow-hidden">
             {data?.imageFilename ? (
               <img
@@ -325,7 +328,7 @@ function RecycleCard({
                 loading="lazy"
               />
             ) : (
-              <RecycleIcon className="w-8 h-8 text-muted-foreground" />
+              <HammerIcon className="w-8 h-8 text-muted-foreground" />
             )}
           </div>
 
@@ -355,21 +358,35 @@ function RecycleCard({
               </span>
             </div>
             <CardDescription className="mt-2">
-              Original value{" "}
+              Material cost{" "}
               <span className="font-medium text-foreground">
-                {formatCredits(originalValue)}
+                {formatCredits(materialCost)}
               </span>{" "}
-              → Recycled haul{" "}
+              → Sells for{" "}
               <span className="font-medium text-primary">
-                {formatCredits(recycledValue)}
+                {formatCredits(craftedValue)}
               </span>
             </CardDescription>
 
+            {craftBenches.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {craftBenches.map((bench) => (
+                  <span
+                    key={bench}
+                    className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-secondary border border-border/50 text-muted-foreground"
+                  >
+                    <WrenchIcon className="w-3 h-3" />
+                    {bench}
+                  </span>
+                ))}
+              </div>
+            )}
+
             <div className="mt-4 space-y-2">
               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>Recycle yield</span>
+                <span>Profit margin</span>
                 <span className="font-semibold text-foreground">
-                  {yieldPct ? `${Math.round(yieldPct)}%` : "—"}
+                  {marginPct ? `${marginPct > 0 ? "+" : ""}${Math.round(marginPct)}%` : "—"}
                 </span>
               </div>
               <div className="h-2 rounded-full bg-border/60 overflow-hidden">
@@ -378,7 +395,7 @@ function RecycleCard({
                     isPositive ? "bg-primary" : "bg-destructive"
                   }`}
                   style={{
-                    width: `${Math.min(Math.max(yieldPct, 0), 250)}%`,
+                    width: `${Math.min(Math.max(Math.abs(marginPct), 0), 200)}%`,
                   }}
                 />
               </div>
@@ -387,8 +404,8 @@ function RecycleCard({
                   isPositive ? "text-primary" : "text-destructive"
                 }`}
               >
-                {isPositive ? "+" : "-"}
-                {formatCredits(Math.abs(profit))} compared to selling whole
+                {isPositive ? "+" : ""}
+                {formatCredits(profit)} profit per craft
               </div>
             </div>
           </div>
@@ -398,8 +415,8 @@ function RecycleCard({
       <CardContent className="space-y-4 pt-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm font-semibold">
-            <RecycleIcon className="w-4 h-4 text-primary" />
-            Recycles into
+            <HammerIcon className="w-4 h-4 text-primary" />
+            Required materials
           </div>
         </div>
 
@@ -408,24 +425,24 @@ function RecycleCard({
             <Skeleton className="h-20 rounded-xl" />
             <Skeleton className="h-20 rounded-xl" />
           </div>
-        ) : data?.recycles && data.recycles.length > 0 ? (
+        ) : data?.recipes && data.recipes.length > 0 ? (
           <div className="grid gap-2 sm:grid-cols-2">
-            {data.recycles.map((recycle) => {
-              const materialValue = recycle.material?.value ?? 0;
-              const totalMaterialValue = materialValue * recycle.quantity;
+            {data.recipes.map((recipe) => {
+              const materialValue = recipe.material?.value ?? 0;
+              const totalMaterialValue = materialValue * recipe.quantity;
               return (
                 <Link
-                  key={`${recycle.itemId}-${recycle.materialId}`}
+                  key={`${recipe.itemId}-${recipe.materialId}`}
                   to="/items/$itemId"
-                  params={{ itemId: recycle.materialId }}
+                  params={{ itemId: recipe.materialId }}
                   preload="intent"
                   className="flex items-center gap-3 rounded-2xl border border-border/50 bg-background/50 p-3 hover:border-primary/60 transition-colors"
                 >
                   <div className="w-12 h-12 rounded-xl bg-secondary/60 border border-border/40 flex items-center justify-center overflow-hidden">
-                    {recycle.material?.imageFilename ? (
+                    {recipe.material?.imageFilename ? (
                       <img
-                        src={recycle.material.imageFilename ?? undefined}
-                        alt={recycle.material?.name ?? "Recycled material"}
+                        src={recipe.material.imageFilename ?? undefined}
+                        alt={recipe.material?.name ?? "Material"}
                         className="w-full h-full object-contain p-1.5"
                         loading="lazy"
                       />
@@ -435,10 +452,10 @@ function RecycleCard({
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold truncate">
-                      {recycle.material?.name ?? "Unknown component"}
+                      {recipe.material?.name ?? "Unknown material"}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {recycle.quantity}x · {formatCredits(materialValue)} each
+                      {recipe.quantity}x · {formatCredits(materialValue)} each
                     </p>
                   </div>
                   <div className="text-sm font-semibold tabular-nums">
@@ -450,7 +467,7 @@ function RecycleCard({
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">
-            We do not have recycle outputs logged for this item yet.
+            We do not have recipe data logged for this item yet.
           </p>
         )}
       </CardContent>
@@ -492,60 +509,54 @@ function EmptyState({
 }) {
   return (
     <div className="border border-border/50 rounded-2xl bg-secondary/40 p-8 text-center space-y-3">
-      <h3 className="text-2xl font-semibold">No recycles found</h3>
+      <h3 className="text-2xl font-semibold">No craftable items found</h3>
       <p className="text-muted-foreground">
         {hasSearch
           ? "Try refining or clearing your search term."
           : hasFilter
-          ? "All items are shown once you disable filters."
-          : "We have not indexed any recycles yet."}
+            ? "All items are shown once you disable filters."
+            : "We have not indexed any craftable items yet."}
       </p>
     </div>
   );
 }
 
-function computeStats(recycles: RecycleValueEntry[]) {
-  if (!recycles.length) {
+function computeStats(crafts: CraftingProfitEntry[]) {
+  if (!crafts.length) {
     return {
-      avgYield: 0,
+      avgMargin: 0,
       profitableShare: 0,
-      totalRecycledValue: 0,
+      totalPotentialProfit: 0,
       profitableCount: 0,
       total: 0,
       topProfit: 0,
-      topProfitItem: undefined as RecycleValueEntry | undefined,
+      topProfitItem: undefined as CraftingProfitEntry | undefined,
     };
   }
 
-  const yieldValues = recycles
-    .map((entry) => entry.recycleYieldPct)
+  const marginValues = crafts
+    .map((entry) => entry.profitMarginPct)
     .filter(
       (value): value is number =>
         typeof value === "number" && Number.isFinite(value)
     );
-  const avgYield = yieldValues.length
-    ? yieldValues.reduce((sum, value) => sum + value, 0) / yieldValues.length
+  const avgMargin = marginValues.length
+    ? marginValues.reduce((sum, value) => sum + value, 0) / marginValues.length
     : 0;
-  const totalRecycledValue = recycles.reduce(
-    (sum, entry) => sum + (entry.recycledValue ?? 0),
+  const totalPotentialProfit = crafts.reduce(
+    (sum, entry) => sum + Math.max(entry.profit ?? 0, 0),
     0
   );
-  const profitableEntries = recycles.filter(
-    (entry) => (entry.recycleYieldPct ?? 0) >= 1
-  );
-  const topProfitResult = recycles.reduce(
+  const profitableEntries = crafts.filter((entry) => (entry.profit ?? 0) > 0);
+  const topProfitResult = crafts.reduce(
     (acc, entry) => {
-      if (
-        entry.recycleYieldPct === null ||
-        entry.recycleYieldPct === undefined
-      ) {
+      if (entry.profit === null || entry.profit === undefined) {
         return acc;
       }
 
-      const profit = (entry.recycledValue ?? 0) - (entry.originalValue ?? 0);
-      if (profit > acc.topProfit) {
+      if (entry.profit > acc.topProfit) {
         return {
-          topProfit: profit,
+          topProfit: entry.profit,
           topProfitItem: entry,
         };
       }
@@ -553,16 +564,16 @@ function computeStats(recycles: RecycleValueEntry[]) {
     },
     {
       topProfit: Number.NEGATIVE_INFINITY,
-      topProfitItem: undefined as RecycleValueEntry | undefined,
+      topProfitItem: undefined as CraftingProfitEntry | undefined,
     }
   );
 
   return {
-    avgYield,
-    profitableShare: (profitableEntries.length / recycles.length) * 100,
-    totalRecycledValue,
+    avgMargin,
+    profitableShare: (profitableEntries.length / crafts.length) * 100,
+    totalPotentialProfit,
     profitableCount: profitableEntries.length,
-    total: recycles.length,
+    total: crafts.length,
     topProfit:
       topProfitResult.topProfit === Number.NEGATIVE_INFINITY
         ? 0
@@ -572,27 +583,23 @@ function computeStats(recycles: RecycleValueEntry[]) {
 }
 
 function sortEntries(
-  a: RecycleValueEntry,
-  b: RecycleValueEntry,
+  a: CraftingProfitEntry,
+  b: CraftingProfitEntry,
   sortBy: SortOption
 ) {
   switch (sortBy) {
     case "value":
-      return (b.recycledValue ?? 0) - (a.recycledValue ?? 0);
-    case "profit":
+      return (b.craftedValue ?? 0) - (a.craftedValue ?? 0);
+    case "margin":
       return (
-        (b.recycledValue ?? 0) -
-        (b.originalValue ?? 0) -
-        ((a.recycledValue ?? 0) - (a.originalValue ?? 0))
+        (b.profitMarginPct ?? Number.NEGATIVE_INFINITY) -
+        (a.profitMarginPct ?? Number.NEGATIVE_INFINITY)
       );
     case "name":
       return a.itemName.localeCompare(b.itemName);
-    case "yield":
+    case "profit":
     default:
-      return (
-        (b.recycleYieldPct ?? Number.NEGATIVE_INFINITY) -
-        (a.recycleYieldPct ?? Number.NEGATIVE_INFINITY)
-      );
+      return (b.profit ?? Number.NEGATIVE_INFINITY) - (a.profit ?? Number.NEGATIVE_INFINITY);
   }
 }
 
