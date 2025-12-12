@@ -1,11 +1,36 @@
 import { useState } from "react";
-import { Cache, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Cache,
+  Icon,
+  List,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { QueryClient, useQuery } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import type { Persister } from "@tanstack/react-query-persist-client";
 import { orpc } from "./api";
-import { capitalize } from "es-toolkit/string";
-import { SearchHit } from "@topside-db/schemas";
+import type { SearchHit } from "@topside-db/schemas";
+import {
+  formatKind,
+  getIconForSearchHit,
+  getSubtitleForSearchHit,
+  getUrlForSearchHit,
+  type EntityKind,
+} from "./utils/search-helpers";
+import {
+  ItemDetail,
+  MapDetail,
+  QuestDetail,
+  TraderDetail,
+  ArcDetail,
+  HideoutDetail,
+} from "./components";
+
+// ============================================================================
+// QUERY CLIENT SETUP
+// ============================================================================
 
 const cache = new Cache();
 
@@ -40,10 +65,14 @@ const queryClient = new QueryClient({
   },
 });
 
+// ============================================================================
+// MAIN COMMAND
+// ============================================================================
+
 function Command() {
   const [searchText, setSearchText] = useState("");
 
-  const { data } = useQuery(
+  const { data, isLoading } = useQuery(
     orpc.search.search.queryOptions({
       input: {
         query: searchText,
@@ -61,36 +90,102 @@ function Command() {
       searchBarPlaceholder="Search anything in Arc Raiders"
       throttle
       isShowingDetail
+      isLoading={isLoading}
     >
-      {hits.length === 0 && <List.EmptyView title="No results found" />}
+      {hits.length === 0 && !isLoading && (
+        <List.EmptyView
+          title="No results found"
+          description={
+            searchText
+              ? "Try a different search term"
+              : "Start typing to search"
+          }
+          icon={Icon.MagnifyingGlass}
+        />
+      )}
       {hits.map((item) => (
         <List.Item
           icon={{
-            source: getIconForSearchHit(item) ?? "unknown.png",
+            source: getIconForSearchHit(item) ?? Icon.Document,
             tooltip: item.name,
           }}
-          key={item.id}
+          key={`${item.kind}-${item.id}`}
           title={item.name}
-          subtitle={capitalize(item.kind)}
+          subtitle={getSubtitleForSearchHit(item)}
+          accessories={[{ tag: { value: formatKind(item.kind) } }]}
           detail={<TopsideDetail id={item.id} kind={item.kind} />}
+          actions={<SearchResultActions item={item} />}
         />
       ))}
     </List>
   );
 }
 
-function getIconForSearchHit(hit: SearchHit) {
-  switch (hit.kind) {
+// ============================================================================
+// ACTIONS
+// ============================================================================
+
+function SearchResultActions({ item }: { item: SearchHit }) {
+  const url = getUrlForSearchHit(item);
+
+  return (
+    <ActionPanel>
+      {url && (
+        <>
+          <Action.OpenInBrowser title="Open in Browser" url={url} />
+          <Action.CopyToClipboard
+            title="Copy URL"
+            content={url}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          />
+        </>
+      )}
+      <Action.CopyToClipboard
+        title="Copy Name"
+        content={item.name}
+        shortcut={{ modifiers: ["cmd"], key: "c" }}
+      />
+      <Action
+        title="Open Extension Preferences"
+        icon={Icon.Gear}
+        onAction={openExtensionPreferences}
+        shortcut={{ modifiers: ["cmd"], key: "," }}
+      />
+    </ActionPanel>
+  );
+}
+
+// ============================================================================
+// DETAIL ROUTER
+// ============================================================================
+
+type TopsideDetailProps = {
+  id: string;
+  kind: EntityKind;
+};
+
+function TopsideDetail({ id, kind }: TopsideDetailProps) {
+  switch (kind) {
     case "items":
-      return hit.imageFilename;
-    case "arcs":
-      return hit.imageUrl;
+      return <ItemDetail id={id} />;
     case "maps":
-      return hit.imageUrl;
+      return <MapDetail id={id} />;
+    case "quests":
+      return <QuestDetail id={id} />;
     case "traders":
-      return hit.imageUrl;
+      return <TraderDetail id={id} />;
+    case "arcs":
+      return <ArcDetail id={id} />;
+    case "hideoutStations":
+      return <HideoutDetail id={id} />;
+    default:
+      return <List.Item.Detail markdown="Unknown type" />;
   }
 }
+
+// ============================================================================
+// EXPORT
+// ============================================================================
 
 export default function CommandWrapper() {
   return (
@@ -100,64 +195,5 @@ export default function CommandWrapper() {
     >
       <Command />
     </PersistQueryClientProvider>
-  );
-}
-
-type TopsideDetailProps = {
-  id: string;
-  kind: "items" | "hideoutStations" | "maps" | "traders" | "quests" | "arcs";
-};
-
-function TopsideDetail({ id, kind }: TopsideDetailProps) {
-  if (kind === "items") {
-    return <ItemDetail id={id} />;
-  }
-
-  if (kind === "maps") {
-    return <MapDetail id={id} />;
-  }
-
-  return <List.Item.Detail markdown="Not implemented" />;
-}
-
-function ItemDetail({ id }: { id: string }) {
-  const { data, isLoading } = useQuery(
-    orpc.items.getItem.queryOptions({
-      input: { id },
-    })
-  );
-
-  if (isLoading) {
-    return <List.Item.Detail markdown="Loading..." />;
-  }
-
-  if (!data) {
-    return <List.Item.Detail markdown="No data found" />;
-  }
-
-  return (
-    <List.Item.Detail markdown={`# ${data.name}\n\n${data.description}`} />
-  );
-}
-
-function MapDetail({ id }: { id: string }) {
-  const { data, isLoading } = useQuery(
-    orpc.maps.getMap.queryOptions({
-      input: { id },
-    })
-  );
-
-  if (isLoading) {
-    return <List.Item.Detail markdown="Loading..." />;
-  }
-
-  if (!data) {
-    return <List.Item.Detail markdown="No data found" />;
-  }
-
-  return (
-    <List.Item.Detail
-      markdown={`# ${data.name}\n\n![${data.name} map image](${data.imageUrl})`}
-    />
   );
 }
