@@ -318,7 +318,7 @@ function CraftingCard({
   return (
     <Card className="relative border-border/60 bg-card/80">
       <CardHeader className="flex flex-col gap-4">
-        <div className="flex items-start gap-4">
+        <div className="flex items-start justify-between gap-4 w-full" style={{ width: '100%' }}>
           <div className="relative w-20 h-20 rounded-2xl bg-background border border-border/60 flex items-center justify-center overflow-hidden">
             {data?.imageFilename ? (
               <img
@@ -334,12 +334,19 @@ function CraftingCard({
 
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-2 min-w-0">
-              <CardTitle
-                className="text-2xl flex-1 min-w-0 truncate"
-                title={entry.itemName}
+              <Link
+                to="/items/$itemId"
+                params={{ itemId: entry.itemId }}
+                preload="intent"
+                className="flex-1 min-w-0"
               >
-                {entry.itemName}
-              </CardTitle>
+                <CardTitle
+                  className="text-2xl flex-1 min-w-0 truncate hover:text-primary transition-colors"
+                  title={entry.itemName}
+                >
+                  {entry.itemName}
+                </CardTitle>
+              </Link>
               <span
                 className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
                   isPositive
@@ -402,18 +409,6 @@ function CraftingCard({
               </div>
             </div>
           </div>
-
-          <Link
-            to="/items/$itemId"
-            params={{ itemId: entry.itemId }}
-            preload="intent"
-            className="self-start"
-          >
-            <Button variant="ghost" size="sm" className="gap-1">
-              Inspect
-              <ArrowUpRightIcon className="w-4 h-4" />
-            </Button>
-          </Link>
         </div>
       </CardHeader>
 
