@@ -71,9 +71,7 @@ export function ItemDetail({ id }: { id: string }) {
 
   // Effects
   if (data.effects && data.effects.length > 0) {
-    metadata.push(
-      <List.Item.Detail.Metadata.Separator key="effects-sep" />
-    );
+    metadata.push(<List.Item.Detail.Metadata.Separator key="effects-sep" />);
     metadata.push(
       <List.Item.Detail.Metadata.Label
         key="effects-header"
@@ -94,9 +92,7 @@ export function ItemDetail({ id }: { id: string }) {
 
   // Recycles
   if (data.recycles && data.recycles.length > 0) {
-    metadata.push(
-      <List.Item.Detail.Metadata.Separator key="recycles-sep" />
-    );
+    metadata.push(<List.Item.Detail.Metadata.Separator key="recycles-sep" />);
     const recycleWorth =
       data.recycledValue != null && data.value != null
         ? data.recycledValue > data.value
@@ -128,9 +124,7 @@ export function ItemDetail({ id }: { id: string }) {
 
   // Salvages
   if (data.salvages && data.salvages.length > 0) {
-    metadata.push(
-      <List.Item.Detail.Metadata.Separator key="salvages-sep" />
-    );
+    metadata.push(<List.Item.Detail.Metadata.Separator key="salvages-sep" />);
     metadata.push(
       <List.Item.Detail.Metadata.Label
         key="salvages-header"
@@ -152,9 +146,7 @@ export function ItemDetail({ id }: { id: string }) {
 
   // Crafting recipe
   if (data.recipes && data.recipes.length > 0) {
-    metadata.push(
-      <List.Item.Detail.Metadata.Separator key="recipes-sep" />
-    );
+    metadata.push(<List.Item.Detail.Metadata.Separator key="recipes-sep" />);
     metadata.push(
       <List.Item.Detail.Metadata.Label
         key="recipes-header"
@@ -176,9 +168,7 @@ export function ItemDetail({ id }: { id: string }) {
 
   // Traders
   if (data.traders && data.traders.length > 0) {
-    metadata.push(
-      <List.Item.Detail.Metadata.Separator key="traders-sep" />
-    );
+    metadata.push(<List.Item.Detail.Metadata.Separator key="traders-sep" />);
     metadata.push(
       <List.Item.Detail.Metadata.Label
         key="traders-header"
@@ -209,9 +199,7 @@ export function ItemDetail({ id }: { id: string }) {
 
   // Hideout requirements
   if (data.hideoutRequirements && data.hideoutRequirements.length > 0) {
-    metadata.push(
-      <List.Item.Detail.Metadata.Separator key="hideout-sep" />
-    );
+    metadata.push(<List.Item.Detail.Metadata.Separator key="hideout-sep" />);
     metadata.push(
       <List.Item.Detail.Metadata.Label
         key="hideout-header"
@@ -255,9 +243,7 @@ export function ItemDetail({ id }: { id: string }) {
 
   // Arc loot
   if (data.arcLootItems && data.arcLootItems.length > 0) {
-    metadata.push(
-      <List.Item.Detail.Metadata.Separator key="arc-loot-sep" />
-    );
+    metadata.push(<List.Item.Detail.Metadata.Separator key="arc-loot-sep" />);
     metadata.push(
       <List.Item.Detail.Metadata.Label
         key="arc-loot-header"
@@ -279,9 +265,6 @@ export function ItemDetail({ id }: { id: string }) {
 
   // Build markdown for top section
   let markdown = `# ${data.name}\n\n`;
-  if (data.imageFilename) {
-    markdown += `![${data.name}](${data.imageFilename})\n\n`;
-  }
   if (data.description) {
     markdown += data.description;
   }

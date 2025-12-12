@@ -131,9 +131,6 @@ export function TraderDetail({ id }: { id: string }) {
 
   // Build markdown
   let markdown = `# ${data.name}\n\n`;
-  if (data.imageUrl) {
-    markdown += `![${data.name}](${data.imageUrl})\n\n`;
-  }
   if (data.description) {
     markdown += data.description;
   } else {

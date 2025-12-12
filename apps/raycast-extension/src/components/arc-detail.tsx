@@ -143,7 +143,7 @@ export function ArcDetail({ id }: { id: string }) {
         text=""
       />
     );
-    data.lootDetails.slice(0, 8).forEach((l, idx) => {
+    data.lootDetails.forEach((l, idx) => {
       const item = l.item;
       metadata.push(
         <List.Item.Detail.Metadata.Label
@@ -154,22 +154,10 @@ export function ArcDetail({ id }: { id: string }) {
         />
       );
     });
-    if (data.lootDetails.length > 8) {
-      metadata.push(
-        <List.Item.Detail.Metadata.Label
-          key="loot-more"
-          title=""
-          text={`...and ${data.lootDetails.length - 8} more`}
-        />
-      );
-    }
   }
 
   // Build markdown
   let markdown = `# ${data.name}\n\n`;
-  if (data.imageUrl) {
-    markdown += `![${data.name}](${data.imageUrl})\n\n`;
-  }
   if (data.description) {
     markdown += data.description;
   } else {

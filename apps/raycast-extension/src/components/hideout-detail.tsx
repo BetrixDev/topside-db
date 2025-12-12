@@ -65,15 +65,6 @@ export function HideoutDetail({ id }: { id: string }) {
           }
         />
       );
-      if (level.description) {
-        metadata.push(
-          <List.Item.Detail.Metadata.Label
-            key={`level-desc-${levelIdx}`}
-            title=""
-            text={level.description}
-          />
-        );
-      }
       if (level.requirements && level.requirements.length > 0) {
         level.requirements.forEach((req, reqIdx) => {
           metadata.push(
@@ -98,12 +89,7 @@ export function HideoutDetail({ id }: { id: string }) {
   }
 
   // Build markdown
-  let markdown = `# ${data.name}\n\n`;
-  if (data.description) {
-    markdown += data.description;
-  } else {
-    markdown += "*No description available*";
-  }
+  const markdown = `# ${data.name}`;
 
   return (
     <List.Item.Detail
