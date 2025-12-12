@@ -44,7 +44,7 @@ const sortOptions = [
 
 type SortOption = (typeof sortOptions)[number]["value"];
 
-export const Route = createFileRoute("/hideout_/crafts")({
+export const Route = createFileRoute("/tools/craft-profit")({
   head: () => ({
     meta: [
       ...seo({

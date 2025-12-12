@@ -21,11 +21,11 @@ import { Route as ArcsRouteImport } from './routes/arcs'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TradersTraderIdRouteImport } from './routes/traders_.$traderId'
 import { Route as ToolsDiscordBotRouteImport } from './routes/tools.discord-bot'
+import { Route as ToolsCraftProfitRouteImport } from './routes/tools.craft-profit'
 import { Route as QuestsQuestIdRouteImport } from './routes/quests_.$questId'
 import { Route as MapsMapIdRouteImport } from './routes/maps_.$mapId'
 import { Route as ItemsRecyclesRouteImport } from './routes/items_.recycles'
 import { Route as ItemsItemIdRouteImport } from './routes/items_.$itemId'
-import { Route as HideoutCraftsRouteImport } from './routes/hideout_.crafts'
 import { Route as HideoutWorkbenchIdRouteImport } from './routes/hideout_.$workbenchId'
 import { Route as ArcsArcIdRouteImport } from './routes/arcs_.$arcId'
 
@@ -89,6 +89,11 @@ const ToolsDiscordBotRoute = ToolsDiscordBotRouteImport.update({
   path: '/tools/discord-bot',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ToolsCraftProfitRoute = ToolsCraftProfitRouteImport.update({
+  id: '/tools/craft-profit',
+  path: '/tools/craft-profit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QuestsQuestIdRoute = QuestsQuestIdRouteImport.update({
   id: '/quests_/$questId',
   path: '/quests/$questId',
@@ -107,11 +112,6 @@ const ItemsRecyclesRoute = ItemsRecyclesRouteImport.update({
 const ItemsItemIdRoute = ItemsItemIdRouteImport.update({
   id: '/items_/$itemId',
   path: '/items/$itemId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HideoutCraftsRoute = HideoutCraftsRouteImport.update({
-  id: '/hideout_/crafts',
-  path: '/hideout/crafts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HideoutWorkbenchIdRoute = HideoutWorkbenchIdRouteImport.update({
@@ -138,11 +138,11 @@ export interface FileRoutesByFullPath {
   '/traders': typeof TradersRoute
   '/arcs/$arcId': typeof ArcsArcIdRoute
   '/hideout/$workbenchId': typeof HideoutWorkbenchIdRoute
-  '/hideout/crafts': typeof HideoutCraftsRoute
   '/items/$itemId': typeof ItemsItemIdRoute
   '/items/recycles': typeof ItemsRecyclesRoute
   '/maps/$mapId': typeof MapsMapIdRoute
   '/quests/$questId': typeof QuestsQuestIdRoute
+  '/tools/craft-profit': typeof ToolsCraftProfitRoute
   '/tools/discord-bot': typeof ToolsDiscordBotRoute
   '/traders/$traderId': typeof TradersTraderIdRoute
 }
@@ -159,11 +159,11 @@ export interface FileRoutesByTo {
   '/traders': typeof TradersRoute
   '/arcs/$arcId': typeof ArcsArcIdRoute
   '/hideout/$workbenchId': typeof HideoutWorkbenchIdRoute
-  '/hideout/crafts': typeof HideoutCraftsRoute
   '/items/$itemId': typeof ItemsItemIdRoute
   '/items/recycles': typeof ItemsRecyclesRoute
   '/maps/$mapId': typeof MapsMapIdRoute
   '/quests/$questId': typeof QuestsQuestIdRoute
+  '/tools/craft-profit': typeof ToolsCraftProfitRoute
   '/tools/discord-bot': typeof ToolsDiscordBotRoute
   '/traders/$traderId': typeof TradersTraderIdRoute
 }
@@ -181,11 +181,11 @@ export interface FileRoutesById {
   '/traders': typeof TradersRoute
   '/arcs_/$arcId': typeof ArcsArcIdRoute
   '/hideout_/$workbenchId': typeof HideoutWorkbenchIdRoute
-  '/hideout_/crafts': typeof HideoutCraftsRoute
   '/items_/$itemId': typeof ItemsItemIdRoute
   '/items_/recycles': typeof ItemsRecyclesRoute
   '/maps_/$mapId': typeof MapsMapIdRoute
   '/quests_/$questId': typeof QuestsQuestIdRoute
+  '/tools/craft-profit': typeof ToolsCraftProfitRoute
   '/tools/discord-bot': typeof ToolsDiscordBotRoute
   '/traders_/$traderId': typeof TradersTraderIdRoute
 }
@@ -204,11 +204,11 @@ export interface FileRouteTypes {
     | '/traders'
     | '/arcs/$arcId'
     | '/hideout/$workbenchId'
-    | '/hideout/crafts'
     | '/items/$itemId'
     | '/items/recycles'
     | '/maps/$mapId'
     | '/quests/$questId'
+    | '/tools/craft-profit'
     | '/tools/discord-bot'
     | '/traders/$traderId'
   fileRoutesByTo: FileRoutesByTo
@@ -225,11 +225,11 @@ export interface FileRouteTypes {
     | '/traders'
     | '/arcs/$arcId'
     | '/hideout/$workbenchId'
-    | '/hideout/crafts'
     | '/items/$itemId'
     | '/items/recycles'
     | '/maps/$mapId'
     | '/quests/$questId'
+    | '/tools/craft-profit'
     | '/tools/discord-bot'
     | '/traders/$traderId'
   id:
@@ -246,11 +246,11 @@ export interface FileRouteTypes {
     | '/traders'
     | '/arcs_/$arcId'
     | '/hideout_/$workbenchId'
-    | '/hideout_/crafts'
     | '/items_/$itemId'
     | '/items_/recycles'
     | '/maps_/$mapId'
     | '/quests_/$questId'
+    | '/tools/craft-profit'
     | '/tools/discord-bot'
     | '/traders_/$traderId'
   fileRoutesById: FileRoutesById
@@ -268,11 +268,11 @@ export interface RootRouteChildren {
   TradersRoute: typeof TradersRoute
   ArcsArcIdRoute: typeof ArcsArcIdRoute
   HideoutWorkbenchIdRoute: typeof HideoutWorkbenchIdRoute
-  HideoutCraftsRoute: typeof HideoutCraftsRoute
   ItemsItemIdRoute: typeof ItemsItemIdRoute
   ItemsRecyclesRoute: typeof ItemsRecyclesRoute
   MapsMapIdRoute: typeof MapsMapIdRoute
   QuestsQuestIdRoute: typeof QuestsQuestIdRoute
+  ToolsCraftProfitRoute: typeof ToolsCraftProfitRoute
   ToolsDiscordBotRoute: typeof ToolsDiscordBotRoute
   TradersTraderIdRoute: typeof TradersTraderIdRoute
 }
@@ -363,6 +363,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsDiscordBotRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tools/craft-profit': {
+      id: '/tools/craft-profit'
+      path: '/tools/craft-profit'
+      fullPath: '/tools/craft-profit'
+      preLoaderRoute: typeof ToolsCraftProfitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/quests_/$questId': {
       id: '/quests_/$questId'
       path: '/quests/$questId'
@@ -389,13 +396,6 @@ declare module '@tanstack/react-router' {
       path: '/items/$itemId'
       fullPath: '/items/$itemId'
       preLoaderRoute: typeof ItemsItemIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/hideout_/crafts': {
-      id: '/hideout_/crafts'
-      path: '/hideout/crafts'
-      fullPath: '/hideout/crafts'
-      preLoaderRoute: typeof HideoutCraftsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hideout_/$workbenchId': {
@@ -428,11 +428,11 @@ const rootRouteChildren: RootRouteChildren = {
   TradersRoute: TradersRoute,
   ArcsArcIdRoute: ArcsArcIdRoute,
   HideoutWorkbenchIdRoute: HideoutWorkbenchIdRoute,
-  HideoutCraftsRoute: HideoutCraftsRoute,
   ItemsItemIdRoute: ItemsItemIdRoute,
   ItemsRecyclesRoute: ItemsRecyclesRoute,
   MapsMapIdRoute: MapsMapIdRoute,
   QuestsQuestIdRoute: QuestsQuestIdRoute,
+  ToolsCraftProfitRoute: ToolsCraftProfitRoute,
   ToolsDiscordBotRoute: ToolsDiscordBotRoute,
   TradersTraderIdRoute: TradersTraderIdRoute,
 }
